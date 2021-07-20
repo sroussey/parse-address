@@ -1,6 +1,6 @@
 {
   "name": "@bankrate/parse-address",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "US Street Address Parser",
   "main": "dist/parser.js",
   "scripts": {
@@ -14,7 +14,7 @@
   },
   "license": "ISC",
   "dependencies": {
-    "xregexp": "^4.4.1"
+    "xregexp": "^5.0.2"
   },
   "devDependencies": {
     "@types/jest": "^26.0.24",
