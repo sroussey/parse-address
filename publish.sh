@@ -21,4 +21,4 @@ else
   printf '\n\n\n\nNO VERSION BUMP\n\n\n\n'
 fi
 
-npm publish
+npm publish --access public
