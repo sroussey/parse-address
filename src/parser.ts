@@ -210,22 +210,22 @@ export class AddressParser {
     return parsed
   }
 
-  parseAddress(address) {
+  parseAddress(address: string) {
     const parts = XRegExp.exec(address, this.addressMatch.address)
     return this.normalizeAddress(parts)
   }
 
-  parseInformalAddress(address) {
+  parseInformalAddress(address: string) {
     const parts = XRegExp.exec(address, this.addressMatch.informal_address)
     return this.normalizeAddress(parts)
   }
 
-  parsePoAddress(address) {
+  parsePoAddress(address: string) {
     const parts = XRegExp.exec(address, this.addressMatch.po_address)
     return this.normalizeAddress(parts)
   }
 
-  parseLocation(address) {
+  parseLocation(address: string) {
     if (XRegExp(this.addressMatch.corner, 'xi').test(address)) {
       return this.parseIntersection(address)
     }
@@ -238,7 +238,7 @@ export class AddressParser {
       || this.parseInformalAddress(address)
   }
 
-  parseIntersection(address) {
+  parseIntersection(address: string) {
     let parts = XRegExp.exec(address, this.addressMatch.intersection)
     // @ts-ignore
     parts = this.normalizeAddress(parts)
