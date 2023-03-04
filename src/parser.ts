@@ -46,114 +46,114 @@ export class AddressParser {
 
     this.addressMatch.number = '(?<number>(\\d+-?\\d*)|([N|S|E|W]\\d{1,3}[N|S|E|W]\\d{1,6}))(?=\\D)'
 
-    this.addressMatch.street = '                                       \n\
-      (?:                                                       \n\
-        (?:(?<street_0>'+ this.addressMatch.direct + ')\\W+               \n\
-            (?<type_0>'+ this.addressMatch.type + ')\\b                    \n\
-        )                                                       \n\
-        |                                                       \n\
-        (?:(?<prefix_0>'+ this.addressMatch.direct + ')\\W+)?             \n\
-        (?:                                                     \n\
-          (?<street_1>[^,]*\\d)                                 \n\
-          (?:[^\\w,]*(?<suffix_1>'+ this.addressMatch.direct + ')\\b)     \n\
-          |                                                     \n\
-          (?<street_2>[^,]+)                                    \n\
-          (?:[^\\w,]+(?<type_2>'+ this.addressMatch.type + ')\\b)         \n\
-          (?:[^\\w,]+(?<suffix_2>'+ this.addressMatch.direct + ')\\b)?    \n\
-          |                                                     \n\
-          (?<street_3>[^,]+?)                                   \n\
-          (?:[^\\w,]+(?<type_3>'+ this.addressMatch.type + ')\\b)?        \n\
-          (?:[^\\w,]+(?<suffix_3>'+ this.addressMatch.direct + ')\\b)?    \n\
-        )                                                       \n\
-      )'
+    this.addressMatch.street = `
+      (?:
+        (?:(?<street_0>${this.addressMatch.direct})\\W+
+            (?<type_0>${ this.addressMatch.type })\\b
+        )
+        |
+        (?:(?<prefix_0>${ this.addressMatch.direct })\\W+)?
+        (?:
+          (?<street_1>[^,]*\\d)
+          (?:[^\\w,]*(?<suffix_1>${ this.addressMatch.direct })\\b)
+          |
+          (?<street_2>[^,]+)
+          (?:[^\\w,]+(?<type_2>${ this.addressMatch.type })\\b)
+          (?:[^\\w,]+(?<suffix_2>${ this.addressMatch.direct })\\b)?
+          |
+          (?<street_3>[^,]+?)
+          (?:[^\\w,]+(?<type_3>${ this.addressMatch.type })\\b)?
+          (?:[^\\w,]+(?<suffix_3>${ this.addressMatch.direct })\\b)?
+        )
+      )`
 
     this.addressMatch.po_box = 'p\\W*(?:[om]|ost\\ ?office)\\W*b(?:ox)?'
 
-    this.addressMatch.sec_unit_type_numbered = '             \n\
-      (?<sec_unit_type_1>su?i?te                      \n\
-        |'+ this.addressMatch.po_box + '                        \n\
-        |(?:ap|dep)(?:ar)?t(?:me?nt)?                 \n\
-        |ro*m                                         \n\
-        |flo*r?                                       \n\
-        |uni?t                                        \n\
-        |bu?i?ldi?n?g                                 \n\
-        |ha?nga?r                                     \n\
-        |lo?t                                         \n\
-        |pier                                         \n\
-        |slip                                         \n\
-        |spa?ce?                                      \n\
-        |stop                                         \n\
-        |tra?i?le?r                                   \n\
-        |box)(?![a-z]                                 \n\
-      )                                               \n\
-      '
+    this.addressMatch.sec_unit_type_numbered = `
+      (?<sec_unit_type_1>su?i?te
+        |${ this.addressMatch.po_box }
+        |(?:ap|dep)(?:ar)?t(?:me?nt)?
+        |ro*m
+        |flo*r?
+        |uni?t
+        |bu?i?ldi?n?g
+        |ha?nga?r
+        |lo?t
+        |pier
+        |slip
+        |spa?ce?
+        |stop
+        |tra?i?le?r
+        |box)(?![a-z]
+      )
+      `
 
-    this.addressMatch.sec_unit_type_unnumbered = '           \n\
-      (?<sec_unit_type_2>ba?se?me?n?t                 \n\
-        |fro?nt                                       \n\
-        |lo?bby                                       \n\
-        |lowe?r                                       \n\
-        |off?i?ce?                                    \n\
-        |pe?n?t?ho?u?s?e?                             \n\
-        |rear                                         \n\
-        |side                                         \n\
-        |uppe?r                                       \n\
-      )\\b'
+    this.addressMatch.sec_unit_type_unnumbered = `
+      (?<sec_unit_type_2>ba?se?me?n?t
+        |fro?nt
+        |lo?bby
+        |lowe?r
+        |off?i?ce?
+        |pe?n?t?ho?u?s?e?
+        |rear
+        |side
+        |uppe?r
+      )\\b`
 
-    this.addressMatch.sec_unit = '                               \n\
-      (?:                               #fix3             \n\
-        (?:                             #fix1             \n\
-          (?:                                             \n\
-            (?:'+ this.addressMatch.sec_unit_type_numbered + '\\W*) \n\
-            |(?<sec_unit_type_3>\\#)\\W*                  \n\
-          )                                               \n\
-          (?<sec_unit_num_1>[\\w-]+)                      \n\
-        )                                                 \n\
-        |                                                 \n\
-        '+ this.addressMatch.sec_unit_type_unnumbered + '           \n\
-      )'
+    this.addressMatch.sec_unit = `
+      (?:                               #fix3
+        (?:                             #fix1
+          (?:
+            (?:${ this.addressMatch.sec_unit_type_numbered }\\W*)
+            |(?<sec_unit_type_3>\\#)\\W*
+          )
+          (?<sec_unit_num_1>[\\w-]+)
+        )
+        |
+        ${ this.addressMatch.sec_unit_type_unnumbered }
+      )`
 
-    this.addressMatch.city_and_state = '                       \n\
-      (?:                                               \n\
-        (?<city>[^\\d,]+?)\\W+                          \n\
-        (?<state>'+ this.addressMatch.state + ')                  \n\
-      )                                                 \n\
-      '
+    this.addressMatch.city_and_state = `
+      (?:
+        (?<city>[^\\d,]+?)\\W+
+        (?<state>${ this.addressMatch.state })
+      )
+      `
 
-    this.addressMatch.place = '                                \n\
-      (?:'+ this.addressMatch.city_and_state + '\\W*)?            \n\
-      (?:'+ this.addressMatch.zip + ')?                           \n\
-      '
+    this.addressMatch.place = `
+      (?:${ this.addressMatch.city_and_state }\\W*)?
+      (?:${ this.addressMatch.zip })?
+      `
 
-    this.addressMatch.address = XRegExp('                      \n\
-      ^                                                 \n\
-      [^\\w\\#]*                                        \n\
-      ('+ this.addressMatch.number + ')\\W*                       \n\
-      (?:'+ this.addressMatch.fraction + '\\W*)?                  \n\
-          '+ this.addressMatch.street + '\\W+                      \n\
-      (?:'+ this.addressMatch.sec_unit + ')?\\W*          #fix2   \n\
-          '+ this.addressMatch.place + '                           \n\
-      \\W*$', 'ix')
+    this.addressMatch.address = XRegExp(`
+      ^
+      [^\\w\\#]*
+      (${ this.addressMatch.number })\\W*
+      (?:${ this.addressMatch.fraction }\\W*)?
+          ${ this.addressMatch.street }\\W+
+      (?:${ this.addressMatch.sec_unit })?\\W*          #fix2
+          ${ this.addressMatch.place }
+      \\W*$`, 'ix')
 
     const sep = '(?:\\W+|$)' // no support for \Z
 
-    this.addressMatch.informal_address = XRegExp('                   \n\
-      ^                                                       \n\
-      \\s*                                                    \n\
-      (?:'+ this.addressMatch.sec_unit + sep + ')?                        \n\
-      (?:'+ this.addressMatch.number + ')?\\W*                          \n\
-      (?:'+ this.addressMatch.fraction + '\\W*)?                        \n\
-          '+ this.addressMatch.street + sep + '                            \n\
-      (?:'+ this.addressMatch.sec_unit.replace(/_\d/g, '$&1') + sep + ')?  \n\
-      (?:'+ this.addressMatch.place + ')?                               \n\
-      ', 'ix')
+    this.addressMatch.informal_address = XRegExp(`
+      ^
+      \\s* 
+      (?:${ this.addressMatch.sec_unit + sep })? 
+      (?:${ this.addressMatch.number })?\\W* 
+      (?:${ this.addressMatch.fraction }\\W*)? 
+         ${ this.addressMatch.street + sep } 
+      (?:${ this.addressMatch.sec_unit.replace(/_\d/g, '$&1') + sep })? 
+      (?:${ this.addressMatch.place })? 
+      `, 'ix')
 
-    this.addressMatch.po_address = XRegExp('                         \n\
-      ^                                                       \n\
-      \\s*                                                    \n\
-      (?:'+ this.addressMatch.sec_unit.replace(/_\d/g, '$&1') + sep + ')?  \n\
-      (?:'+ this.addressMatch.place + ')?                               \n\
-      ', 'ix')
+    this.addressMatch.po_address = XRegExp(`
+      ^
+      \\s*
+      (?:${ this.addressMatch.sec_unit.replace(/_\d/g, '$&1') + sep })?
+      (?:${ this.addressMatch.place })?
+      `, 'ix')
 
     this.addressMatch.intersection = XRegExp('                     \n\
       ^\\W*                                                 \n\
@@ -201,7 +201,7 @@ export class AddressParser {
 
     if (parsed.city) {
       parsed.city = XRegExp.replace(parsed.city,
-        XRegExp('^(?<dircode>' + this.addressMatch.dircode + ')\\s+(?=\\S)', 'ix'),
+        XRegExp(`^(?<dircode>${ this.addressMatch.dircode })\\s+(?=\\S)`, 'ix'),
         function (match) {
           return capitalize(self.directionCode[match.dircode.toUpperCase()]) + ' '
         })
@@ -252,7 +252,7 @@ export class AddressParser {
         const short_street_type = parts.short_street_type2
         type = XRegExp.replace(type, /s\W*$/, '')
 
-        if (XRegExp('^' + this.addressMatch.type + '$', 'ix').test(type)) {
+        if (XRegExp(`^${ this.addressMatch.type }$`, 'ix').test(type)) {
           parts.type1 = parts.type2 = type
           parts.short_street_type1 = parts.short_street_type2 = short_street_type
         }
