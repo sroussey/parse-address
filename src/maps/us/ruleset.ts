@@ -40,8 +40,8 @@ const zip = "(?<zip>\\d{5})(?:[- ]?(?<plus4>\\d{4}))?";
 
 const corner = "(?:\\band\\b|\\bat\\b|&|\\@)";
 
-const stnumber =
-  "(?<number>(\\d+-?\\d*)|([N|S|E|W]\\d{1,3}[N|S|E|W]\\d{1,6}))(?=\\D)";
+const namednumber = `(one|two|three|four|five|six|seven|eight|nine)`;
+const stnumber = `(?<number>${namednumber}(?=\\W)|(\\d+-?\\d*)|([N|S|E|W]\\d{1,3}[N|S|E|W]\\d{1,6}))(?=\\D)`;
 
 const namedfloor = `
   (?:

@@ -1,14 +1,26 @@
 import { AddressTestCaseMap } from "../src/types/address";
 
 export const namedfloorTests: AddressTestCaseMap = {
-  "1450 Park avenue 1st Floor, New York, NY 10022": {
+  "One Park avenue 1st Floor, New York, NY 10022": {
+    city: "New York",
+    state: "NY",
+    number: "1",
+    street: "Park",
+    type: "Ave",
+    short_street_type: "AV",
+    sec_unit_num: "1",
+    sec_unit_type: "Floor",
+    zip: "10022",
+    country: "US",
+  },
+  "1450 Park avenue 11st Floor, New York, NY 10022": {
     city: "New York",
     state: "NY",
     number: "1450",
     street: "Park",
     type: "Ave",
     short_street_type: "AV",
-    sec_unit_num: "1",
+    sec_unit_num: "11",
     sec_unit_type: "Floor",
     zip: "10022",
     country: "US",
