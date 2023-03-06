@@ -12,6 +12,22 @@
     "type": "git",
     "url": "git://github.com/sroussey/parse-address.git"
   },
+  "keywords": [
+    "extract",
+    "address",
+    "parser",
+    "address",
+    "street",
+    "US",
+    "Canada",
+    "Geo::StreetAddress::US",
+    "geo"
+  ],
+  "author": "hassansin <rezatxe@gmail.com> (https://github.com/hassansin)",
+  "contributors": [
+    "euphonie <cs.joel.09@gmail.com>",
+    "sroussey <sroussey@gmail.com>"
+  ],
   "license": "ISC",
   "dependencies": {
     "xregexp": "^5.1.1"

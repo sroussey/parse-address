@@ -1,35 +1,32 @@
-import assert from 'assert'
-import { AddressParser } from '../src/parser'
-import { existingTests, additionalTests } from './test-cases'
+import assert from "assert";
+import { AddressParser } from "../src/parser";
+import { namedfloorTests, existingTests } from "./test-cases";
 
-import {
-  AddressTestCase,
-  AddressTestCaseMap,
-} from '../src/types/address'
+import { AddressTestCase, AddressTestCaseMap } from "../src/types/address";
 
-const addressParser = new AddressParser()
+const addressParser = new AddressParser();
 
-describe('Parser', () => {
-  it('Properly parses addresses (existing test cases)', () => {
-    const testAddresses = Object.keys(existingTests)
-    testAddresses.forEach(runTests(existingTests))
-  })
+describe("Floor test cases", () => {
+  runTests(existingTests);
+});
 
-  it('Properly parses addresses (new test cases)', () => {
-    const testAddresses = Object.keys(additionalTests)
-    testAddresses.forEach(runTests(additionalTests))
-  })
-})
+describe("Edgar tests", () => {
+  runTests(namedfloorTests);
+});
+
+function runTest(addressString: string, testCase: AddressTestCase) {
+  if (testCase.__skipTest) {
+    return;
+  }
+
+  const parsed = addressParser.parseLocation(addressString);
+  assert.deepEqual(parsed, testCase);
+}
 
 function runTests(tests: AddressTestCaseMap) {
-  return function runTestsCurried(addressString) {
-    const testCase = tests[addressString] as AddressTestCase
-
-    if (testCase.__skipTest) {
-      return
-    }
-
-    const parsed = addressParser.parseLocation(addressString)
-    assert.deepEqual(parsed, testCase)
-  }
+  Object.entries(tests).forEach(([addressString, testCase]) => {
+    it(`Properly parses addresses (${addressString})`, () => {
+      runTest(addressString, testCase);
+    });
+  });
 }
