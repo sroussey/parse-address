@@ -91,8 +91,6 @@ export class AddressParserUS implements AddressParserImpl {
     }
 
     return this.parseAddress(address) || this.parseInformalAddress(address);
-
-    return this.parseInformalAddress(address);
   }
 
   parseIntersection(address: string) {

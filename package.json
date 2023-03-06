@@ -1,6 +1,6 @@
 {
   "name": "@sroussey/parse-address",
-  "version": "2.2.5",
+  "version": "2.2.6",
   "description": "US Street Address Parser",
   "main": "dist/parser.js",
   "scripts": {
