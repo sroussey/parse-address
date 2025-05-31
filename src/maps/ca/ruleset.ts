@@ -26,7 +26,7 @@ const province =
   ")\\b";
 
 const direct = values(directionsMap)
-  .sort((a, b) => Number(a.length < b.length))
+  .sort((a, b) => b.length - a.length)
   .reduce(function (prev, curr) {
     return prev.concat([XRegExp.escape(curr.replace(/\w/g, "$&.")), curr]);
   }, keys(directionsMap))
