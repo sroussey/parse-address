@@ -58,31 +58,31 @@ export class AddressParserUS implements AddressParserImpl {
 
     switch (parts.number) {
       case "One":
-        parsed.number = 1;
+        parsed.number = "1";
         break;
       case "Two":
-        parsed.number = 1;
+        parsed.number = "2";
         break;
       case "Three":
-        parsed.number = 1;
+        parsed.number = "3";
         break;
       case "Four":
-        parsed.number = 1;
+        parsed.number = "4";
         break;
       case "Five":
-        parsed.number = 1;
+        parsed.number = "5";
         break;
       case "Six":
-        parsed.number = 1;
+        parsed.number = "6";
         break;
       case "Seven":
-        parsed.number = 1;
+        parsed.number = "7";
         break;
       case "Eight":
-        parsed.number = 1;
+        parsed.number = "8";
         break;
       case "Nine":
-        parsed.number = 1;
+        parsed.number = "9";
         break;
     }
 
