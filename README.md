@@ -22,6 +22,6 @@ const parsed = addressParser.parseLocation(address)
  type: 'Hwy',
  city: 'Sebastopol',
  state: 'CA',
- zip: '95472',
+ postal_code: '95472',
 }
 ```

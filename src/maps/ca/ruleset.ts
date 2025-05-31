@@ -1,7 +1,7 @@
 import XRegExp from "xregexp";
 
 import { keys, invert, values, flatten } from "../../utils";
-import { stateCodesMap } from "./states";
+import { provinceCodesMap } from "./provinces";
 import { directionsMap } from "./directions";
 import { streetTypeMap } from "./street-type";
 import { AddressRuleset } from "../../types/ruleset";
@@ -15,12 +15,12 @@ const type = flatten(streetTypeMap)
   })
   .join("|");
 
-const fraction = "\\d+\\/\\d+";
+const fraction = "(?<civic_number_suffix>\\d+\\/\\d+)";
 
-const state =
+const province =
   "\\b(?:" +
-  keys(stateCodesMap)
-    .concat(values(stateCodesMap))
+  keys(provinceCodesMap)
+    .concat(values(provinceCodesMap))
     .map(XRegExp.escape)
     .join("|") +
   ")\\b";
@@ -36,7 +36,8 @@ const directionCode = invert(directionsMap);
 
 const dircode = keys(directionCode).join("|");
 
-const postal_code = "(?<postal_code>\\d{5})(?:[- ]?(?<plus4>\\d{4}))?";
+// Canadian postal code pattern: A1A 1A1
+const postal_code = "(?<postal_code>[A-Za-z]\\d[A-Za-z])(?:\\s*(?<postal_code_suffix>\\d[A-Za-z]\\d))?";
 
 const corner = "(?:\\band\\b|\\bat\\b|&|\\@)";
 
@@ -58,6 +59,10 @@ const street = `
       |
       (?:(?<prefix_0>${direct})\\W+)?
       (?:
+        (?<type_5>${type})\\W+
+        (?<street_5>[^,]+?)
+        (?:[^\\w,]+(?<suffix_5>${direct})\\b)?
+        |
         (?<street_4>[\\w\\s]+)
         (?:[^\\w]+(?<type_4>${type})\\b)
         (?:[^\\w]+(?<suffix_4>${direct})\\b)?
@@ -93,7 +98,9 @@ const sec_unit_type_numbered = `
       |spa?ce?
       |stop
       |tra?i?le?r
-      |box)(?![a-z]
+      |box
+      |r\.?r\.?
+      |rural route)(?![a-z]
     )
     `;
 
@@ -122,17 +129,17 @@ const sec_unit = `
       ${sec_unit_type_unnumbered}
     )`;
 
-const city_and_state = `
+const city_and_province = `
     (?:
       (?<city>[^\\d,]+?)\\W+
-      (?<state>${state})
+      (?<province>${province})
     )
     `;
 
-const country = `(?<country>(?:U\\.?S\\.?|U\\.?S\\.?A\\.?|United States|United States of America))`;
+const country = `(?<country>(?:Canada|CAN|CA))`;
 
 const place = `
-    (?:${city_and_state}\\W*)?
+    (?:${city_and_province}\\W*)?
     (?:${postal_code}\\W*)?
     (?:${country})?
     `;
@@ -198,10 +205,10 @@ const intersection = XRegExp(
   "ix"
 );
 
-export const AddressRulesetUS: AddressRuleset = {
+export const AddressRulesetCA: AddressRuleset = {
   type,
   fraction,
-  state,
+  state: province, // Canada uses provinces, map state to province pattern
   direct,
   dircode,
   postal_code,
@@ -217,4 +224,4 @@ export const AddressRulesetUS: AddressRuleset = {
   directionCode,
 };
 
-export default AddressRulesetUS;
+export default AddressRulesetCA; 
