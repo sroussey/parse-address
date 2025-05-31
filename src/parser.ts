@@ -43,35 +43,45 @@ export class AddressParser implements AddressParserImpl {
   }
 }
 
-function detectCountry(address: string): CountryMappings {
-  // Canadian postal code pattern: A1A 1A1 or A1A1A1
-  const canadianPostalCode = /[A-Za-z]\d[A-Za-z]\s*\d[A-Za-z]\d/;
-  
-  // US ZIP code pattern: 12345 or 12345-1234
-  const usZipCode = /\b\d{5}(?:-?\d{4})?\b/;
-  
-  // Check for explicit country indicators
+/**
+ * Check if address contains explicit country name indicators
+ */
+function hasExplicitCountryIndicators(address: string): CountryMappings | null {
   if (/\b(Canada)\b/i.test(address)) {
     return "ca";
   }
   if (/\b(US|USA|United States)\b/i.test(address)) {
     return "us";
   }
+  return null;
+}
+
+/**
+ * Check for postal code format patterns
+ */
+function detectCountryByPostalCode(address: string): CountryMappings | null {
+  // Canadian postal code pattern: A1A 1A1 or A1A1A1
+  const canadianPostalCode = /[A-Za-z]\d[A-Za-z]\s*\d[A-Za-z]\d/;
   
-  // Check postal code formats first (more reliable than province/state codes)
+  // US ZIP code pattern: 12345 or 12345-1234
+  const usZipCode = /\b\d{5}(?:-?\d{4})?\b/;
+  
   if (canadianPostalCode.test(address)) {
     return "ca";
   }
   if (usZipCode.test(address)) {
     return "us";
   }
-  
-  // Check for Canadian provinces vs US states
+  return null;
+}
+
+/**
+ * Check for province or state names (full names)
+ */
+function detectCountryByRegionNames(address: string): CountryMappings | null {
   const addressLower = address.toLowerCase();
   const canadianProvinces = Object.keys(provinceCodesMap);
-  const canadianProvinceCodes = Object.values(provinceCodesMap);
   const usStates = Object.keys(stateCodesMap);
-  const usStateCodes = Object.values(stateCodesMap);
   
   // Check for Canadian provinces (full names first)
   for (const province of canadianProvinces) {
@@ -87,7 +97,16 @@ function detectCountry(address: string): CountryMappings {
     }
   }
   
-  // Check for state/province codes - be more specific to avoid conflicts
+  return null;
+}
+
+/**
+ * Check for province or state codes (abbreviated forms)
+ */
+function detectCountryByRegionCodes(address: string): CountryMappings | null {
+  const canadianProvinceCodes = Object.values(provinceCodesMap);
+  const usStateCodes = Object.values(stateCodesMap);
+  
   // Check US state codes first (more common)
   for (const stateCode of usStateCodes) {
     if (new RegExp(`\\b${stateCode}\\b`).test(address)) {
@@ -102,12 +121,54 @@ function detectCountry(address: string): CountryMappings {
     }
   }
   
-  // Check for French street types (strong indicator of Canada)
+  return null;
+}
+
+/**
+ * Check for French street types (strong indicator of Canada)
+ */
+function detectCountryByFrenchStreetTypes(address: string): CountryMappings | null {
+  const addressLower = address.toLowerCase();
   const frenchStreetTypes = ['rue', 'chemin', 'boulevard', 'avenue', 'allée'];
+  
   for (const frenchType of frenchStreetTypes) {
     if (addressLower.includes(frenchType)) {
       return "ca";
     }
+  }
+  
+  return null;
+}
+
+function detectCountry(address: string): CountryMappings {
+  // Check explicit country indicators first
+  const explicitCountry = hasExplicitCountryIndicators(address);
+  if (explicitCountry) {
+    return explicitCountry;
+  }
+  
+  // Check postal code formats (more reliable than province/state codes)
+  const postalCodeCountry = detectCountryByPostalCode(address);
+  if (postalCodeCountry) {
+    return postalCodeCountry;
+  }
+  
+  // Check for region names (provinces/states)
+  const regionNameCountry = detectCountryByRegionNames(address);
+  if (regionNameCountry) {
+    return regionNameCountry;
+  }
+  
+  // Check for region codes (province/state abbreviations)
+  const regionCodeCountry = detectCountryByRegionCodes(address);
+  if (regionCodeCountry) {
+    return regionCodeCountry;
+  }
+  
+  // Check for French street types
+  const frenchStreetCountry = detectCountryByFrenchStreetTypes(address);
+  if (frenchStreetCountry) {
+    return frenchStreetCountry;
   }
   
   // Default to US
