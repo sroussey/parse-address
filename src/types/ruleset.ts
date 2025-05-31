@@ -1,6 +1,6 @@
 import type { Pattern } from "xregexp";
 
-export type CountryMappings = "us";
+export type CountryMappings = "us" | "ca";
 
 export interface AddressRuleset {
   type: Pattern;
@@ -8,7 +8,7 @@ export interface AddressRuleset {
   state: Pattern;
   direct: Pattern;
   dircode: Pattern;
-  zip: Pattern;
+  postal_code: Pattern;
   corner: Pattern;
   street: Pattern;
   stnumber: Pattern;
