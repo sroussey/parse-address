@@ -15,6 +15,8 @@ export class AddressParser implements AddressParserImpl {
       case "ca":
         this.parser = new AddressParserCA();
         break;
+      default:
+        throw new Error(`Unsupported country "${country}"; supported: us, ca`);
     }
   }
   normalizeAddress(parts) {
