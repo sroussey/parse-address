@@ -148,7 +148,7 @@ const address = XRegExp(
   `
     ^
     [^\\w\\#]*
-    (${stnumber})\\W*
+    (${stnumber})(?<civic_number_suffix_2>[A-Za-z])?\\W*
     (?:${fraction}\\W*)?
         ${street}\\W+
     (?:${sec_unit})?\\W*          #fix2
@@ -162,13 +162,13 @@ const sep = "(?:\\W+|$)"; // no support for \Z
 const informal_address = XRegExp(
   `
     ^
-    \\s* 
-    (?:${sec_unit + sep})? 
-    (?:${stnumber})?\\W* 
-    (?:${fraction}\\W*)? 
+    \\s*
+    (?:${sec_unit + sep})?
+    (?:(?:${stnumber})(?<civic_number_suffix_2>[A-Za-z])?)?\\W*
+    (?:${fraction}\\W*)?
     ${street + sep}
-    (?:${sec_unit.replace(/_\d/g, "$&1") + sep})? 
-    (?:${place})? 
+    (?:${sec_unit.replace(/_\d/g, "$&1") + sep})?
+    (?:${place})?
     `,
   "ix"
 );
@@ -176,12 +176,12 @@ const informal_address = XRegExp(
 const street_address = XRegExp(
   `
     ^
-    \\s* 
-    (?:${sec_unit + sep})? 
-    (?:${stnumber})?\\W* 
-    (?:${fraction}\\W*)? 
-       ${street + sep} 
-    (?:${sec_unit.replace(/_\d/g, "$&1") + sep})? 
+    \\s*
+    (?:${sec_unit + sep})?
+    (?:(?:${stnumber})(?<civic_number_suffix_2>[A-Za-z])?)?\\W*
+    (?:${fraction}\\W*)?
+       ${street + sep}
+    (?:${sec_unit.replace(/_\d/g, "$&1") + sep})?
     `,
   "ix"
 );

@@ -20,3 +20,28 @@ describe("Canadian French compound street names", () => {
     assert.equal(p!.street, "du Parc");
   });
 });
+
+describe("Canadian civic number suffix", () => {
+  it("captures an attached letter suffix", () => {
+    const p = ca.parseLocation("123A Main St, Toronto, ON M5V 3A8");
+    assert.equal(p!.number, "123");
+    assert.equal(p!.civic_number_suffix, "A");
+    assert.equal(p!.street, "Main");
+  });
+
+  it("captures an attached letter suffix street-only", () => {
+    const p = ca.parseLocation("123A Main St");
+    assert.equal(p!.civic_number_suffix, "A");
+    assert.equal(p!.street, "Main");
+  });
+
+  it("does NOT capture a spaced directional as a suffix", () => {
+    const p = ca.parseLocation("123 N Main St, Toronto, ON M5V 3A8");
+    assert.equal(p!.civic_number_suffix, undefined);
+  });
+
+  it("still captures a fractional suffix", () => {
+    const p = ca.parseLocation("10 1/2 Main St, Toronto, ON M5V 3A8");
+    assert.equal(p!.civic_number_suffix, "1/2");
+  });
+});
