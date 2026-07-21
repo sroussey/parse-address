@@ -60,7 +60,7 @@ const street = `
       (?:(?<prefix_0>${direct})\\W+)?
       (?:
         (?<type_5>${type})\\W+
-        (?<street_5>[^,]+?)
+        (?<street_5>[^,]+)
         (?:[^\\w,]+(?<suffix_5>${direct})\\b)?
         |
         (?<street_4>[\\w\\s]+)
