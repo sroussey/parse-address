@@ -1,7 +1,7 @@
 {
   "name": "@sroussey/parse-address",
-  "version": "3.0.0-beta1",
-  "description": "US Street Address Parser",
+  "version": "3.0.0",
+  "description": "USA/Canada Street Address Parser",
   "main": "dist/parser.js",
   "scripts": {
     "test": "npx jest",
@@ -33,13 +33,18 @@
     "xregexp": "^5.1.2"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.14",
-    "@types/node": "^18.18.9",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.13.3",
     "browserify": "^17.0.1",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.3.4",
+    "jest": "^30.4.2",
+    "ts-jest": "^29.4.11",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3",
+    "typescript": "^6.0.3",
     "uglifyjs": "^2.4.11"
+  },
+  "allowScripts": {
+    "core-js-pure": false,
+    "fsevents": false,
+    "unrs-resolver": false
   }
 }
