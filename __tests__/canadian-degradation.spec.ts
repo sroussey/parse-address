@@ -15,19 +15,17 @@ describe("Canadian French compound street names", () => {
     assert.equal(p!.street, "du Parc");
   });
 
-  it("keeps the full name with an unrecognized trailing region code", () => {
-    // "A8" is not a recognized province code, so the raw grammar fails to
-    // find a city/province/postal_code boundary at all and would otherwise
-    // silently drop "Montreal, A8, H2X 3P6" entirely (a genuine Tier-1 gap).
-    // The Task 6 lossless-fallback wiring at the `AddressParser` facade
-    // catches this and rebuilds a minimal-but-lossless result instead, so the
-    // structured fields no longer isolate "du Parc" -- but nothing is lost.
+  it("parses cleanly with a SEC EDGAR region code (A8 = Quebec) in the province slot", () => {
+    // "A8" is EDGAR's code for Quebec; it is recognized as a province, so the
+    // street stays isolated and the tail resolves to city/province/postal_code
+    // (rather than the whole tail collapsing into `street`).
     const p = ca.parseLocation("123 Avenue du Parc, Montreal, A8, H2X 3P6");
-    assert.ok(p);
     assert.equal(p!.number, "123");
-    assert.ok(p!.street && p!.street.includes("du Parc"));
-    assert.ok(p!.street && p!.street.includes("Montreal"));
-    assert.ok(p!.street && p!.street.includes("H2X 3P6"));
+    assert.equal(p!.street, "du Parc");
+    assert.equal(p!.type, "Ave");
+    assert.equal(p!.city, "Montreal");
+    assert.equal(p!.province, "QC");
+    assert.equal(p!.postal_code, "H2X 3P6");
   });
 });
 
