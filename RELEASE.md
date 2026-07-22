@@ -24,18 +24,17 @@ Stable releases are cut from `main` and tagged `vX.Y.Z`.
    ```bash
    npm publish
    ```
-6. **Fix the dist-tag.**
-   ```bash
-   npm dist-tag add @sroussey/parse-address@3.0.0 latest
-   ```
-   Until 3.0.0 is published, point `latest` back at the last stable so fresh
-   installs do not pull a beta:
+6. **Fix the dist-tag.** The npm `latest` tag currently points at
+   `3.0.0-beta1`, so a fresh `npm install` pulls a beta. Until 3.0.0 is
+   published, point `latest` back at the last stable and move the beta to a
+   prerelease channel:
    ```bash
    npm dist-tag add @sroussey/parse-address@2.4.2 latest
-   ```
-   Optionally keep the beta on a prerelease channel:
-   ```bash
    npm dist-tag add @sroussey/parse-address@3.0.0-beta1 next
+   ```
+   Then, once 3.0.0 itself is published (step 5), promote it to `latest`:
+   ```bash
+   npm dist-tag add @sroussey/parse-address@3.0.0 latest
    ```
 
 ## Prerelease

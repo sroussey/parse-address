@@ -106,6 +106,15 @@ function cityBoundaryIndex(addressLower: string, value: string): number {
 
 // The source up to the earliest locational-field occurrence (whole-word match,
 // so a short region code like "ON" does not match inside "Onondaga").
+//
+// Boundary matching takes the earliest in-source occurrence of a boundary value.
+// If a street word equals the city/region (e.g. "100 Springfield Extra Ave,
+// Springfield, IL"), the cut can land inside the street and shrink the required
+// count, masking a drop after it. This is unreachable through the current
+// grammars: they capture the street greedily (`street_5` is `[^,]+`), so a real
+// parse either captures the whole street (no drop to mask) or fails outright
+// (the fallback then rebuilds losslessly). Revisit this if a grammar change ever
+// lets a partial-middle street drop through.
 export function streetSegment(address: string, parsed: ParsedAddress): string {
   const lower = address.toLowerCase();
   let cut = address.length;
