@@ -25,3 +25,40 @@ const parsed = addressParser.parseLocation(address)
  postal_code: '95472',
 }
 ```
+
+## Canadian addresses
+
+```ts
+import { AddressParser, IntlAddressParser } from '@sroussey/parse-address'
+
+// Explicit country
+const ca = new AddressParser('ca')
+ca.parseLocation('123 Avenue du Parc, Montreal, QC H2X 3P6')
+// { number: '123', type: 'Ave', street: 'du Parc', city: 'Montreal',
+//   province: 'QC', postal_code: 'H2X 3P6', fsa: 'H2X', ldu: '3P6', country: 'CA' }
+
+// Auto-detect country (US or CA), with an optional override
+const intl = new IntlAddressParser()
+intl.parseLocation('123 Main St, Toronto, ON M5V 3A8')   // detects CA
+intl.parseStreet('123 Main St', 'ca')                    // force CA
+```
+
+### Fields
+
+US and CA share the street fields (`number`, `civic_number_suffix`, `prefix`,
+`street`, `type`, `suffix`, `sec_unit_type`, `sec_unit_num`). Canadian results add
+`province`, `postal_code`, `fsa`, `ldu`; US results add `postal_code`, `plus4`,
+`state`.
+
+### Country detection precedence
+
+`IntlAddressParser` auto-detects in this fixed order: explicit country name/code →
+postal-code shape → full region names → region codes → French street types →
+default US. Pass a `country` argument to any `IntlAddressParser` method to skip
+detection.
+
+### Guarantee: no dropped street tokens
+
+A parse never silently drops a word from the street line. When the structured
+parse cannot fully resolve an input, the parser falls back to a minimal result
+(house number + full street remainder) rather than a truncated one.
