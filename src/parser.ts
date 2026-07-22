@@ -120,9 +120,16 @@ function detectEuCountry(address: string): CountryMappings | null {
   if (/\b(?:GIR\s*0AA|[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2})\b/.test(address)) {
     return "gb";
   }
-  // NL postcode: 4 digits + 2 letters. Require a following city word so a bare
-  // "1234 AB" house-number-plus-region does not trip it.
-  if (/\b\d{4}\s?[A-Za-z]{2}\b\s+[A-Za-z]/.test(address) && !/\b\d{5}\b/.test(address)) {
+  // NL postcode: 4 digits + 2 letters, followed by a city word. A real Dutch
+  // postcode never leads an address (the street comes first), so require some
+  // street content before it -- this rejects a leading "1234 AB Cres" house
+  // number that would otherwise be misread as a postcode. Also skip when a
+  // 5-digit US ZIP is present.
+  if (
+    /\S.*\b\d{4}\s?[A-Za-z]{2}\b\s+[A-Za-z]/.test(address) &&
+    !/^\s*\d{4}\s?[A-Za-z]{2}\b/.test(address) &&
+    !/\b\d{5}\b/.test(address)
+  ) {
     return "nl";
   }
   return null;

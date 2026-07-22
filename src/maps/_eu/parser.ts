@@ -13,10 +13,26 @@ const NUMERIC = /^\d+$/;
 export class AddressParserEU implements AddressParserImpl {
   readonly config: EuCountryConfig;
   private readonly ruleset: EuRuleset;
+  // Precomputed once per country (these are invariant across parse calls).
+  private readonly poDetectRe: RegExp;
+  private readonly fusedSuffixesSorted: Array<[string, string]>;
+  private readonly unsplittablePrefixRe: RegExp | null;
 
   constructor(config: EuCountryConfig) {
     this.config = config;
     this.ruleset = buildEuRuleset(config);
+    this.poDetectRe = XRegExp(
+      `^\\s*(?:${this.ruleset.po_box})(?![A-Za-z])`,
+      "xi"
+    );
+    // Longest suffix first so "strasse" wins over "str" regardless of config order.
+    this.fusedSuffixesSorted = [...(config.fusedTypeSuffixes ?? [])].sort(
+      (a, b) => b[0].length - a[0].length
+    );
+    const prefixes = config.unsplittablePrefixes ?? [];
+    this.unsplittablePrefixRe = prefixes.length
+      ? new RegExp(`^(?:${prefixes.map((p) => XRegExp.escape(p)).join("|")})\\s`, "i")
+      : null;
   }
 
   // --- public surface -------------------------------------------------------
@@ -42,7 +58,7 @@ export class AddressParserEU implements AddressParserImpl {
   }
 
   parseLocation(address: string) {
-    if (XRegExp(`^\\s*(?:${this.ruleset.po_box})(?![A-Za-z])`, "xi").test(address)) {
+    if (this.poDetectRe.test(address)) {
       const po = this.parsePoAddress(address);
       if (po) return po;
     }
@@ -149,10 +165,8 @@ export class AddressParserEU implements AddressParserImpl {
 
     // Prepositional/article-led names ("Am Weidendamm", "Unter den Linden") are
     // unsplittable: keep the whole name and leave the type empty.
-    const prefixes = this.config.unsplittablePrefixes ?? [];
-    if (prefixes.length) {
-      const re = new RegExp(`^(?:${prefixes.join("|")})\\s`, "i");
-      if (re.test(parsed.street)) return;
+    if (this.unsplittablePrefixRe && this.unsplittablePrefixRe.test(parsed.street)) {
+      return;
     }
     const exact = this.config.unsplittableExact ?? [];
     if (exact.some((n) => n.toLowerCase() === parsed.street.toLowerCase())) return;
@@ -160,12 +174,8 @@ export class AddressParserEU implements AddressParserImpl {
     // A trailing abbreviation dot ("Berliner Str.") should not defeat the match.
     const base = String(parsed.street).replace(/\.\s*$/, "");
     const lower = base.toLowerCase();
-    // Longest suffix first so "strasse" wins over "str" regardless of config order.
-    const suffixes = [...(this.config.fusedTypeSuffixes ?? [])].sort(
-      (a, b) => b[0].length - a[0].length
-    );
     const splitSpaced = this.config.splitSpacedType !== false;
-    for (const [spelling, display] of suffixes) {
+    for (const [spelling, display] of this.fusedSuffixesSorted) {
       const s = spelling.toLowerCase();
       if (lower.endsWith(s)) {
         const remainder = base.slice(0, base.length - s.length);
