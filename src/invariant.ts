@@ -106,7 +106,7 @@ function cityBoundaryIndex(addressLower: string, value: string): number {
 
 // The source up to the earliest locational-field occurrence (whole-word match,
 // so a short region code like "ON" does not match inside "Onondaga").
-function streetSegment(address: string, parsed: ParsedAddress): string {
+export function streetSegment(address: string, parsed: ParsedAddress): string {
   const lower = address.toLowerCase();
   let cut = address.length;
   for (const field of BOUNDARY_FIELDS) {
@@ -154,4 +154,58 @@ export function losesTokens(address: string, parsed: ParsedAddress | null): bool
   const segment = streetSegment(address, parsed);
   const requiredCount = countSignificantTokens(segment) - fractionDiscount(segment, parsed);
   return outputStreetTokenCount(parsed) < requiredCount;
+}
+
+// Locational fields kept as-is when rebuilding a minimal, guaranteed-lossless
+// result: the same boundary fields `streetSegment` strips from the tail (so
+// the street/locational split stays one consistent notion across the
+// detector and the fallback), plus the postal-code-adjacent `fsa`/`ldu`.
+const KEPT_LOCATIONAL_FIELDS: (keyof ParsedAddress)[] = [...BOUNDARY_FIELDS, "fsa", "ldu"];
+
+/**
+ * A minimal, guaranteed-lossless parse: leading civic number (+ attached letter
+ * suffix) and the entire remaining street segment intact in `street`. Reuses
+ * `streetSegment` -- the same street-segment isolation `losesTokens` uses --
+ * so the fallback and the detector never disagree on where the street portion
+ * ends. Keeps the high-confidence locational fields the raw parse already
+ * found; drops the (untrusted) prefix/type/suffix/unit structure rather than
+ * risk a partial, lossy split.
+ */
+export function minimalLosslessParse(address: string, parsed: ParsedAddress): ParsedAddress {
+  const segment = streetSegment(address, parsed)
+    .replace(/[\s,]+$/, "")
+    .replace(/^[\s,#]+/, "")
+    .trim();
+
+  const result: ParsedAddress = { country: parsed.country };
+  for (const field of KEPT_LOCATIONAL_FIELDS) {
+    const value = parsed[field];
+    if (typeof value === "string" && value)
+      (result as unknown as Record<string, string>)[field] = value;
+  }
+
+  const m = /^(\d+)([A-Za-z])?\s+(.*\S)\s*$/.exec(segment);
+  if (m) {
+    result.number = m[1];
+    if (m[2]) result.civic_number_suffix = m[2];
+    result.street = m[3];
+  } else if (segment) {
+    result.street = segment;
+  } else {
+    // No street segment survived stripping; keep the raw parse rather than blank it.
+    return parsed;
+  }
+  return result;
+}
+
+/**
+ * Guard applied at the `AddressParser` facade: passes a lossless parse
+ * through unchanged, and replaces a truncating one with `minimalLosslessParse`.
+ */
+export function enforceTokenPreservation(
+  address: string,
+  parsed: ParsedAddress | null
+): ParsedAddress | null {
+  if (!losesTokens(address, parsed)) return parsed;
+  return minimalLosslessParse(address, parsed as ParsedAddress);
 }

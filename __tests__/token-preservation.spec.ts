@@ -1,5 +1,5 @@
 import assert from "assert";
-import { IntlAddressParser } from "../src/parser";
+import { AddressParser, IntlAddressParser } from "../src/parser";
 import { losesTokens } from "../src/invariant";
 import { canadianAddresses, canadianTestCases, existingTests, namedfloorTests } from "./test-cases";
 import type { AddressTestCaseMap } from "../src/types/address";
@@ -187,5 +187,78 @@ describe("token-preservation detector does not false-trigger on the corpus", () 
         `detector wrongly flagged a known-good parse: ${JSON.stringify(parsed)}`
       );
     });
+  });
+});
+
+function tokens(text: string): string[] {
+  return text.toLowerCase().replace(/[.,#/]/g, " ").split(/\s+/).filter(Boolean);
+}
+
+describe("lossless fallback never drops a street token", () => {
+  const ca = new AddressParser("ca");
+
+  // These two inputs are the brief's original repro cases. Both now parse
+  // correctly via the Tier-1 fixes landed in Task 5 -- e.g. "Boulevard" and
+  // "Chemin" are recognized street types abbreviated into `type` ("Blvd" /
+  // "Ch"), and "Ouest" is normalized into `suffix` ("W"). That abbreviation
+  // is intentional, pre-existing normalization (the same thing happens for
+  // any plain-English "Street" -> "St"), not a token drop, so a literal
+  // string-token reconstruction check is the wrong tool here: it would flag
+  // "chemin"/"boulevard"/"ouest" as "missing" even though nothing was lost,
+  // only normalized. The project's own ground truth for "was a token
+  // dropped" is `losesTokens` (Task 5) -- assert directly against it, through
+  // the now-wired facade, instead of re-deriving a (flawed) literal check.
+  const noTailInputs = [
+    "1 Chemin de la Rive Boucherville",
+    "500 Boulevard de Maisonneuve Ouest",
+  ];
+  noTailInputs.forEach((address) => {
+    it(`does not lose tokens for (${address})`, () => {
+      const p = ca.parseLocation(address);
+      assert.ok(p);
+      assert.equal(
+        losesTokens(address, p),
+        false,
+        `facade output flagged as lossy: ${JSON.stringify(p)}`
+      );
+    });
+  });
+
+  // A real, naturally-occurring truncation: the RR/Box (rural route) path
+  // stops at the box number and drops the entire remaining street +
+  // locational tail (also documented in
+  // CALIBRATION_EXCLUDED_KEYS above as "In production this correctly
+  // triggers the Tier-2 lossless fallback"). Unlike the two inputs above,
+  // this one is not fixed by Tier-1 -- `AddressParserCA.parseLocation`
+  // itself returns {sec_unit_type:"RR", sec_unit_num:"1", street:"Box",
+  // country:"CA"} with no city/province/postal_code at all, so this is a
+  // genuine end-to-end RED without the facade wiring below (verified: RED
+  // before `AddressParser.parseLocation` wraps with
+  // `enforceTokenPreservation`, GREEN after -- see task report).
+  it("preserves every literal source token for the RR/Box rural-route truncation", () => {
+    const address = "RR 1, Box 123, Old Mill Road, Smiths Falls, ON K7A 4S4";
+    const p = ca.parseLocation(address);
+    assert.ok(p);
+    const rebuilt = [
+      p!.number,
+      p!.civic_number_suffix,
+      p!.prefix,
+      p!.street,
+      p!.type,
+      p!.suffix,
+      p!.sec_unit_type,
+      p!.sec_unit_num,
+      p!.city,
+      p!.province,
+      p!.postal_code,
+    ]
+      .filter(Boolean)
+      .join(" ");
+    const outTokens = new Set(tokens(rebuilt));
+    const missing = tokens(address).filter((t) => !outTokens.has(t));
+    assert.deepEqual(missing, [], `dropped ${JSON.stringify(missing)} from ${JSON.stringify(p)}`);
+    // The literal check above is necessary but not sufficient on its own --
+    // pin it to the project's actual invariant too.
+    assert.equal(losesTokens(address, p), false, "facade output must not be flagged lossy");
   });
 });

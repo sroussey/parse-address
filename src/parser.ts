@@ -4,6 +4,7 @@ import { AddressParserCA } from "./maps/ca/parser";
 import { AddressParserImpl } from "./types/parser";
 import { stateCodesMap } from "./maps/us/states";
 import { provinceCodesMap } from "./maps/ca/provinces";
+import { enforceTokenPreservation } from "./invariant";
 
 export class AddressParser implements AddressParserImpl {
   parser: AddressParserImpl;
@@ -23,19 +24,19 @@ export class AddressParser implements AddressParserImpl {
     return this.parser.normalizeAddress(parts);
   }
   parseAddress(address: string) {
-    return this.parser.parseAddress(address);
+    return enforceTokenPreservation(address, this.parser.parseAddress(address));
   }
   parseStreet(address: string) {
-    return this.parser.parseStreet(address);
+    return enforceTokenPreservation(address, this.parser.parseStreet(address));
   }
   parseInformalAddress(address: string) {
-    return this.parser.parseInformalAddress(address);
+    return enforceTokenPreservation(address, this.parser.parseInformalAddress(address));
   }
   parsePoAddress(address: string) {
-    return this.parser.parsePoAddress(address);
+    return enforceTokenPreservation(address, this.parser.parsePoAddress(address));
   }
   parseLocation(address: string) {
-    return this.parser.parseLocation(address);
+    return enforceTokenPreservation(address, this.parser.parseLocation(address));
   }
   parseIntersection(address: string) {
     return this.parser.parseIntersection(address);
