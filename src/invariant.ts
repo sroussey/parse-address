@@ -3,11 +3,20 @@ import type { ParsedAddress } from "./types/address";
 // Intersection connector words that appear in source but are not addressable tokens.
 const FILLER = new Set(["and", "at"]);
 
+// Non-addressable "number" markers that a normalized parse legitimately drops
+// (they label the house/door number rather than name a street): the Spanish
+// número (nº / núm. / n.º) and sin número (s/n). These contain characters that
+// never occur in US/CA street lines, so stripping them is a no-op there.
+const NUMBER_MARKERS = /n\.?º\.?|nº|núm\.?|\bs\/n\b/gi;
+
 // Count significant tokens. A run like "S.E." / "P.O." (single letter + period,
 // abutting another single-letter+period) collapses to one token; every other
 // period, comma, hash, slash, or hyphen is a separator.
 export function countSignificantTokens(text: string): number {
-  const collapsed = text.toLowerCase().replace(/\b([a-z])\.(?=[a-z]\b)/g, "$1");
+  const collapsed = text
+    .toLowerCase()
+    .replace(NUMBER_MARKERS, " ")
+    .replace(/\b([a-z])\.(?=[a-z]\b)/g, "$1");
   return collapsed
     .replace(/[.,#/\-]/g, " ")
     .split(/\s+/)
@@ -164,6 +173,10 @@ export function losesTokens(address: string, parsed: ParsedAddress | null): bool
   if (!parsed) return false;
   // Intersections carry two streets; the single-street count model does not apply.
   if (parsed.street2 || parsed.type2) return false;
+  // Unit-only results (a PO box / Postfach with no street line) legitimately
+  // reformat their box number -- e.g. grouped digits "10 01 20" -> "100120" --
+  // so the street-token model does not apply. There is no street to preserve.
+  if (!parsed.street && !parsed.number && parsed.sec_unit_type) return false;
 
   const segment = streetSegment(address, parsed);
   const requiredCount = countSignificantTokens(segment) - fractionDiscount(segment, parsed);

@@ -1,6 +1,15 @@
 import type { Pattern } from "xregexp";
 
-export type CountryMappings = "us" | "ca";
+export type CountryMappings =
+  | "us"
+  | "ca"
+  // European countries (see src/maps/_eu)
+  | "de"
+  | "fr"
+  | "gb"
+  | "it"
+  | "es"
+  | "nl";
 
 export interface AddressRuleset {
   type: Pattern;

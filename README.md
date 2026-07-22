@@ -43,19 +43,68 @@ intl.parseLocation('123 Main St, Toronto, ON M5V 3A8')   // detects CA
 intl.parseStreet('123 Main St', 'ca')                    // force CA
 ```
 
+## European addresses
+
+Six European countries are supported in addition to US/CA, built on a shared,
+configuration-driven engine (`src/maps/_eu`). European addressing differs from
+the US/CA grammar along three axes the engine models per country: where the
+house number sits (before vs after the street), where the street *type* sits
+(leading `Rue`, trailing `Street`, or fused as in `Bäckerstraße`), and whether
+the postcode precedes the city (continental) or comes last (UK).
+
+```ts
+import { AddressParser, IntlAddressParser } from '@sroussey/parse-address'
+
+new AddressParser('de').parseLocation('Bäckerstraße 12, 10115 Berlin')
+// { street: 'Bäcker', type: 'Straße', number: '12', postal_code: '10115', city: 'Berlin', country: 'DE' }
+
+new AddressParser('fr').parseLocation('10 Rue de Rivoli, 75001 Paris')
+// { number: '10', type: 'Rue', street: 'de Rivoli', postal_code: '75001', city: 'Paris', country: 'FR' }
+
+new AddressParser('gb').parseLocation('221B Baker Street, London, NW1 6XE')
+// { number: '221', civic_number_suffix: 'B', street: 'Baker', type: 'Street', city: 'London', postal_code: 'NW1 6XE', country: 'GB' }
+
+new AddressParser('it').parseLocation('Via Roma 15, 00184 Roma RM')
+// { type: 'Via', street: 'Roma', number: '15', postal_code: '00184', city: 'Roma', state: 'RM', country: 'IT' }
+
+new AddressParser('es').parseLocation('Calle de Alcalá, 42, 28014 Madrid')
+// { type: 'Calle', street: 'de Alcalá', number: '42', postal_code: '28014', city: 'Madrid', country: 'ES' }
+
+new AddressParser('nl').parseLocation("Spuistraat 63, 2511 BD 's-Gravenhage")
+// { street: 'Spui', type: 'straat', number: '63', postal_code: '2511 BD', city: "'s-Gravenhage", country: 'NL' }
+```
+
+| Code | Country | Number | Type | Postcode | Region field |
+|------|---------|--------|------|----------|--------------|
+| `de` | Germany | after street | fused suffix (`-straße`) | 5-digit, before city | – |
+| `fr` | France | before street | leading (`Rue`) | 5-digit, before city | – |
+| `gb` | United Kingdom | before street | trailing (`Street`) | last, after city | county → `state` |
+| `it` | Italy | after street | leading (`Via`) | 5-digit, before city | province → `state` |
+| `es` | Spain | after street (comma) | leading (`Calle`) | 5-digit, before city | province → `state` |
+| `nl` | Netherlands | after street | fused suffix (`-straat`) | 4-digit+2-letter, before city | – |
+
+Each country's addressing rules, prior-work notes and known failure modes are
+documented under [`docs/eu-research`](docs/eu-research); the parsers are validated
+against 100+ real-address fixtures per country in `__tests__/eu-fixtures`.
+
 ### Fields
 
 US and CA share the street fields (`number`, `civic_number_suffix`, `prefix`,
 `street`, `type`, `suffix`, `sec_unit_type`, `sec_unit_num`). Canadian results add
 `province`, `postal_code`, `fsa`, `ldu`; US results add `postal_code`, `plus4`,
-`state`.
+`state`. European results use the shared street fields plus `postal_code`, `city`,
+and (where applicable) `state` for the province/county; the street `type` carries
+a `short_street_type` code as in US/CA.
 
 ### Country detection precedence
 
 `IntlAddressParser` auto-detects in this fixed order: explicit country name/code →
-postal-code shape → full region names → region codes → French street types →
-default US. Pass a `country` argument to any `IntlAddressParser` method to skip
-detection.
+explicit European country name / UK & NL postcode shape → postal-code shape →
+full region names → region codes → French street types → default US. The
+continental countries (DE/FR/IT/ES) share a bare 5-digit postcode that is
+ambiguous with a US ZIP, so unless the input carries an explicit country name
+they fall through to the US default — **pass a `country` argument** to any
+`IntlAddressParser`/`AddressParser` method when you know the country.
 
 ### Guarantee: no dropped street tokens
 

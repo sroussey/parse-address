@@ -1,10 +1,18 @@
 import type { CountryMappings } from "./types/ruleset";
 import { AddressParserUS } from "./maps/us/parser";
 import { AddressParserCA } from "./maps/ca/parser";
+import { AddressParserEU } from "./maps/_eu/parser";
+import { euConfigs, euCountryCodes } from "./maps/_eu/registry";
 import { AddressParserImpl } from "./types/parser";
 import { stateCodesMap } from "./maps/us/states";
 import { provinceCodesMap } from "./maps/ca/provinces";
 import { enforceTokenPreservation } from "./invariant";
+
+const SUPPORTED_COUNTRIES: CountryMappings[] = [
+  "us",
+  "ca",
+  ...(euCountryCodes as CountryMappings[]),
+];
 
 export type {
   ParsedAddress,
@@ -17,15 +25,16 @@ export { AddressParserImpl } from "./types/parser";
 export class AddressParser implements AddressParserImpl {
   parser: AddressParserImpl;
   constructor(country: CountryMappings = "us") {
-    switch (country) {
-      case "us":
-        this.parser = new AddressParserUS();
-        break;
-      case "ca":
-        this.parser = new AddressParserCA();
-        break;
-      default:
-        throw new Error(`Unsupported country "${country}"; supported: us, ca`);
+    if (country === "us") {
+      this.parser = new AddressParserUS();
+    } else if (country === "ca") {
+      this.parser = new AddressParserCA();
+    } else if (euConfigs[country]) {
+      this.parser = new AddressParserEU(euConfigs[country]);
+    } else {
+      throw new Error(
+        `Unsupported country "${country}"; supported: ${SUPPORTED_COUNTRIES.join(", ")}`
+      );
     }
   }
   normalizeAddress(parts) {
@@ -82,6 +91,39 @@ function detectCountryByPostalCode(address: string): CountryMappings | null {
   }
   if (usZipCode.test(address)) {
     return "us";
+  }
+  return null;
+}
+
+/**
+ * Strong European signals: an explicit country name, or a country-specific
+ * postcode shape distinctive enough not to collide with US ZIP / CA postal.
+ * The continental countries (DE/FR/IT/ES) all share a bare 5-digit postcode
+ * that is ambiguous with a US ZIP, so without an explicit country name they are
+ * left to the US default -- callers who know the country should pass it.
+ */
+function detectEuCountry(address: string): CountryMappings | null {
+  const names: [CountryMappings, RegExp][] = [
+    ["de", /\b(?:Deutschland|Germany)\b/i],
+    ["fr", /\bFrance\b/i],
+    ["it", /\b(?:Italia|Italy)\b/i],
+    ["es", /\b(?:España|Espana|Spain)\b/i],
+    ["nl", /\b(?:Nederland|Netherlands|Holland)\b/i],
+    ["gb", /\b(?:United Kingdom|Great Britain)\b/i],
+  ];
+  for (const [code, re] of names) {
+    if (re.test(address)) return code;
+  }
+  // UK postcode: outward (1-2 letters, digit, optional letter/digit) + inward
+  // (digit + two letters). CA postal ends digit-letter-digit, so it never
+  // matches this; US ZIP has no letters.
+  if (/\b(?:GIR\s*0AA|[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2})\b/.test(address)) {
+    return "gb";
+  }
+  // NL postcode: 4 digits + 2 letters. Require a following city word so a bare
+  // "1234 AB" house-number-plus-region does not trip it.
+  if (/\b\d{4}\s?[A-Za-z]{2}\b\s+[A-Za-z]/.test(address) && !/\b\d{5}\b/.test(address)) {
+    return "nl";
   }
   return null;
 }
@@ -168,7 +210,14 @@ function detectCountry(address: string): CountryMappings {
   if (explicitCountry) {
     return explicitCountry;
   }
-  
+
+  // Strong European signals (explicit name, or UK/NL postcode shape) before the
+  // US-ZIP default, which would otherwise claim continental 5-digit codes.
+  const euCountry = detectEuCountry(address);
+  if (euCountry) {
+    return euCountry;
+  }
+
   // Check postal code formats (more reliable than province/state codes)
   const postalCodeCountry = detectCountryByPostalCode(address);
   if (postalCodeCountry) {
@@ -198,19 +247,21 @@ function detectCountry(address: string): CountryMappings {
 }
 
 export class IntlAddressParser {
-  private parsers: Record<CountryMappings, AddressParser>;
+  private parsers: Partial<Record<CountryMappings, AddressParser>>;
   constructor() {
-    this.parsers = {
-      us: new AddressParser("us"),
-      ca: new AddressParser("ca"),
-    };
+    this.parsers = {};
+    for (const code of SUPPORTED_COUNTRIES) {
+      this.parsers[code] = new AddressParser(code);
+    }
   }
 
   private pick(address: string, country?: CountryMappings): AddressParser {
     const resolved = country ?? detectCountry(address);
     const parser = this.parsers[resolved];
     if (!parser) {
-      throw new Error(`Unsupported country "${resolved}"; supported: us, ca`);
+      throw new Error(
+        `Unsupported country "${resolved}"; supported: ${SUPPORTED_COUNTRIES.join(", ")}`
+      );
     }
     return parser;
   }

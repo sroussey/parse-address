@@ -1,7 +1,7 @@
 {
   "name": "@sroussey/parse-address",
   "version": "3.0.0",
-  "description": "USA/Canada Street Address Parser",
+  "description": "USA/Canada/Europe Street Address Parser (US, CA, DE, FR, GB, IT, ES, NL)",
   "type": "module",
   "main": "./dist/parser.js",
   "types": "./dist/parser.d.ts",
@@ -32,6 +32,14 @@
     "street",
     "US",
     "Canada",
+    "Europe",
+    "Germany",
+    "France",
+    "UK",
+    "Italy",
+    "Spain",
+    "Netherlands",
+    "international",
     "Geo::StreetAddress::US",
     "geo"
   ],
