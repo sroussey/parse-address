@@ -1,6 +1,6 @@
 import assert from "assert";
 import { AddressParser, IntlAddressParser } from "../src/parser";
-import { losesTokens } from "../src/invariant";
+import { losesTokens, minimalLosslessParse } from "../src/invariant";
 import { canadianAddresses, canadianTestCases, existingTests, namedfloorTests } from "./test-cases";
 import type { AddressTestCaseMap } from "../src/types/address";
 
@@ -260,5 +260,23 @@ describe("lossless fallback never drops a street token", () => {
     // The literal check above is necessary but not sufficient on its own --
     // pin it to the project's actual invariant too.
     assert.equal(losesTokens(address, p), false, "facade output must not be flagged lossy");
+  });
+});
+
+describe("minimalLosslessParse carries over tail locational fields", () => {
+  it("preserves plus4 (which lives in the excluded tail, not the street segment)", () => {
+    const out = minimalLosslessParse("123 Main Extra St, City, ST 12345-6789", {
+      number: "123",
+      street: "Main",
+      type: "St",
+      city: "City",
+      state: "ST",
+      postal_code: "12345",
+      plus4: "6789",
+      country: "US",
+    });
+    assert.equal(out.postal_code, "12345");
+    assert.equal(out.plus4, "6789");
+    assert.equal(out.street, "Main Extra"); // the dropped "Extra" is recovered
   });
 });

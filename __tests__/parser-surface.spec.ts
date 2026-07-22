@@ -66,3 +66,14 @@ describe("postal_code is the sole postal field", () => {
     assert.equal((p as unknown as Record<string, unknown>).zip, undefined);
   });
 });
+
+describe("IntlAddressParser unsupported-country override", () => {
+  it("throws a clear error instead of an opaque TypeError", () => {
+    const intl = new IntlAddressParser();
+    assert.throws(
+      // @ts-expect-error intentionally passing an unsupported country at runtime
+      () => intl.parseLocation("123 Main St", "mx"),
+      /Unsupported country "mx"; supported: us, ca/
+    );
+  });
+});

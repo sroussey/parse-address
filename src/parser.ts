@@ -199,7 +199,12 @@ export class IntlAddressParser {
   }
 
   private pick(address: string, country?: CountryMappings): AddressParser {
-    return this.parsers[country ?? detectCountry(address)];
+    const resolved = country ?? detectCountry(address);
+    const parser = this.parsers[resolved];
+    if (!parser) {
+      throw new Error(`Unsupported country "${resolved}"; supported: us, ca`);
+    }
+    return parser;
   }
 
   parseLocation(address: string, country?: CountryMappings) {

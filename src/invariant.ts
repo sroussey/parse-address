@@ -65,15 +65,20 @@ function boundaryCandidates(
   return [value];
 }
 
-function firstIndexOfValue(addressLower: string, value: string): number {
+// A whole-word (\b-anchored) matcher for a lowercased boundary value, with regex
+// metacharacters escaped. Shared by the first/last occurrence lookups.
+function wholeWordRegExp(value: string, flags = ""): RegExp {
   const escaped = value.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const match = new RegExp(`\\b${escaped}\\b`).exec(addressLower);
+  return new RegExp(`\\b${escaped}\\b`, flags);
+}
+
+function firstIndexOfValue(addressLower: string, value: string): number {
+  const match = wholeWordRegExp(value).exec(addressLower);
   return match ? match.index : -1;
 }
 
 function lastIndexOfValue(addressLower: string, value: string): number {
-  const escaped = value.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const re = new RegExp(`\\b${escaped}\\b`, "g");
+  const re = wholeWordRegExp(value, "g");
   let idx = -1;
   let match: RegExpExecArray | null;
   while ((match = re.exec(addressLower)) !== null) {
@@ -168,8 +173,15 @@ export function losesTokens(address: string, parsed: ParsedAddress | null): bool
 // Locational fields kept as-is when rebuilding a minimal, guaranteed-lossless
 // result: the same boundary fields `streetSegment` strips from the tail (so
 // the street/locational split stays one consistent notion across the
-// detector and the fallback), plus the postal-code-adjacent `fsa`/`ldu`.
-const KEPT_LOCATIONAL_FIELDS: (keyof ParsedAddress)[] = [...BOUNDARY_FIELDS, "fsa", "ldu"];
+// detector and the fallback), plus the postal-code-adjacent `fsa`/`ldu`/`plus4`
+// (these live in the excluded tail, so they are never recoverable from the
+// street segment and must be carried over explicitly).
+const KEPT_LOCATIONAL_FIELDS: (keyof ParsedAddress)[] = [
+  ...BOUNDARY_FIELDS,
+  "fsa",
+  "ldu",
+  "plus4",
+];
 
 /**
  * A minimal, guaranteed-lossless parse: leading civic number (+ attached letter
