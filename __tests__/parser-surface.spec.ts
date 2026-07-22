@@ -53,3 +53,16 @@ describe("country detection contract", () => {
     assert.equal(intl.parseLocation("123 Main St, Toronto ON M5V 3A8")!.country, "CA");
   });
 });
+
+describe("postal_code is the sole postal field", () => {
+  it("US exposes postal_code, not zip", () => {
+    const p = new AddressParser("us").parseLocation("1005 Gravenstein Hwy, Sebastopol, CA 95472");
+    assert.equal(p!.postal_code, "95472");
+    assert.equal((p as unknown as Record<string, unknown>).zip, undefined);
+  });
+  it("CA exposes postal_code, not zip", () => {
+    const p = new AddressParser("ca").parseLocation("123 Main St, Toronto, ON M5V 3A8");
+    assert.equal(p!.postal_code, "M5V 3A8");
+    assert.equal((p as unknown as Record<string, unknown>).zip, undefined);
+  });
+});
