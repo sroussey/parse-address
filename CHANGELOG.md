@@ -1,5 +1,14 @@
 # Change Log
 
+## 3.1.0
+
+### New features
+- Recognize SEC EDGAR Canadian region codes (`A0`–`B0`, `Z4`) in the province
+  slot. They normalize to the canonical province code (e.g. `A8` → `QC`), so an
+  EDGAR-style address (`"…, Montreal, A8, H1A 1A1"`) parses cleanly instead of
+  collapsing the tail into `street`. `IntlAddressParser` also treats them as a
+  Canadian signal for auto-detection.
+
 ## 3.0.0
 
 ### Breaking changes

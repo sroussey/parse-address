@@ -50,12 +50,19 @@ US and CA share the street fields (`number`, `civic_number_suffix`, `prefix`,
 `province`, `postal_code`, `fsa`, `ldu`; US results add `postal_code`, `plus4`,
 `state`.
 
+### SEC EDGAR region codes
+
+Canadian provinces are recognized both by their canonical two-letter code (`QC`,
+`ON`, …) and by SEC EDGAR's `A0`–`B0` / `Z4` codes, which normalize to the
+canonical code (e.g. `A8` → `QC`). This lets an EDGAR-sourced address parse
+without pre-mapping the region code.
+
 ### Country detection precedence
 
 `IntlAddressParser` auto-detects in this fixed order: explicit country name/code →
-postal-code shape → full region names → region codes → French street types →
-default US. Pass a `country` argument to any `IntlAddressParser` method to skip
-detection.
+postal-code shape → full region names → region codes (incl. SEC EDGAR codes) →
+French street types → default US. Pass a `country` argument to any
+`IntlAddressParser` method to skip detection.
 
 ### Guarantee: no dropped street tokens
 

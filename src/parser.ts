@@ -4,6 +4,7 @@ import { AddressParserCA } from "./maps/ca/parser";
 import { AddressParserImpl } from "./types/parser";
 import { stateCodesMap } from "./maps/us/states";
 import { provinceCodesMap } from "./maps/ca/provinces";
+import { secProvinceCodesMap } from "./maps/ca/sec-provinces";
 import { enforceTokenPreservation } from "./invariant";
 
 export type {
@@ -115,7 +116,12 @@ function detectCountryByRegionNames(address: string): CountryMappings | null {
  * Check for province or state codes (abbreviated forms)
  */
 function detectCountryByRegionCodes(address: string): CountryMappings | null {
-  const canadianProvinceCodes = Object.values(provinceCodesMap);
+  const canadianProvinceCodes = [
+    ...Object.values(provinceCodesMap),
+    // SEC EDGAR encodes Canadian provinces as "A0"-"B0"/"Z4"; treat them as a
+    // Canadian signal too (uppercased for the case-sensitive whole-word test).
+    ...Object.keys(secProvinceCodesMap).map((code) => code.toUpperCase()),
+  ];
   const usStateCodes = Object.values(stateCodesMap);
   
   // Check US state codes first (more common)
