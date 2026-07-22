@@ -12,8 +12,21 @@ const corpus: AddressTestCaseMap = {
   ...canadianAddresses,
 };
 
-describe("token-preservation detector catches reproduced false-negatives", () => {
-  it("Finding 1: country-field phantom token no longer masks a single-word drop", () => {
+describe("token-preservation detector catches genuine street-token drops", () => {
+  it("canary: dropped street-name token ('Parc') with no locational fields at all", () => {
+    assert.equal(
+      losesTokens("123 Avenue du Parc", {
+        number: "123",
+        type: "Ave",
+        street: "du",
+        country: "CA",
+      }),
+      true,
+      "detector must catch the dropped 'Parc' token"
+    );
+  });
+
+  it("Finding 1: dropped 'Extra' token before the street type", () => {
     assert.equal(
       losesTokens("123 Main Extra Street, Springfield, IL 62701", {
         number: "123",
@@ -29,20 +42,7 @@ describe("token-preservation detector catches reproduced false-negatives", () =>
     );
   });
 
-  it("canary: country still uncounted (and drop still caught) when source has no country word", () => {
-    assert.equal(
-      losesTokens("123 Avenue du Parc", {
-        number: "123",
-        type: "Ave",
-        street: "du",
-        country: "CA",
-      }),
-      true,
-      "detector must still catch the dropped 'Parc' token"
-    );
-  });
-
-  it("Finding 2: PO-box exemption no longer bypasses drops when locational fields are present", () => {
+  it("Finding 2 (PO-box shape): dropped 'Canyon'/'Road' tokens", () => {
     assert.equal(
       losesTokens("100 Box Canyon Road, Springfield, IL 62701", {
         number: "100",
@@ -54,6 +54,76 @@ describe("token-preservation detector catches reproduced false-negatives", () =>
       }),
       true,
       "detector must catch the dropped 'Canyon'/'Road' tokens"
+    );
+  });
+
+  it("US Highway: dropped 'Old' token between the highway name and the road name", () => {
+    assert.equal(
+      losesTokens("123 US Hwy Old Farm Road, Springfield, IL 62701", {
+        number: "123",
+        street: "US Hwy Farm",
+        type: "Rd",
+        city: "Springfield",
+        state: "IL",
+        postal_code: "62701",
+        country: "US",
+      }),
+      true,
+      "detector must catch the dropped 'Old' token"
+    );
+  });
+
+  it("New York collision: dropped 'Extra' token despite 'New York' city containing 'york'", () => {
+    assert.equal(
+      losesTokens("Nine Park Extra avenue 1st Floor, New York, NY 10022", {
+        number: "9",
+        street: "Park",
+        type: "Ave",
+        sec_unit_num: "1",
+        sec_unit_type: "Floor",
+        city: "New York",
+        state: "NY",
+        postal_code: "10022",
+        country: "US",
+      }),
+      true,
+      "detector must catch the dropped 'Extra' token"
+    );
+  });
+
+  it("N.Main period: dropped 'Extra' token immediately after a period-abbreviated prefix", () => {
+    assert.equal(
+      losesTokens("123 N.Main Extra St, Springfield, IL 62701", {
+        number: "123",
+        prefix: "N",
+        street: "Main",
+        type: "St",
+        city: "Springfield",
+        state: "IL",
+        postal_code: "62701",
+        country: "US",
+      }),
+      true,
+      "detector must catch the dropped 'Extra' token"
+    );
+  });
+});
+
+describe("token-preservation detector does not false-trigger on a correct parse", () => {
+  it("correct S.E. directional suffix is not a drop", () => {
+    assert.equal(
+      losesTokens("123 Main St S.E., Springfield, IL 62701", {
+        number: "123",
+        street: "Main",
+        type: "St",
+        suffix: "SE",
+        city: "Springfield",
+        state: "IL",
+        postal_code: "62701",
+        country: "US",
+      }),
+      false,
+      "detector must not flag a correct parse with no dropped tokens"
     );
   });
 });

@@ -1,111 +1,133 @@
 import type { ParsedAddress } from "./types/address";
-import { stateCodesMap } from "./maps/us/states";
-import { provinceCodesMap } from "./maps/ca/provinces";
 
-// Connector words that appear in the source but not as an addressable token
-// (intersections). Extended only if the calibration test surfaces a case.
+// Intersection connector words that appear in source but are not addressable tokens.
 const FILLER = new Set(["and", "at"]);
 
-// Output fields whose text represents source tokens. Locational fields are
-// included so abbreviation/normalization in the street portion can be offset by
-// the full text elsewhere; only a genuine drop lowers the total.
-const ACCOUNTED_FIELDS: (keyof ParsedAddress)[] = [
+// Count significant tokens. A run like "S.E." / "P.O." (single letter + period,
+// abutting another single-letter+period) collapses to one token; every other
+// period, comma, hash, slash, or hyphen is a separator.
+export function countSignificantTokens(text: string): number {
+  const collapsed = text.toLowerCase().replace(/\b([a-z])\.(?=[a-z]\b)/g, "$1");
+  return collapsed
+    .replace(/[.,#/\-]/g, " ")
+    .split(/\s+/)
+    .filter((t) => t.length > 0 && !FILLER.has(t)).length;
+}
+
+// Street-relevant output fields. Locational fields are deliberately excluded.
+const STREET_FIELDS: (keyof ParsedAddress)[] = [
   "number", "civic_number_suffix", "prefix", "street", "type", "suffix",
-  "street1", "street2", "type1", "type2",
-  "sec_unit_type", "sec_unit_num", "city", "province", "state",
-  "postal_code", "plus4", "country",
+  "sec_unit_type", "sec_unit_num",
 ];
 
-// Reverse lookup (abbreviation -> full name) for the multi-word US
-// states / Canadian provinces normalized down to a 2-letter code (e.g.
-// "New York" -> "NY"). Used only to recognize that a full name actually
-// present in the source accounts for more tokens than its abbreviated form.
-const US_STATE_FULL_NAMES: Record<string, string> = Object.fromEntries(
-  Object.entries(stateCodesMap).map(([full, abbr]) => [abbr, full])
-);
-const CA_PROVINCE_FULL_NAMES: Record<string, string> = Object.fromEntries(
-  Object.entries(provinceCodesMap).map(([full, abbr]) => [abbr, full])
-);
+// Locational values mark where the street segment ends. `country` is synthetic
+// (often absent from the source, and its code can collide inside street words),
+// and fsa/ldu are substrings of postal_code, so both are excluded.
+const BOUNDARY_FIELDS: (keyof ParsedAddress)[] = [
+  "city", "province", "state", "postal_code",
+];
 
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
+// Calibration fix: a city value is sometimes normalized from an abbreviated
+// compass direction in the source ("N Sebastopol" / "NW Edmonton" ->
+// "North Sebastopol" / "Northwest Edmonton"). Matching only the normalized form
+// misses the source's boundary entirely and lets the whole locational tail
+// spill into the street segment (corpus: "1005 Gravenstein Hwy, N Sebastopol
+// CA", "14205 96 Ave NW NW Edmonton AB T5N 0C2", "1 First St, e San Jose CA").
+// Compound directions are listed before their single-word components so they
+// match first (e.g. "northwest" before "north"/"west").
+const CITY_DIRECTION_PREFIXES: readonly (readonly [string, string])[] = [
+  ["northeast", "ne"],
+  ["northwest", "nw"],
+  ["southeast", "se"],
+  ["southwest", "sw"],
+  ["north", "n"],
+  ["south", "s"],
+  ["east", "e"],
+  ["west", "w"],
+];
 
-export function countSignificantTokens(text: string): number {
-  return text
-    .toLowerCase()
-    // Periods are dropped outright (not replaced with a space) so a
-    // letter-by-letter abbreviation written with periods in the source
-    // ("S.E.", "P.O.") tokenizes to the same single merged token
-    // ("se", "po") that the parser's normalized output field uses --
-    // otherwise the source side counts one token per letter while the
-    // output side counts one token for the whole abbreviation.
-    .replace(/\./g, "")
-    .replace(/[,#/]/g, " ")
-    .split(/\s+/)
-    // A token with no letters or digits is stray punctuation (e.g. a bare
-    // "-" separator) rather than a dropped word, so it doesn't count on
-    // either side of the comparison.
-    .filter((t) => t.length > 0 && !FILLER.has(t) && /[a-z0-9]/.test(t)).length;
-}
-
-// A state/province field is normalized to its 2-letter code even when the
-// source spelled out the full (possibly multi-word) name, e.g. "New Mexico"
-// -> "NM". That normalization legitimately drops a token that was never lost
-// -- it is still present in the source, just abbreviated on output. Count it
-// as the full name's token length only when that full name is actually the
-// text the source used; otherwise fall back to the abbreviation's own count.
-function locationalFieldTokenCount(
+// Alternate source spellings for a boundary field's value, tried in addition to
+// the value itself; the earliest match among all candidates wins.
+function boundaryCandidates(
   field: keyof ParsedAddress,
   value: string,
-  address: string
-): number {
-  const fullNames =
-    field === "state" ? US_STATE_FULL_NAMES : field === "province" ? CA_PROVINCE_FULL_NAMES : undefined;
-  const fullName = fullNames?.[value.toUpperCase()];
-  if (fullName && new RegExp(`\\b${escapeRegExp(fullName)}\\b`, "i").test(address)) {
-    return countSignificantTokens(fullName);
+  parsed: ParsedAddress
+): string[] {
+  if (field === "city") {
+    const lower = value.toLowerCase();
+    for (const [full, abbr] of CITY_DIRECTION_PREFIXES) {
+      if (lower.startsWith(`${full} `)) {
+        return [value, `${abbr}${value.slice(full.length)}`];
+      }
+    }
   }
-  return countSignificantTokens(value);
+  // Calibration fix: a ZIP+4 is sometimes written as one unbroken digit run
+  // ("606066306"), so the stand-alone postal_code has no trailing word
+  // boundary to match against; try the concatenated form first (corpus:
+  // "233 S Wacker Dr 606066306").
+  if (field === "postal_code" && typeof parsed.plus4 === "string" && parsed.plus4) {
+    return [`${value}${parsed.plus4}`, value];
+  }
+  return [value];
 }
 
-function outputTokenCount(parsed: ParsedAddress, address: string): number {
-  // `country` is a required field always populated by the parser ("US"/"CA")
-  // even though it is inferred from which country-specific grammar matched,
-  // not extracted from the source text. Counting it unconditionally inflates
-  // the output total and can silently offset a genuine dropped street token.
-  // Only count it when the source address actually contains a country word --
-  // that keeps both sides of the comparison symmetric (no source word means
-  // neither side should count one) and stops it from masking a drop in the
-  // ordinary case where city/province/state/postal_code are already present.
-  const sourceMentionsCountry = /\b(canada|can|usa?|united states)\b/i.test(address);
-  return ACCOUNTED_FIELDS.reduce((sum, field) => {
-    if (field === "country" && !sourceMentionsCountry) return sum;
+function firstIndexOfValue(addressLower: string, value: string): number {
+  const escaped = value.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = new RegExp(`\\b${escaped}\\b`).exec(addressLower);
+  return match ? match.index : -1;
+}
+
+// The source up to the earliest locational-field occurrence (whole-word match,
+// so a short region code like "ON" does not match inside "Onondaga").
+function streetSegment(address: string, parsed: ParsedAddress): string {
+  const lower = address.toLowerCase();
+  let cut = address.length;
+  for (const field of BOUNDARY_FIELDS) {
     const value = parsed[field];
-    if (typeof value !== "string") return sum;
-    return sum + locationalFieldTokenCount(field, value, address);
+    if (typeof value !== "string" || !value) continue;
+    for (const candidate of boundaryCandidates(field, value, parsed)) {
+      const idx = firstIndexOfValue(lower, candidate);
+      if (idx >= 0) cut = Math.min(cut, idx);
+    }
+  }
+  return address.slice(0, cut);
+}
+
+function outputStreetTokenCount(parsed: ParsedAddress): number {
+  return STREET_FIELDS.reduce((sum, field) => {
+    const value = parsed[field];
+    return sum + (typeof value === "string" ? countSignificantTokens(value) : 0);
   }, 0);
 }
 
-// A civic-number fraction ("<num> 1/2 <street>...") that the current grammar
-// leaves uncaptured (no `civic_number_suffix`) for this number shape is
-// dropped by the parser today rather than left dangling as an unaccounted
-// street-name token. Only the fraction's own token count is forgiven -- an
-// additional genuine drop elsewhere in the same address must still trip the
-// detector.
+// Calibration fix: a civic-number fraction ("<num> 1/2 <street>...") that the
+// current grammar leaves uncaptured (no `civic_number_suffix`) is dropped by
+// the parser today rather than left dangling as an unaccounted street-name
+// token. Only the fraction's own token count is forgiven -- a genuine drop
+// elsewhere in the same segment still trips the detector (corpus: "3813 1/2
+// Some Road, Los Angeles, CA").
 const LEADING_CIVIC_FRACTION = /^\d+\s+(\d+\/\d+)\b/;
+
+function fractionDiscount(segment: string, parsed: ParsedAddress): number {
+  if (parsed.civic_number_suffix) return 0;
+  const match = segment.trim().match(LEADING_CIVIC_FRACTION);
+  return match ? countSignificantTokens(match[1] ?? "") : 0;
+}
 
 export function losesTokens(address: string, parsed: ParsedAddress | null): boolean {
   if (!parsed) return false;
   // Intersections carry two streets; the single-street count model does not apply.
   if (parsed.street2 || parsed.type2) return false;
-  // Rural-route / bare box shape: the grammar drops city/province/postal
-  // detail after a bare box designator, and the "box" word itself lands in
-  // `street` (e.g. "RR 1, Box 123, Smiths Falls, ON K7A 4S4"). This is only a
-  // known grammar gap when that locational detail is actually missing -- if
-  // city/province/state/postal_code are all present, nothing was dropped
-  // there and the exemption must not mask a genuine street-token drop
-  // elsewhere (e.g. "100 Box Canyon Road, Springfield, IL 62701").
+
+  // Calibration fix: rural-route / bare box shape. The grammar drops all
+  // locational detail after a bare box designator, and the "box" word itself
+  // lands in `street` (e.g. "RR 1, Box 123, Smiths Falls, ON K7A 4S4"). With no
+  // city/province/state/postal_code to bound it, the street segment would
+  // otherwise swallow that whole (uncaptured, not dropped) locational tail.
+  // Scoped to when locational context is entirely absent -- if any of those
+  // fields are present, nothing was left uncaptured and this must not mask a
+  // genuine street-token drop (e.g. "100 Box Canyon Road, Springfield, IL
+  // 62701").
   const missingLocationalContext = !(
     parsed.city || parsed.province || parsed.state || parsed.postal_code
   );
@@ -116,9 +138,7 @@ export function losesTokens(address: string, parsed: ParsedAddress | null): bool
   )
     return false;
 
-  let requiredCount = countSignificantTokens(address);
-  const fractionMatch = !parsed.civic_number_suffix ? address.trim().match(LEADING_CIVIC_FRACTION) : null;
-  if (fractionMatch) requiredCount -= countSignificantTokens(fractionMatch[1] ?? "");
-
-  return outputTokenCount(parsed, address) < requiredCount;
+  const segment = streetSegment(address, parsed);
+  const requiredCount = countSignificantTokens(segment) - fractionDiscount(segment, parsed);
+  return outputStreetTokenCount(parsed) < requiredCount;
 }
