@@ -15,17 +15,17 @@ export function countSignificantTokens(text: string): number {
 }
 
 // Street-relevant output fields. Locational fields are deliberately excluded.
-const STREET_FIELDS: (keyof ParsedAddress)[] = [
+const STREET_FIELDS = [
   "number", "civic_number_suffix", "prefix", "street", "type", "suffix",
   "sec_unit_type", "sec_unit_num",
-];
+] as const;
 
 // Locational values mark where the street segment ends. `country` is synthetic
 // (often absent from the source, and its code can collide inside street words),
 // and fsa/ldu are substrings of postal_code, so both are excluded.
-const BOUNDARY_FIELDS: (keyof ParsedAddress)[] = [
+const BOUNDARY_FIELDS = [
   "city", "province", "state", "postal_code",
-];
+] as const;
 
 // Calibration fix: a city value is sometimes normalized from an abbreviated
 // compass direction in the source ("N Sebastopol" / "NW Edmonton" ->

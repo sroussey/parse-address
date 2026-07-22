@@ -2,7 +2,19 @@
   "name": "@sroussey/parse-address",
   "version": "3.0.0",
   "description": "USA/Canada Street Address Parser",
-  "main": "dist/parser.js",
+  "type": "module",
+  "main": "./dist/parser.js",
+  "types": "./dist/parser.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/parser.d.ts",
+      "import": "./dist/parser.js",
+      "default": "./dist/parser.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "test": "npx jest",
     "build": "rm -rf ./dist && tsc",

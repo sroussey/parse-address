@@ -3,6 +3,9 @@
   "compilerOptions": {
     "rootDir": ".",
     "noEmit": true,
+    "module": "commonjs",
+    "moduleResolution": "node10",
+    "ignoreDeprecations": "6.0",
     "types": ["jest", "node"]
   },
   "include": ["src/**/*.ts", "__tests__/**/*.ts"],

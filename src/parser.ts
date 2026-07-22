@@ -6,6 +6,14 @@ import { stateCodesMap } from "./maps/us/states";
 import { provinceCodesMap } from "./maps/ca/provinces";
 import { enforceTokenPreservation } from "./invariant";
 
+export type {
+  ParsedAddress,
+  AddressTestCase,
+  AddressTestCaseMap,
+} from "./types/address";
+export type { CountryMappings, AddressRuleset } from "./types/ruleset";
+export { AddressParserImpl } from "./types/parser";
+
 export class AddressParser implements AddressParserImpl {
   parser: AddressParserImpl;
   constructor(country: CountryMappings = "us") {
@@ -226,3 +234,7 @@ export class IntlAddressParser {
     return this.pick(address, country).parseIntersection(address);
   }
 }
+
+/** Default US parser instance (convenience for `import addressParser from ...`). */
+const addressParser = new AddressParser("us");
+export default addressParser;
