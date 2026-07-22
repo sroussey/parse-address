@@ -1,0 +1,1380 @@
+// AUTO-GENERATED from research sub-agent corpus (samples-at.json).
+// Ground-truth field breakdowns for AT addresses; consumed by __tests__/eu.spec.ts.
+import type { EuSample } from "./types";
+
+export const atSamples: EuSample[] = [
+  {
+    "input": "Kärntner Straße 12, 1010 Wien",
+    "number": "12",
+    "street": "Kärntner",
+    "type": "Straße",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "spaced type, umlaut, Vienna 1st district"
+  },
+  {
+    "input": "Mariahilfer Straße 103, 1060 Wien",
+    "number": "103",
+    "street": "Mariahilfer",
+    "type": "Straße",
+    "postal_code": "1060",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "spaced type, long shopping street"
+  },
+  {
+    "input": "Rotenturmstraße 25, 1010 Wien",
+    "number": "25",
+    "street": "Rotenturm",
+    "type": "Straße",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "fused -straße"
+  },
+  {
+    "input": "Favoritenstraße 7, 1040 Wien",
+    "number": "7",
+    "street": "Favoriten",
+    "type": "Straße",
+    "postal_code": "1040",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "fused -straße"
+  },
+  {
+    "input": "Praterstraße 60, 1020 Wien",
+    "number": "60",
+    "street": "Prater",
+    "type": "Straße",
+    "postal_code": "1020",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "fused -straße, 2nd district"
+  },
+  {
+    "input": "Landstraßer Hauptstraße 99, 1030 Wien",
+    "number": "99",
+    "street": "Landstraßer",
+    "type": "Hauptstraße",
+    "postal_code": "1030",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "compound Hauptstraße suffix, spaced"
+  },
+  {
+    "input": "Wiedner Hauptstraße 32, 1040 Wien",
+    "number": "32",
+    "street": "Wiedner",
+    "type": "Hauptstraße",
+    "postal_code": "1040",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "spaced Hauptstraße"
+  },
+  {
+    "input": "Schulerstraße 1-3, 1010 Wien",
+    "number": "1",
+    "civic_number_suffix": "-3",
+    "street": "Schuler",
+    "type": "Straße",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "house range 1-3"
+  },
+  {
+    "input": "Operngasse 4, 1010 Wien",
+    "number": "4",
+    "street": "Opern",
+    "type": "Gasse",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "fused -gasse"
+  },
+  {
+    "input": "Neubaugasse 12, 1070 Wien",
+    "number": "12",
+    "street": "Neubau",
+    "type": "Gasse",
+    "postal_code": "1070",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "fused -gasse, 7th district"
+  },
+  {
+    "input": "Herrengasse 23, 1010 Wien",
+    "number": "23",
+    "street": "Herren",
+    "type": "Gasse",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "fused -gasse"
+  },
+  {
+    "input": "Gonzagagasse 15, 1010 Wien",
+    "number": "15",
+    "street": "Gonzaga",
+    "type": "Gasse",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "fused -gasse"
+  },
+  {
+    "input": "Bäckerstraße 8, 1010 Wien",
+    "number": "8",
+    "street": "Bäcker",
+    "type": "Straße",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "fused, umlaut"
+  },
+  {
+    "input": "Sonnenfelsgasse 3, 1010 Wien",
+    "number": "3",
+    "street": "Sonnenfels",
+    "type": "Gasse",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "fused -gasse"
+  },
+  {
+    "input": "Naglergasse 9, 1010 Wien",
+    "number": "9",
+    "street": "Nagler",
+    "type": "Gasse",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "fused -gasse"
+  },
+  {
+    "input": "Bognergasse 2, 1010 Wien",
+    "number": "2",
+    "street": "Bogner",
+    "type": "Gasse",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "fused -gasse"
+  },
+  {
+    "input": "Grünangergasse 6, 1010 Wien",
+    "number": "6",
+    "street": "Grünanger",
+    "type": "Gasse",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "fused -gasse, umlaut"
+  },
+  {
+    "input": "Wollzeile 14, 1010 Wien",
+    "number": "14",
+    "street": "Woll",
+    "type": "Zeile",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "fused -zeile"
+  },
+  {
+    "input": "Fleischmarkt 5, 1010 Wien",
+    "number": "5",
+    "street": "Fleisch",
+    "type": "Markt",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "fused -markt"
+  },
+  {
+    "input": "Opernring 2, 1010 Wien",
+    "number": "2",
+    "street": "Opern",
+    "type": "Ring",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "fused -ring, Ringstraße segment"
+  },
+  {
+    "input": "Schottenring 30, 1010 Wien",
+    "number": "30",
+    "street": "Schotten",
+    "type": "Ring",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "fused -ring"
+  },
+  {
+    "input": "Kärntner Ring 12-14, 1010 Wien",
+    "number": "12",
+    "civic_number_suffix": "-14",
+    "street": "Kärntner",
+    "type": "Ring",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "spaced Ring, house range 12-14, umlaut"
+  },
+  {
+    "input": "Stubenring 1, 1010 Wien",
+    "number": "1",
+    "street": "Stuben",
+    "type": "Ring",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "fused -ring"
+  },
+  {
+    "input": "Währinger Gürtel 18, 1090 Wien",
+    "number": "18",
+    "street": "Währinger",
+    "type": "Gürtel",
+    "postal_code": "1090",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "spaced Gürtel, umlaut"
+  },
+  {
+    "input": "Handelskai 388, 1020 Wien",
+    "number": "388",
+    "street": "Handels",
+    "type": "Kai",
+    "postal_code": "1020",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "fused -kai"
+  },
+  {
+    "input": "Franz-Josefs-Kai 3, 1010 Wien",
+    "number": "3",
+    "street": "Franz-Josefs",
+    "type": "Kai",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "spaced Kai, hyphenated person name"
+  },
+  {
+    "input": "Roßauer Lände 27, 1090 Wien",
+    "number": "27",
+    "street": "Roßauer",
+    "type": "Lände",
+    "postal_code": "1090",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "spaced Lände, ß + umlaut"
+  },
+  {
+    "input": "Prinz-Eugen-Straße 20, 1040 Wien",
+    "number": "20",
+    "street": "Prinz-Eugen",
+    "type": "Straße",
+    "postal_code": "1040",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "hyphenated person name, fused"
+  },
+  {
+    "input": "Am Graben 21, 1010 Wien",
+    "number": "21",
+    "street": "Am Graben",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "prepositional name, type null"
+  },
+  {
+    "input": "Am Hof 8, 1010 Wien",
+    "number": "8",
+    "street": "Am Hof",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "prepositional name, type null"
+  },
+  {
+    "input": "Am Heumarkt 2, 1030 Wien",
+    "number": "2",
+    "street": "Am Heumarkt",
+    "postal_code": "1030",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "prepositional name, type null"
+  },
+  {
+    "input": "Graben 13, 1010 Wien",
+    "number": "13",
+    "street": "Graben",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "bare noun name, type null"
+  },
+  {
+    "input": "Kohlmarkt 16, 1010 Wien",
+    "number": "16",
+    "street": "Kohlmarkt",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "bare noun, type null"
+  },
+  {
+    "input": "Tuchlauben 7a, 1010 Wien",
+    "number": "7",
+    "civic_number_suffix": "a",
+    "street": "Tuchlauben",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "bare noun, alpha suffix 7a"
+  },
+  {
+    "input": "Freyung 6, 1010 Wien",
+    "number": "6",
+    "street": "Freyung",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "bare noun, type null"
+  },
+  {
+    "input": "Naschmarkt 40, 1040 Wien",
+    "number": "40",
+    "street": "Naschmarkt",
+    "postal_code": "1040",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "bare compound noun, kept whole"
+  },
+  {
+    "input": "Alter Markt 11, 1010 Wien",
+    "number": "11",
+    "street": "Alter",
+    "type": "Markt",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "adjective + Markt generic, spaced"
+  },
+  {
+    "input": "Auf der Schmelz 3, 1150 Wien",
+    "number": "3",
+    "street": "Auf der Schmelz",
+    "postal_code": "1150",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "prepositional phrase, type null"
+  },
+  {
+    "input": "Getreidegasse 9 Top 5, 5020 Salzburg",
+    "number": "9",
+    "street": "Getreide",
+    "type": "Gasse",
+    "sec_unit_type": "Top",
+    "sec_unit_num": "5",
+    "postal_code": "5020",
+    "city": "Salzburg",
+    "country": "AT",
+    "notes": "Top apartment unit, Salzburg (Mozart birthplace)"
+  },
+  {
+    "input": "Operngasse 4/3, 1010 Wien",
+    "number": "4",
+    "street": "Opern",
+    "type": "Gasse",
+    "sec_unit_type": "Tür",
+    "sec_unit_num": "3",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "slash /3 = Tür (door)"
+  },
+  {
+    "input": "Kaiserstraße 53/2/19, 1070 Wien",
+    "number": "53",
+    "street": "Kaiser",
+    "type": "Straße",
+    "sec_unit_type": "Stiege",
+    "sec_unit_num": "2",
+    "postal_code": "1070",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "slash short form Stiege 2 / Tür 19; captured Stiege, Tür 19 in notes"
+  },
+  {
+    "input": "Maria-Theresien-Straße 45/2/3/8, 6020 Innsbruck",
+    "__skip": "3-part slash sub-unit (extra levels dropped)",
+    "number": "45",
+    "street": "Maria-Theresien",
+    "type": "Straße",
+    "sec_unit_type": "Stiege",
+    "sec_unit_num": "2",
+    "postal_code": "6020",
+    "city": "Innsbruck",
+    "country": "AT",
+    "notes": "multi-slash Stiege2/Top3/Tür8; hyphenated name, Innsbruck"
+  },
+  {
+    "input": "Neubaugasse 12/7, 1070 Wien",
+    "number": "12",
+    "street": "Neubau",
+    "type": "Gasse",
+    "sec_unit_type": "Tür",
+    "sec_unit_num": "7",
+    "postal_code": "1070",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "slash /7 = Tür"
+  },
+  {
+    "input": "Favoritenstraße 100/14, 1100 Wien",
+    "number": "100",
+    "street": "Favoriten",
+    "type": "Straße",
+    "sec_unit_type": "Tür",
+    "sec_unit_num": "14",
+    "postal_code": "1100",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "slash door, 10th district"
+  },
+  {
+    "input": "Anton-Baumgartner-Straße 44 Stiege 3 Top 12, 1230 Wien",
+    "__skip": "stacked Stiege + Top units",
+    "number": "44",
+    "street": "Anton-Baumgartner",
+    "type": "Straße",
+    "sec_unit_type": "Stiege",
+    "sec_unit_num": "3",
+    "postal_code": "1230",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "long-form Stiege+Top, huge complex 3226 households; Top 12 in notes"
+  },
+  {
+    "input": "Linzer Gasse 14 Top 2, 5020 Salzburg",
+    "number": "14",
+    "street": "Linzer",
+    "type": "Gasse",
+    "sec_unit_type": "Top",
+    "sec_unit_num": "2",
+    "postal_code": "5020",
+    "city": "Salzburg",
+    "country": "AT",
+    "notes": "spaced Gasse, Top unit, Salzburg"
+  },
+  {
+    "input": "Mariahilfer Straße 88/1/9, 1070 Wien",
+    "number": "88",
+    "street": "Mariahilfer",
+    "type": "Straße",
+    "sec_unit_type": "Stiege",
+    "sec_unit_num": "1",
+    "postal_code": "1070",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "slash Stiege1/Tür9; Tür 9 in notes"
+  },
+  {
+    "input": "Herrengasse 6-8/Stiege 2/Top 4, 8010 Graz",
+    "__skip": "mixed slash + word stacked units",
+    "number": "6",
+    "civic_number_suffix": "-8",
+    "street": "Herren",
+    "type": "Gasse",
+    "sec_unit_type": "Stiege",
+    "sec_unit_num": "2",
+    "postal_code": "8010",
+    "city": "Graz",
+    "country": "AT",
+    "notes": "range 6-8 + Stiege + Top; Graz; Top 4 in notes"
+  },
+  {
+    "input": "Kärntner Straße 10 Stg. 1 Tür 5, 1010 Wien",
+    "__skip": "stacked Stiege + Tür units",
+    "number": "10",
+    "street": "Kärntner",
+    "type": "Straße",
+    "sec_unit_type": "Stiege",
+    "sec_unit_num": "1",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "Stg. abbreviation for Stiege; Tür 5 in notes"
+  },
+  {
+    "input": "Wollzeile 5/12, 1010 Wien",
+    "number": "5",
+    "street": "Woll",
+    "type": "Zeile",
+    "sec_unit_type": "Tür",
+    "sec_unit_num": "12",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "slash door on -zeile street"
+  },
+  {
+    "input": "Praterstraße 31a, 1020 Wien",
+    "number": "31",
+    "civic_number_suffix": "a",
+    "street": "Prater",
+    "type": "Straße",
+    "postal_code": "1020",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "alpha suffix 31a"
+  },
+  {
+    "input": "Rennweg 2b, 1030 Wien",
+    "number": "2",
+    "civic_number_suffix": "b",
+    "street": "Renn",
+    "type": "Weg",
+    "postal_code": "1030",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "fused -weg, alpha suffix"
+  },
+  {
+    "input": "Grabenweg 15A, 6020 Innsbruck",
+    "number": "15",
+    "civic_number_suffix": "A",
+    "street": "Graben",
+    "type": "Weg",
+    "postal_code": "6020",
+    "city": "Innsbruck",
+    "country": "AT",
+    "notes": "fused -weg, uppercase alpha suffix, Innsbruck"
+  },
+  {
+    "input": "Museumstraße 38-40, 6020 Innsbruck",
+    "number": "38",
+    "civic_number_suffix": "-40",
+    "street": "Museum",
+    "type": "Straße",
+    "postal_code": "6020",
+    "city": "Innsbruck",
+    "country": "AT",
+    "notes": "house range 38-40, Innsbruck"
+  },
+  {
+    "input": "Anichstraße 12, 6020 Innsbruck",
+    "number": "12",
+    "street": "Anich",
+    "type": "Straße",
+    "postal_code": "6020",
+    "city": "Innsbruck",
+    "country": "AT",
+    "notes": "fused -straße, Innsbruck"
+  },
+  {
+    "input": "Universitätsstraße 15, 6020 Innsbruck",
+    "number": "15",
+    "street": "Universitäts",
+    "type": "Straße",
+    "postal_code": "6020",
+    "city": "Innsbruck",
+    "country": "AT",
+    "notes": "fused, umlaut, Innsbruck"
+  },
+  {
+    "input": "Herrengasse 16, 8010 Graz",
+    "number": "16",
+    "street": "Herren",
+    "type": "Gasse",
+    "postal_code": "8010",
+    "city": "Graz",
+    "country": "AT",
+    "notes": "fused -gasse, Graz main street"
+  },
+  {
+    "input": "Sackstraße 20, 8010 Graz",
+    "number": "20",
+    "street": "Sack",
+    "type": "Straße",
+    "postal_code": "8010",
+    "city": "Graz",
+    "country": "AT",
+    "notes": "fused -straße, Graz"
+  },
+  {
+    "input": "Sporgasse 25, 8010 Graz",
+    "number": "25",
+    "street": "Spor",
+    "type": "Gasse",
+    "postal_code": "8010",
+    "city": "Graz",
+    "country": "AT",
+    "notes": "fused -gasse, Graz old town"
+  },
+  {
+    "input": "Murgasse 3, 8010 Graz",
+    "number": "3",
+    "street": "Mur",
+    "type": "Gasse",
+    "postal_code": "8010",
+    "city": "Graz",
+    "country": "AT",
+    "notes": "fused -gasse, Graz"
+  },
+  {
+    "input": "Hauptplatz 1, 8010 Graz",
+    "number": "1",
+    "street": "Haupt",
+    "type": "Platz",
+    "postal_code": "8010",
+    "city": "Graz",
+    "country": "AT",
+    "notes": "fused -platz, Graz town hall"
+  },
+  {
+    "input": "Schmiedgasse 2, 8010 Graz",
+    "number": "2",
+    "street": "Schmied",
+    "type": "Gasse",
+    "postal_code": "8010",
+    "city": "Graz",
+    "country": "AT",
+    "notes": "fused -gasse, Graz"
+  },
+  {
+    "input": "Kaiser-Josef-Platz 9, 8010 Graz",
+    "number": "9",
+    "street": "Kaiser-Josef",
+    "type": "Platz",
+    "postal_code": "8010",
+    "city": "Graz",
+    "country": "AT",
+    "notes": "hyphenated + Platz, Graz"
+  },
+  {
+    "input": "Neutorgasse 47, 8010 Graz",
+    "number": "47",
+    "street": "Neutor",
+    "type": "Gasse",
+    "postal_code": "8010",
+    "city": "Graz",
+    "country": "AT",
+    "notes": "fused -gasse, Graz"
+  },
+  {
+    "input": "Landstraße 12, 4020 Linz",
+    "number": "12",
+    "street": "Land",
+    "type": "Straße",
+    "postal_code": "4020",
+    "city": "Linz",
+    "country": "AT",
+    "notes": "fused -straße, Linz main street"
+  },
+  {
+    "input": "Hauptstraße 5, 4040 Linz",
+    "number": "5",
+    "street": "Haupt",
+    "type": "Straße",
+    "postal_code": "4040",
+    "city": "Linz",
+    "country": "AT",
+    "notes": "fused Hauptstraße, Linz Urfahr"
+  },
+  {
+    "input": "Promenade 3, 4020 Linz",
+    "number": "3",
+    "street": "Promenade",
+    "postal_code": "4020",
+    "city": "Linz",
+    "country": "AT",
+    "notes": "standalone name, type null, Linz"
+  },
+  {
+    "input": "Herrenstraße 19, 4020 Linz",
+    "number": "19",
+    "street": "Herren",
+    "type": "Straße",
+    "postal_code": "4020",
+    "city": "Linz",
+    "country": "AT",
+    "notes": "fused -straße, Linz"
+  },
+  {
+    "input": "Mozartstraße 7, 4020 Linz",
+    "number": "7",
+    "street": "Mozart",
+    "type": "Straße",
+    "postal_code": "4020",
+    "city": "Linz",
+    "country": "AT",
+    "notes": "fused -straße, Linz"
+  },
+  {
+    "input": "Graben 18, 4020 Linz",
+    "number": "18",
+    "street": "Graben",
+    "postal_code": "4020",
+    "city": "Linz",
+    "country": "AT",
+    "notes": "bare noun, type null, Linz"
+  },
+  {
+    "input": "Getreidegasse 3, 5020 Salzburg",
+    "number": "3",
+    "street": "Getreide",
+    "type": "Gasse",
+    "postal_code": "5020",
+    "city": "Salzburg",
+    "country": "AT",
+    "notes": "fused -gasse, Salzburg"
+  },
+  {
+    "input": "Griesgasse 11, 5020 Salzburg",
+    "number": "11",
+    "street": "Gries",
+    "type": "Gasse",
+    "postal_code": "5020",
+    "city": "Salzburg",
+    "country": "AT",
+    "notes": "fused -gasse, Salzburg"
+  },
+  {
+    "input": "Judengasse 8, 5020 Salzburg",
+    "number": "8",
+    "street": "Juden",
+    "type": "Gasse",
+    "postal_code": "5020",
+    "city": "Salzburg",
+    "country": "AT",
+    "notes": "fused -gasse, Salzburg"
+  },
+  {
+    "input": "Mozartplatz 4, 5020 Salzburg",
+    "number": "4",
+    "street": "Mozart",
+    "type": "Platz",
+    "postal_code": "5020",
+    "city": "Salzburg",
+    "country": "AT",
+    "notes": "fused -platz, Salzburg"
+  },
+  {
+    "input": "Residenzplatz 1, 5020 Salzburg",
+    "number": "1",
+    "street": "Residenz",
+    "type": "Platz",
+    "postal_code": "5020",
+    "city": "Salzburg",
+    "country": "AT",
+    "notes": "fused -platz, Salzburg"
+  },
+  {
+    "input": "Alter Markt 2, 5020 Salzburg",
+    "number": "2",
+    "street": "Alter",
+    "type": "Markt",
+    "postal_code": "5020",
+    "city": "Salzburg",
+    "country": "AT",
+    "notes": "adjective + Markt, spaced, Salzburg"
+  },
+  {
+    "input": "Hellbrunner Straße 34, 5020 Salzburg",
+    "number": "34",
+    "street": "Hellbrunner",
+    "type": "Straße",
+    "postal_code": "5020",
+    "city": "Salzburg",
+    "country": "AT",
+    "notes": "spaced Straße, Salzburg"
+  },
+  {
+    "input": "Alter Platz 1, 9020 Klagenfurt",
+    "number": "1",
+    "street": "Alter",
+    "type": "Platz",
+    "postal_code": "9020",
+    "city": "Klagenfurt",
+    "country": "AT",
+    "notes": "adjective + Platz, spaced, Klagenfurt"
+  },
+  {
+    "input": "Kramergasse 12, 9020 Klagenfurt",
+    "number": "12",
+    "street": "Kramer",
+    "type": "Gasse",
+    "postal_code": "9020",
+    "city": "Klagenfurt",
+    "country": "AT",
+    "notes": "fused -gasse, Klagenfurt"
+  },
+  {
+    "input": "Bahnhofstraße 44, 9020 Klagenfurt",
+    "number": "44",
+    "street": "Bahnhof",
+    "type": "Straße",
+    "postal_code": "9020",
+    "city": "Klagenfurt",
+    "country": "AT",
+    "notes": "fused -straße, common name"
+  },
+  {
+    "input": "Hauptplatz 5, 9500 Villach",
+    "number": "5",
+    "street": "Haupt",
+    "type": "Platz",
+    "postal_code": "9500",
+    "city": "Villach",
+    "country": "AT",
+    "notes": "fused -platz, Villach"
+  },
+  {
+    "input": "Widmanngasse 38, 9500 Villach",
+    "number": "38",
+    "street": "Widmann",
+    "type": "Gasse",
+    "postal_code": "9500",
+    "city": "Villach",
+    "country": "AT",
+    "notes": "fused -gasse, Villach"
+  },
+  {
+    "input": "Klagenfurter Straße 62, 9500 Villach",
+    "number": "62",
+    "street": "Klagenfurter",
+    "type": "Straße",
+    "postal_code": "9500",
+    "city": "Villach",
+    "country": "AT",
+    "notes": "spaced Straße, Villach"
+  },
+  {
+    "input": "Marktstraße 10, 6850 Dornbirn",
+    "number": "10",
+    "street": "Markt",
+    "type": "Straße",
+    "postal_code": "6850",
+    "city": "Dornbirn",
+    "country": "AT",
+    "notes": "fused -straße, Dornbirn"
+  },
+  {
+    "input": "Rathausstraße 4, 6900 Bregenz",
+    "number": "4",
+    "street": "Rathaus",
+    "type": "Straße",
+    "postal_code": "6900",
+    "city": "Bregenz",
+    "country": "AT",
+    "notes": "fused -straße, Bregenz"
+  },
+  {
+    "input": "Kirchstraße 9, 6900 Bregenz",
+    "number": "9",
+    "street": "Kirch",
+    "type": "Straße",
+    "postal_code": "6900",
+    "city": "Bregenz",
+    "country": "AT",
+    "notes": "fused -straße, Bregenz"
+  },
+  {
+    "input": "Marktgasse 1, 6800 Feldkirch",
+    "number": "1",
+    "street": "Markt",
+    "type": "Gasse",
+    "postal_code": "6800",
+    "city": "Feldkirch",
+    "country": "AT",
+    "notes": "fused -gasse, Feldkirch"
+  },
+  {
+    "input": "Werdenbergerstraße 7, 6700 Bludenz",
+    "number": "7",
+    "street": "Werdenberger",
+    "type": "Straße",
+    "postal_code": "6700",
+    "city": "Bludenz",
+    "country": "AT",
+    "notes": "fused -straße, Bludenz"
+  },
+  {
+    "input": "Herzog-Friedrich-Straße 21, 6020 Innsbruck",
+    "number": "21",
+    "street": "Herzog-Friedrich",
+    "type": "Straße",
+    "postal_code": "6020",
+    "city": "Innsbruck",
+    "country": "AT",
+    "notes": "hyphenated person name, Innsbruck old town"
+  },
+  {
+    "input": "Bahnhofstraße 2, 6330 Kufstein",
+    "number": "2",
+    "street": "Bahnhof",
+    "type": "Straße",
+    "postal_code": "6330",
+    "city": "Kufstein",
+    "country": "AT",
+    "notes": "fused -straße, Kufstein"
+  },
+  {
+    "input": "Bahnhofstraße 15, 6300 Wörgl",
+    "number": "15",
+    "street": "Bahnhof",
+    "type": "Straße",
+    "postal_code": "6300",
+    "city": "Wörgl",
+    "country": "AT",
+    "notes": "fused, umlaut city name Wörgl"
+  },
+  {
+    "input": "Kremser Gasse 12, 3100 St. Pölten",
+    "number": "12",
+    "street": "Kremser",
+    "type": "Gasse",
+    "postal_code": "3100",
+    "city": "St. Pölten",
+    "country": "AT",
+    "notes": "spaced Gasse, abbreviated city St. Pölten"
+  },
+  {
+    "input": "Wiener Straße 3, 3100 St. Pölten",
+    "number": "3",
+    "street": "Wiener",
+    "type": "Straße",
+    "postal_code": "3100",
+    "city": "St. Pölten",
+    "country": "AT",
+    "notes": "spaced Straße, St. Pölten"
+  },
+  {
+    "input": "Rathausplatz 1, 2700 Wiener Neustadt",
+    "number": "1",
+    "street": "Rathaus",
+    "type": "Platz",
+    "postal_code": "2700",
+    "city": "Wiener Neustadt",
+    "country": "AT",
+    "notes": "fused -platz, two-word city"
+  },
+  {
+    "input": "Hauptplatz 30, 3500 Krems an der Donau",
+    "number": "30",
+    "street": "Haupt",
+    "type": "Platz",
+    "postal_code": "3500",
+    "city": "Krems an der Donau",
+    "country": "AT",
+    "notes": "city with suffix 'an der Donau'"
+  },
+  {
+    "input": "Landstraßer Hauptstraße 2, 2500 Baden",
+    "number": "2",
+    "street": "Landstraßer",
+    "type": "Hauptstraße",
+    "postal_code": "2500",
+    "city": "Baden",
+    "country": "AT",
+    "notes": "compound Hauptstraße, Baden bei Wien"
+  },
+  {
+    "input": "Hauptstraße 45, 2340 Mödling",
+    "number": "45",
+    "street": "Haupt",
+    "type": "Straße",
+    "postal_code": "2340",
+    "city": "Mödling",
+    "country": "AT",
+    "notes": "fused -straße, umlaut city Mödling"
+  },
+  {
+    "input": "Enzersdorfer Straße 6, 2340 Mödling",
+    "number": "6",
+    "street": "Enzersdorfer",
+    "type": "Straße",
+    "postal_code": "2340",
+    "city": "Mödling",
+    "country": "AT",
+    "notes": "spaced Straße, Mödling"
+  },
+  {
+    "input": "Domplatz 1, 7000 Eisenstadt",
+    "number": "1",
+    "street": "Dom",
+    "type": "Platz",
+    "postal_code": "7000",
+    "city": "Eisenstadt",
+    "country": "AT",
+    "notes": "fused -platz, Burgenland capital"
+  },
+  {
+    "input": "Rathausstraße 3, 3300 Amstetten",
+    "number": "3",
+    "street": "Rathaus",
+    "type": "Straße",
+    "postal_code": "3300",
+    "city": "Amstetten",
+    "country": "AT",
+    "notes": "fused -straße, Amstetten"
+  },
+  {
+    "input": "Niederösterreich-Ring 2, 3100 St. Pölten",
+    "number": "2",
+    "street": "Niederösterreich",
+    "type": "Ring",
+    "postal_code": "3100",
+    "city": "St. Pölten",
+    "country": "AT",
+    "notes": "fused -ring, umlaut"
+  },
+  {
+    "input": "Wienerstraße 88, 4400 Steyr",
+    "number": "88",
+    "street": "Wiener",
+    "type": "Straße",
+    "postal_code": "4400",
+    "city": "Steyr",
+    "country": "AT",
+    "notes": "fused -straße, Steyr"
+  },
+  {
+    "input": "Stadtplatz 27, 4400 Steyr",
+    "number": "27",
+    "street": "Stadt",
+    "type": "Platz",
+    "postal_code": "4400",
+    "city": "Steyr",
+    "country": "AT",
+    "notes": "fused -platz, Steyr"
+  },
+  {
+    "input": "Ringstraße 5, 4600 Wels",
+    "number": "5",
+    "street": "Ring",
+    "type": "Straße",
+    "postal_code": "4600",
+    "city": "Wels",
+    "country": "AT",
+    "notes": "fused -straße (Ringstraße), Wels"
+  },
+  {
+    "input": "Kaiser-Josef-Platz 50, 4600 Wels",
+    "number": "50",
+    "street": "Kaiser-Josef",
+    "type": "Platz",
+    "postal_code": "4600",
+    "city": "Wels",
+    "country": "AT",
+    "notes": "hyphenated + Platz, Wels"
+  },
+  {
+    "input": "Hauptplatz 14, 8700 Leoben",
+    "number": "14",
+    "street": "Haupt",
+    "type": "Platz",
+    "postal_code": "8700",
+    "city": "Leoben",
+    "country": "AT",
+    "notes": "fused -platz, Leoben"
+  },
+  {
+    "input": "Kärntner Straße 12, 1010 Wien, Österreich",
+    "number": "12",
+    "street": "Kärntner",
+    "type": "Straße",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "German country name Österreich"
+  },
+  {
+    "input": "Getreidegasse 9, 5020 Salzburg, Austria",
+    "number": "9",
+    "street": "Getreide",
+    "type": "Gasse",
+    "postal_code": "5020",
+    "city": "Salzburg",
+    "country": "AT",
+    "notes": "English country name Austria"
+  },
+  {
+    "input": "Mariahilfer Straße 50, 1070 Wien, AT",
+    "number": "50",
+    "street": "Mariahilfer",
+    "type": "Straße",
+    "postal_code": "1070",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "ISO country code AT"
+  },
+  {
+    "input": "A-1010 Wien, Stephansplatz 1",
+    "__skip": "reversed order (postcode+city first)",
+    "number": "1",
+    "street": "Stephans",
+    "type": "Platz",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "legacy A-PLZ prefix; number-after-street reversed order in input"
+  },
+  {
+    "input": "Herrengasse 9, 1010 Wien, AUSTRIA",
+    "number": "9",
+    "street": "Herren",
+    "type": "Gasse",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "uppercase AUSTRIA"
+  },
+  {
+    "input": "Taborstraße 10, 1020 Wien",
+    "number": "10",
+    "street": "Tabor",
+    "type": "Straße",
+    "postal_code": "1020",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "2nd district Leopoldstadt"
+  },
+  {
+    "input": "Landstraßer Hauptstraße 1b, 1030 Wien",
+    "number": "1",
+    "civic_number_suffix": "b",
+    "street": "Landstraßer",
+    "type": "Hauptstraße",
+    "postal_code": "1030",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "alpha suffix 1b, 3rd district"
+  },
+  {
+    "input": "Wiedner Hauptstraße 7, 1040 Wien",
+    "number": "7",
+    "street": "Wiedner",
+    "type": "Hauptstraße",
+    "postal_code": "1040",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "4th district Wieden"
+  },
+  {
+    "input": "Rechte Wienzeile 100, 1050 Wien",
+    "number": "100",
+    "street": "Rechte",
+    "type": "Wienzeile",
+    "postal_code": "1050",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "spaced compound Wienzeile, 5th district"
+  },
+  {
+    "input": "Gumpendorfer Straße 5, 1060 Wien",
+    "number": "5",
+    "street": "Gumpendorfer",
+    "type": "Straße",
+    "postal_code": "1060",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "6th district Mariahilf"
+  },
+  {
+    "input": "Lerchenfelder Straße 44, 1080 Wien",
+    "number": "44",
+    "street": "Lerchenfelder",
+    "type": "Straße",
+    "postal_code": "1080",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "8th district Josefstadt"
+  },
+  {
+    "input": "Währinger Straße 25, 1090 Wien",
+    "number": "25",
+    "street": "Währinger",
+    "type": "Straße",
+    "postal_code": "1090",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "9th district Alsergrund, umlaut"
+  },
+  {
+    "input": "Simmeringer Hauptstraße 96, 1110 Wien",
+    "number": "96",
+    "street": "Simmeringer",
+    "type": "Hauptstraße",
+    "postal_code": "1110",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "11th district, spaced Hauptstraße"
+  },
+  {
+    "input": "Hütteldorfer Straße 81, 1140 Wien",
+    "number": "81",
+    "street": "Hütteldorfer",
+    "type": "Straße",
+    "postal_code": "1140",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "14th district, umlaut"
+  },
+  {
+    "input": "Ottakringer Straße 68, 1160 Wien",
+    "number": "68",
+    "street": "Ottakringer",
+    "type": "Straße",
+    "postal_code": "1160",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "16th district"
+  },
+  {
+    "input": "Heiligenstädter Straße 31, 1190 Wien",
+    "number": "31",
+    "street": "Heiligenstädter",
+    "type": "Straße",
+    "postal_code": "1190",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "19th district Döbling, umlaut"
+  },
+  {
+    "input": "Wagramer Straße 195, 1220 Wien",
+    "number": "195",
+    "street": "Wagramer",
+    "type": "Straße",
+    "postal_code": "1220",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "22nd district Donaustadt"
+  },
+  {
+    "input": "Breitenfurter Straße 372, 1230 Wien",
+    "number": "372",
+    "street": "Breitenfurter",
+    "type": "Straße",
+    "postal_code": "1230",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "23rd district Liesing"
+  },
+  {
+    "input": "Gardegasse 7/4, 1070 Wien",
+    "number": "7",
+    "street": "Garde",
+    "type": "Gasse",
+    "sec_unit_type": "Tür",
+    "sec_unit_num": "4",
+    "postal_code": "1070",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "slash /4 = Tür"
+  },
+  {
+    "input": "Landskrongasse 5 Top 3, 1010 Wien",
+    "number": "5",
+    "street": "Landskron",
+    "type": "Gasse",
+    "sec_unit_type": "Top",
+    "sec_unit_num": "3",
+    "postal_code": "1010",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "Top apartment unit"
+  },
+  {
+    "input": "Anton-Jahn-Gasse 2, 1210 Wien",
+    "number": "2",
+    "street": "Anton-Jahn",
+    "type": "Gasse",
+    "postal_code": "1210",
+    "city": "Wien",
+    "country": "AT",
+    "notes": "spaced hyphenated + Gasse, 21st district"
+  },
+  {
+    "input": "Bahnhofplatz 1, 5760 Saalfelden",
+    "number": "1",
+    "street": "Bahnhof",
+    "type": "Platz",
+    "postal_code": "5760",
+    "city": "Saalfelden",
+    "country": "AT",
+    "notes": "fused -platz, Saalfelden am Steinernen Meer"
+  },
+  {
+    "input": "Salzachtal Bundesstraße 12, 5400 Hallein",
+    "number": "12",
+    "street": "Salzachtal",
+    "type": "Bundesstraße",
+    "postal_code": "5400",
+    "city": "Hallein",
+    "country": "AT",
+    "notes": "compound Bundesstraße, Hallein"
+  },
+  {
+    "input": "Niedermarkt 3, 3400 Klosterneuburg",
+    "number": "3",
+    "street": "Niedermarkt",
+    "postal_code": "3400",
+    "city": "Klosterneuburg",
+    "country": "AT",
+    "notes": "bare compound noun, Klosterneuburg"
+  },
+  {
+    "input": "Wiener Straße 20/5, 3430 Tulln",
+    "number": "20",
+    "street": "Wiener",
+    "type": "Straße",
+    "sec_unit_type": "Tür",
+    "sec_unit_num": "5",
+    "postal_code": "3430",
+    "city": "Tulln",
+    "country": "AT",
+    "notes": "slash door, Tulln an der Donau"
+  },
+  {
+    "input": "Landstraße 40 Top 8, 4020 Linz",
+    "number": "40",
+    "street": "Land",
+    "type": "Straße",
+    "sec_unit_type": "Top",
+    "sec_unit_num": "8",
+    "postal_code": "4020",
+    "city": "Linz",
+    "country": "AT",
+    "notes": "Top unit on Linz Landstraße"
+  },
+  {
+    "input": "Gerbergasse 3, 3910 Zwettl",
+    "number": "3",
+    "street": "Gerber",
+    "type": "Gasse",
+    "postal_code": "3910",
+    "city": "Zwettl",
+    "country": "AT",
+    "notes": "fused -gasse, Zwettl"
+  },
+  {
+    "input": "Sonnenweg 5, 6845 Hohenems",
+    "number": "5",
+    "street": "Sonnen",
+    "type": "Weg",
+    "postal_code": "6845",
+    "city": "Hohenems",
+    "country": "AT",
+    "notes": "fused -weg, Hohenems"
+  }
+];

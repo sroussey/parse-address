@@ -3,9 +3,76 @@ import { AddressParser, IntlAddressParser } from "../src/parser";
 
 describe("European AddressParser construction", () => {
   it("constructs for every supported European country", () => {
-    for (const cc of ["de", "fr", "gb", "it", "es", "nl"] as const) {
+    const codes = ["de", "fr", "gb", "it", "es", "nl", "be", "at", "pl", "ch", "pt", "se"] as const;
+    for (const cc of codes) {
       assert.ok(new AddressParser(cc), `failed to construct ${cc}`);
     }
+  });
+});
+
+describe("European parses (batch 2)", () => {
+  it("BE: French prefix street, number after, bus unit", () => {
+    const p = new AddressParser("be").parseLocation("Rue de la Loi 16 bte 3, 1000 Bruxelles")!;
+    assert.equal(p.type, "Rue");
+    assert.equal(p.street, "de la Loi");
+    assert.equal(p.number, "16");
+    assert.equal(p.sec_unit_type, "bte");
+    assert.equal(p.sec_unit_num, "3");
+    assert.equal(p.postal_code, "1000");
+    assert.equal(p.city, "Bruxelles");
+  });
+
+  it("BE: Dutch fused street", () => {
+    const p = new AddressParser("be").parseLocation("Meirstraat 5, 2000 Antwerpen")!;
+    assert.equal(p.street, "Meir");
+    assert.equal(p.type, "straat");
+  });
+
+  it("AT: 4-digit PLZ, fused type, Tür slash unit", () => {
+    const p = new AddressParser("at").parseLocation("Operngasse 4/3, 1010 Wien")!;
+    assert.equal(p.street, "Opern");
+    assert.equal(p.type, "Gasse");
+    assert.equal(p.number, "4");
+    assert.equal(p.sec_unit_type, "Tür");
+    assert.equal(p.sec_unit_num, "3");
+    assert.equal(p.postal_code, "1010");
+  });
+
+  it("PL: ul. prefix, NN-NNN postcode, slash apartment", () => {
+    const p = new AddressParser("pl").parseLocation("ul. Nowy Świat 12/5, 00-372 Warszawa")!;
+    assert.equal(p.type, "ul.");
+    assert.equal(p.street, "Nowy Świat");
+    assert.equal(p.number, "12");
+    assert.equal(p.sec_unit_type, "m.");
+    assert.equal(p.sec_unit_num, "5");
+    assert.equal(p.postal_code, "00-372");
+  });
+
+  it("CH: German fused (no ß), French prefix, 4-digit", () => {
+    const de = new AddressParser("ch").parseLocation("Bahnhofstrasse 1, 8001 Zürich")!;
+    assert.equal(de.street, "Bahnhof");
+    assert.equal(de.type, "strasse");
+    const fr = new AddressParser("ch").parseLocation("Rue du Rhône 5, 1204 Genève")!;
+    assert.equal(fr.type, "Rue");
+    assert.equal(fr.street, "du Rhône");
+  });
+
+  it("PT: prefix type, PPPP-PPP postcode, floor unit", () => {
+    const p = new AddressParser("pt").parseLocation("Rua Garrett 50 3º Esq, 1200-204 Lisboa")!;
+    assert.equal(p.type, "Rua");
+    assert.equal(p.street, "Garrett");
+    assert.equal(p.number, "50");
+    assert.equal(p.sec_unit_type, "Andar");
+    assert.equal(p.sec_unit_num, "3º Esq");
+    assert.equal(p.postal_code, "1200-204");
+  });
+
+  it("SE: fused -gatan, PPP PP postcode", () => {
+    const p = new AddressParser("se").parseLocation("Drottninggatan 5, 111 51 Stockholm")!;
+    assert.equal(p.street, "Drottning");
+    assert.equal(p.type, "gatan");
+    assert.equal(p.postal_code, "111 51");
+    assert.equal(p.city, "Stockholm");
   });
 });
 
@@ -91,6 +158,14 @@ describe("IntlAddressParser auto-detection of European countries", () => {
     assert.equal(intl.parseLocation("10 Rue de Rivoli, 75001 Paris, France")!.country, "FR");
     assert.equal(intl.parseLocation("Via Roma 15, 00184 Roma, Italia")!.country, "IT");
     assert.equal(intl.parseLocation("Calle de Alcalá 42, 28014 Madrid, España")!.country, "ES");
+    assert.equal(intl.parseLocation("Rue de la Loi 16, 1000 Bruxelles, Belgique")!.country, "BE");
+    assert.equal(intl.parseLocation("Kärntner Straße 12, 1010 Wien, Österreich")!.country, "AT");
+    assert.equal(intl.parseLocation("Bahnhofstrasse 1, 8001 Zürich, Schweiz")!.country, "CH");
+  });
+
+  it("detects PL and PT from their distinctive dash postcodes", () => {
+    assert.equal(intl.parseLocation("ul. Marszałkowska 1, 00-950 Warszawa")!.country, "PL");
+    assert.equal(intl.parseLocation("Rua Augusta 100, 1100-053 Lisboa")!.country, "PT");
   });
 
   it("still detects US and CA (no European regression)", () => {

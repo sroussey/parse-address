@@ -110,10 +110,25 @@ function detectEuCountry(address: string): CountryMappings | null {
     ["es", /\b(?:España|Espana|Spain)\b/i],
     ["nl", /\b(?:Nederland|Netherlands|Holland)\b/i],
     ["gb", /\b(?:United Kingdom|Great Britain)\b/i],
+    ["be", /\b(?:België|Belgie|Belgique|Belgien|Belgium)\b/i],
+    // No leading \b: JS word boundaries are ASCII-only and fail before "Ö".
+    ["at", /(?:Österreich|Oesterreich|Austria)\b/i],
+    ["pl", /\b(?:Polska|Poland)\b/i],
+    ["ch", /\b(?:Schweiz|Suisse|Svizzera|Switzerland)\b/i],
+    ["pt", /\bPortugal\b/i],
+    ["se", /\b(?:Sverige|Sweden)\b/i],
   ];
   for (const [code, re] of names) {
     if (re.test(address)) return code;
   }
+  // Distinctive dash postcodes: Polish "NN-NNN", Portuguese "PPPP-PPP". Require
+  // a preceding comma (place-tail position) so a leading civic-number range like
+  // the Canadian "10-123" is not misread as a Polish postcode.
+  if (/,\s*\d{4}-\d{3}\b/.test(address)) return "pt";
+  if (/,\s*\d{2}-\d{3}\b/.test(address)) return "pl";
+  // Country-prefixed 4-digit postcodes ("CH-1204", "A-1010").
+  if (/\bCH-\d{4}\b/i.test(address)) return "ch";
+  if (/\bA-\d{4}\b/.test(address)) return "at";
   // UK postcode: outward (1-2 letters, digit, optional letter/digit) + inward
   // (digit + two letters). CA postal ends digit-letter-digit, so it never
   // matches this; US ZIP has no letters.

@@ -132,6 +132,8 @@ export class AddressParserEU implements AddressParserImpl {
     this.normalizeRegion(parsed);
     this.tidyCity(parsed);
 
+    if (this.config.postNormalize) this.config.postNormalize(parsed);
+
     parsed.country = this.config.country;
     return parsed;
   }
@@ -158,9 +160,15 @@ export class AddressParserEU implements AddressParserImpl {
       .trim();
   }
 
-  /** Peel a glued street type off the end of the name (DE/NL style). */
+  /**
+   * Peel a glued street type off the end of the name (DE/NL "Bäckerstraße").
+   * Runs for any country that supplies `fusedTypeSuffixes` -- including
+   * mixed-grammar countries (BE/CH) whose `prefix` French/Italian streets are
+   * already typed (so this is a no-op there) but whose Dutch/German streets
+   * arrive here untyped.
+   */
   private applyFusedType(parsed: Record<string, any>) {
-    if (this.config.typePlacement !== "fused") return;
+    if (!this.config.fusedTypeSuffixes?.length) return;
     if (!parsed.street || parsed.type) return;
 
     // Prepositional/article-led names ("Am Weidendamm", "Unter den Linden") are
@@ -177,16 +185,31 @@ export class AddressParserEU implements AddressParserImpl {
     const splitSpaced = this.config.splitSpacedType !== false;
     for (const [spelling, display] of this.fusedSuffixesSorted) {
       const s = spelling.toLowerCase();
-      if (lower.endsWith(s)) {
-        const remainder = base.slice(0, base.length - s.length);
-        if (remainder.trim().length < 3) continue;
-        // When spaced types are not split (Dutch), only peel a *glued* suffix:
-        // the char before it must be a letter, not a word boundary.
-        if (!splitSpaced && /[\s-]$/.test(remainder)) continue;
-        parsed.street = remainder.replace(/[\s-]+$/, "").trim();
-        parsed.type = display;
-        break;
+      if (!lower.endsWith(s)) continue;
+
+      // When the type is a *separate word* ("Kärntner Straße", "Landstraßer
+      // Hauptstraße"), the type is that whole last word -- not a mid-word split
+      // ("...Haupt" + "straße"). This applies only where spaced types split.
+      const lastSpace = base.lastIndexOf(" ");
+      if (splitSpaced && lastSpace >= 1) {
+        const lastWord = base.slice(lastSpace + 1);
+        if (lastWord.toLowerCase().endsWith(s)) {
+          parsed.street = base.slice(0, lastSpace).replace(/[\s-]+$/, "").trim();
+          parsed.type = lastWord; // normalizeType canonicalises it afterwards
+          return;
+        }
       }
+
+      // Otherwise peel the glued suffix from within the single word.
+      const remainder = base.slice(0, base.length - s.length);
+      if (remainder.trim().length < (this.config.minFusedStem ?? 3)) continue;
+      // When spaced types are not split (Dutch/Belgian), a preceding *space*
+      // means the suffix is a separate word ("Grote Markt") that stays whole; a
+      // hyphen still counts as joined ("Albert I-laan" -> "Albert I" + "laan").
+      if (!splitSpaced && /\s$/.test(remainder)) continue;
+      parsed.street = remainder.replace(/[\s-]+$/, "").trim();
+      parsed.type = display;
+      return;
     }
   }
 

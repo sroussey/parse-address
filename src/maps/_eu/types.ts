@@ -35,6 +35,13 @@ export interface EuCountryConfig {
   typePlacement: "prefix" | "suffix" | "fused" | "none";
   /** Postcode position relative to the city. */
   postalPlacement: "before-city" | "after-city";
+  /**
+   * Allow digits inside the street name even for a street-first (number-after)
+   * order. Needed where date/number street names are common (Polish "3 Maja",
+   * "11 Listopada"); the trailing house number is still found as the last
+   * number token. Defaults to false (digits excluded) for street-first orders.
+   */
+  allowDigitsInName?: boolean;
 
   /**
    * XRegExp fragment capturing `(?<postal_code>...)`. Written in free-spacing
@@ -64,6 +71,14 @@ export interface EuCountryConfig {
    * regardless of order). e.g. `["straße", "Straße"]`. Case-insensitive.
    */
   fusedTypeSuffixes?: Array<[string, string]>;
+  /**
+   * Minimum length of the remaining name stem for a fused split to apply.
+   * Guards against splitting a bare type word ("Ring") or a too-short remnant.
+   * Defaults to 3; Swedish stems are often two chars ("Nygatan" -> "Ny"), so SE
+   * lowers it to 2.
+   */
+  minFusedStem?: number;
+
   /**
    * Whether a fused type written as a *separate* word is still split off.
    * German splits "Leipziger Straße" -> "Leipziger" + "Straße" (true, default);
@@ -122,6 +137,15 @@ export interface EuCountryConfig {
    * e.g. a Spanish floor+door "3.º B" whose implied type is "Piso".
    */
   defaultSecUnitType?: string;
+
+  /**
+   * Optional final country-specific fixup, run at the end of normalization with
+   * the assembled result. Used for structure that the shared grammar cannot
+   * express declaratively (e.g. the Austrian "N/M" -> Tür vs "N/M/K" -> Stiege
+   * distinction). It should read any helper capture groups it added and delete
+   * them so they do not leak into the output.
+   */
+  postNormalize?: (parsed: Record<string, any>) => void;
 
   /**
    * PO-box lead-in words (e.g. ["Postfach"], ["BP", "Boîte Postale"]). Used to

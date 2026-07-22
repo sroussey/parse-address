@@ -9,7 +9,13 @@ export type CountryMappings =
   | "gb"
   | "it"
   | "es"
-  | "nl";
+  | "nl"
+  | "be"
+  | "at"
+  | "pl"
+  | "ch"
+  | "pt"
+  | "se";
 
 export interface AddressRuleset {
   type: Pattern;

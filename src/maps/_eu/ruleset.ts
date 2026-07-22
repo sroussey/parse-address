@@ -106,7 +106,7 @@ function buildStreetCore(config: EuCountryConfig): string {
   // so a street name may safely contain digits ("Rue du 8 Mai 1945"). For
   // street-first orders digits are excluded so the trailing number is found.
   const numberFirst = config.order === "number-street";
-  const nameChar = numberFirst ? "[^,\\n]" : "[^,\\d\\n]";
+  const nameChar = numberFirst || config.allowDigitsInName ? "[^,\\n]" : "[^,\\d\\n]";
   const name1 = `(?<street_1>${nameChar}+?)`;
   const name2 = `(?<street_2>${nameChar}+?)`;
   // A bare street name (no leading/trailing type).

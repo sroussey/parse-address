@@ -45,7 +45,7 @@ intl.parseStreet('123 Main St', 'ca')                    // force CA
 
 ## European addresses
 
-Six European countries are supported in addition to US/CA, built on a shared,
+Twelve European countries are supported in addition to US/CA, built on a shared,
 configuration-driven engine (`src/maps/_eu`). European addressing differs from
 the US/CA grammar along three axes the engine models per country: where the
 house number sits (before vs after the street), where the street *type* sits
@@ -82,10 +82,19 @@ new AddressParser('nl').parseLocation("Spuistraat 63, 2511 BD 's-Gravenhage")
 | `it` | Italy | after street | leading (`Via`) | 5-digit, before city | province → `state` |
 | `es` | Spain | after street (comma) | leading (`Calle`) | 5-digit, before city | province → `state` |
 | `nl` | Netherlands | after street | fused suffix (`-straat`) | 4-digit+2-letter, before city | – |
+| `be` | Belgium | after street | leading (`Rue`) **or** fused (`-straat`) | 4-digit, before city | – |
+| `at` | Austria | after street | fused suffix (`-gasse`) | 4-digit, before city | – |
+| `pl` | Poland | after street | leading (`ul.`) | `NN-NNN`, before city | – |
+| `ch` | Switzerland | after street | fused (`-strasse`) **or** leading (`Rue`/`Via`) | 4-digit, before city | – |
+| `pt` | Portugal | after street | leading (`Rua`) | `PPPP-PPP`, before city | – |
+| `se` | Sweden | after street | fused suffix (`-gatan`) | `PPP PP`, before city | – |
 
-Each country's addressing rules, prior-work notes and known failure modes are
-documented under [`docs/eu-research`](docs/eu-research); the parsers are validated
-against 100+ real-address fixtures per country in `__tests__/eu-fixtures`.
+Belgium and Switzerland are multilingual: a leading French/Italian type
+(`Rue`, `Via`) is captured as a prefix, while an untyped Dutch/German name is
+fuse-split (`Meirstraat` → `Meir` + `straat`). Each country's addressing rules,
+prior-work notes and known failure modes are documented under
+[`docs/eu-research`](docs/eu-research); the parsers are validated against 100+
+real-address fixtures per country (1900+ total) in `__tests__/eu-fixtures`.
 
 ### Fields
 
