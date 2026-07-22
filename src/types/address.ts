@@ -2,6 +2,7 @@ export interface ParsedAddress {
   city?: string;
   state?: string;
   number?: string;
+  civic_number_suffix?: string;
   prefix?: string;
   street?: string;
   street1?: string;
@@ -12,7 +13,10 @@ export interface ParsedAddress {
   sec_unit_num?: string;
   sec_unit_type?: string;
   suffix?: string;
-  zip?: string;
+  postal_code?: string;
+  fsa?: string;
+  ldu?: string;
+  province?: string;
   plus4?: string;
   country: string;
   short_street_type?: string;
