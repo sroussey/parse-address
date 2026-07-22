@@ -181,28 +181,32 @@ function detectCountry(address: string): CountryMappings {
 export class IntlAddressParser {
   private parsers: Record<CountryMappings, AddressParser>;
   constructor() {
-    this.parsers = { 
+    this.parsers = {
       us: new AddressParser("us"),
-      ca: new AddressParser("ca")
+      ca: new AddressParser("ca"),
     };
   }
 
-  // must end in country name or country code
-  parseLocation(address: string) {
-    const country = detectCountry(address);
-    return this.parsers[country].parseLocation(address);
+  private pick(address: string, country?: CountryMappings): AddressParser {
+    return this.parsers[country ?? detectCountry(address)];
   }
-  // must end in country name or country code
-  parseAddress(address: string) {
-    const country = detectCountry(address);
-    return this.parsers[country].parseAddress(address);
+
+  parseLocation(address: string, country?: CountryMappings) {
+    return this.pick(address, country).parseLocation(address);
   }
-  // must end in country name or country code
-  parseInformalAddress(address: string) {
-    const country = detectCountry(address);
-    return this.parsers[country].parseInformalAddress(address);
+  parseAddress(address: string, country?: CountryMappings) {
+    return this.pick(address, country).parseAddress(address);
   }
-  parseStreet(address: string, country: CountryMappings) {
-    return this.parsers[country].parseStreet(address);
+  parseInformalAddress(address: string, country?: CountryMappings) {
+    return this.pick(address, country).parseInformalAddress(address);
+  }
+  parseStreet(address: string, country?: CountryMappings) {
+    return this.pick(address, country).parseStreet(address);
+  }
+  parsePoAddress(address: string, country?: CountryMappings) {
+    return this.pick(address, country).parsePoAddress(address);
+  }
+  parseIntersection(address: string, country?: CountryMappings) {
+    return this.pick(address, country).parseIntersection(address);
   }
 }
