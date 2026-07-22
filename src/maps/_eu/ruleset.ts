@@ -161,6 +161,20 @@ function buildSecUnit(config: EuCountryConfig): string {
   return config.secUnitPattern ? `(?:[\\s,]+(?:${config.secUnitPattern}))?` : "";
 }
 
+/**
+ * The inner `(?<building>...)` capture: an optional run of preceding words plus
+ * a trailing building keyword ("Ugland House", "Clifton House", or a bare
+ * "Chambers"). The keyword must sit at a word boundary (start of the segment or
+ * after a space), so an ordinary street ("Warehouse Lane") is never mistaken for
+ * a building. Returns "" when the country supplies no `buildingKeywords`.
+ */
+function buildingGroup(config: EuCountryConfig): string {
+  const kws = config.buildingKeywords ?? [];
+  if (!kws.length) return "";
+  const alt = [...kws].sort((a, b) => b.length - a.length).map(lit).join("|");
+  return `(?<building>(?:[^,\\n]*?\\s)?(?:${alt}))`;
+}
+
 export function buildEuRuleset(config: EuCountryConfig): EuRuleset {
   const core = buildStreetCore(config);
   const place = buildPlace(config);
@@ -172,28 +186,37 @@ export function buildEuRuleset(config: EuCountryConfig): EuRuleset {
       : "";
   const secTrail = config.secUnitPlacement === "before" ? "" : secUnit;
 
+  // An optional leading "Building Name," segment (registered-agent / company
+  // filing addresses). Empty for countries without `buildingKeywords`.
+  const bg = buildingGroup(config);
+  const buildingLead = bg ? `(?:${bg}\\s*,[\\s]+)?` : "";
+  // In a PO-box line the building sits between the box number and the place,
+  // both comma-delimited ("PO Box 309, Ugland House, George Town ..."); the
+  // place fragment supplies its own leading separator, so no trailing comma here.
+  const buildingPo = bg ? `(?:[\\s,]+${bg})?` : "";
+
   const poNames = (config.poBoxNames ?? []).map((n) => lit(n));
   // Alternation used both to detect PO-box inputs and to capture the box word.
   const po_box = poNames.length ? poNames.join("|") : "(?!x)x"; // never-match sentinel
 
   const address = XRegExp(
-    `^\\s*${secLead}${core}${secTrail}${place}[\\s,]*$`,
+    `^\\s*${buildingLead}${secLead}${core}${secTrail}${place}[\\s,]*$`,
     "xi"
   );
 
   // Street-only: same core, no trailing place required.
-  const street_address = XRegExp(`^\\s*${secLead}${core}${secTrail}`, "xi");
+  const street_address = XRegExp(`^\\s*${buildingLead}${secLead}${core}${secTrail}`, "xi");
 
   // Informal: tolerate a missing house number and a partial place tail.
   const informal_address = XRegExp(
-    `^\\s*${secLead}${core}${secTrail}${place}`,
+    `^\\s*${buildingLead}${secLead}${core}${secTrail}${place}`,
     "xi"
   );
 
   // PO-box shape: box lead-in word (captured) + (optionally grouped) box number,
-  // then the place. The box replaces the street entirely.
+  // then an optional building, then the place. The box replaces the street.
   const po_address = XRegExp(
-    `^\\s*(?<sec_unit_type>${po_box})[\\s.:]*(?<sec_unit_num>\\d[\\d\\s-]*\\d|\\d)?${place}\\s*$`,
+    `^\\s*(?<sec_unit_type>${po_box})[\\s.:]*(?<sec_unit_num>\\d[\\d\\s-]*\\d|\\d)?${buildingPo}${place}\\s*$`,
     "xi"
   );
 

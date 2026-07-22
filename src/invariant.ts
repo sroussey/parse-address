@@ -28,7 +28,7 @@ export function countSignificantTokens(text: string): number {
 // Street-relevant output fields. Locational fields are deliberately excluded.
 const STREET_FIELDS = [
   "number", "civic_number_suffix", "prefix", "street", "type", "suffix",
-  "sec_unit_type", "sec_unit_num",
+  "sec_unit_type", "sec_unit_num", "building",
 ] as const;
 
 // Locational values mark where the street segment ends. `country` is synthetic

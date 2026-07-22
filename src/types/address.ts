@@ -13,6 +13,7 @@ export interface ParsedAddress {
   sec_unit_num?: string;
   sec_unit_type?: string;
   suffix?: string;
+  building?: string;
   postal_code?: string;
   fsa?: string;
   ldu?: string;

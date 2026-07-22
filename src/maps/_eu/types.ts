@@ -172,6 +172,18 @@ export interface EuCountryConfig {
   postNormalize?: (parsed: Record<string, any>) => void;
 
   /**
+   * Named-building keywords (e.g. ["House", "Court", "Chambers", "Centre"]).
+   * When supplied, an optional leading `<building>,` segment is captured before
+   * the street core (and after a PO box), so a registered-agent / corporate
+   * filing address such as "Ugland House, South Church Street, George Town"
+   * parses structurally: `building` = "Ugland House", street = "South Church".
+   * The building name is the run of words ending in one of these keywords, so a
+   * plain street ("Baker Street") is unaffected. Used chiefly for GB/IE and the
+   * offshore jurisdictions where a company address leads with its building.
+   */
+  buildingKeywords?: string[];
+
+  /**
    * PO-box lead-in words (e.g. ["Postfach"], ["BP", "Boîte Postale"]). Used to
    * detect and parse box addresses that replace the street entirely.
    */
