@@ -3,7 +3,7 @@ module.exports = {
   testEnvironment: 'node',
   testMatch: ['**/+(*.)+(spec|test).+(ts|js)?(x)'],
   transform: {
-    '^.+\\.(ts|js|html)$': 'ts-jest',
+    '^.+\\.(ts|js|html)$': ['ts-jest', { tsconfig: 'tsconfig.jest.json' }],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageReporters: ['html'],

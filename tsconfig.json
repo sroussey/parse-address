@@ -1,10 +1,12 @@
 {
   "compilerOptions": {
     "outDir": "dist",
+    "rootDir": "./src",
     "target": "ES6",
     "module": "commonjs",
     "noImplicitAny": false,
     "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": false,
     "declaration": true,
