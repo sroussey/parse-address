@@ -2,6 +2,7 @@ import XRegExp from "xregexp";
 
 import { keys, invert, values, flatten } from "../../utils";
 import { provinceCodesMap } from "./provinces";
+import { secProvinceCodesMap } from "./sec-provinces";
 import { directionsMap } from "./directions";
 import { streetTypeMap } from "./street-type";
 import { AddressRuleset } from "../../types/ruleset";
@@ -21,6 +22,7 @@ const province =
   "\\b(?:" +
   keys(provinceCodesMap)
     .concat(values(provinceCodesMap))
+    .concat(keys(secProvinceCodesMap))
     .map(XRegExp.escape)
     .join("|") +
   ")\\b";

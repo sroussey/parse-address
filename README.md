@@ -96,6 +96,13 @@ US and CA share the street fields (`number`, `civic_number_suffix`, `prefix`,
 and (where applicable) `state` for the province/county; the street `type` carries
 a `short_street_type` code as in US/CA.
 
+### SEC EDGAR region codes
+
+Canadian provinces are recognized both by their canonical two-letter code (`QC`,
+`ON`, …) and by SEC EDGAR's `A0`–`B0` / `Z4` codes, which normalize to the
+canonical code (e.g. `A8` → `QC`). This lets an EDGAR-sourced address parse
+without pre-mapping the region code.
+
 ### Country detection precedence
 
 `IntlAddressParser` auto-detects in this fixed order: explicit country name/code →

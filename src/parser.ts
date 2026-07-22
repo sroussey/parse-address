@@ -164,6 +164,11 @@ function detectCountryByRegionNames(address: string): CountryMappings | null {
  * Check for province or state codes (abbreviated forms)
  */
 function detectCountryByRegionCodes(address: string): CountryMappings | null {
+  // SEC EDGAR region codes (A0-B0/Z4) are intentionally NOT used for country
+  // detection: they collide with unit numbers ("Apt A8"), so a US address with
+  // no ZIP/state would misroute to Canada. They are recognized only by the CA
+  // parser itself; a real EDGAR Canadian address auto-detects via its Canadian
+  // postal code, which detection matches by shape before region codes.
   const canadianProvinceCodes = Object.values(provinceCodesMap);
   const usStateCodes = Object.values(stateCodesMap);
   
