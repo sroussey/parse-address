@@ -5,6 +5,7 @@ import { directionsMap } from "./directions";
 import { normalizeMap } from "./normalize";
 import addressRuleset from "./ruleset";
 import { streetAbbrevsMap, streetAbbrevsToShortCodeMap } from "./street-abbrevs";
+import { assignedStreetTypeMap } from "./street-type";
 
 export class AddressParserCA implements AddressParserImpl {
   normalizeAddress(parts) {
@@ -309,8 +310,7 @@ export class AddressParserCA implements AddressParserImpl {
              
              // Use the street type mapping to get the proper abbreviated form
              const lowerExtractedType = extractedType.toLowerCase();
-             // Import and use street type mapping to find the proper abbreviation
-             const { assignedStreetTypeMap } = require('./street-type');
+             // Use the street type mapping to find the proper abbreviation.
              const properType = assignedStreetTypeMap[lowerExtractedType];
              
              if (properType) {
