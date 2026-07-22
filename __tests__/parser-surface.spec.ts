@@ -40,3 +40,16 @@ describe("IntlAddressParser uniform surface", () => {
     assert.equal(typeof intl.parseIntersection, "function");
   });
 });
+
+describe("country detection contract", () => {
+  const intl = new IntlAddressParser();
+  it("treats a US ZIP as US even when a city name looks Canadian-ish", () => {
+    assert.equal(intl.parseLocation("1 Main St, Ontario, CA 91761")!.country, "US");
+  });
+  it("detects CA from a bare province code with no postal", () => {
+    assert.equal(intl.parseLocation("123 Main St, Calgary AB")!.country, "CA");
+  });
+  it("detects CA from a Canadian postal code", () => {
+    assert.equal(intl.parseLocation("123 Main St, Toronto ON M5V 3A8")!.country, "CA");
+  });
+});

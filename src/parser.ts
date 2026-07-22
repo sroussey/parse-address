@@ -143,6 +143,17 @@ function detectCountryByFrenchStreetTypes(address: string): CountryMappings | nu
   return null;
 }
 
+/**
+ * Resolve the country for an address using a fixed precedence (the documented
+ * contract; callers who know the country should pass it explicitly to
+ * IntlAddressParser instead of relying on detection):
+ *   1. Explicit country name/code in the text ("Canada", "US"/"USA")
+ *   2. Postal-code shape (Canadian FSA/LDU vs US ZIP)
+ *   3. Full region names (province/state)
+ *   4. Region codes (province/state abbreviations; US checked first)
+ *   5. French street types (strong Canada signal)
+ *   6. Default: US
+ */
 function detectCountry(address: string): CountryMappings {
   // Check explicit country indicators first
   const explicitCountry = hasExplicitCountryIndicators(address);
