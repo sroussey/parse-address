@@ -86,6 +86,14 @@ export interface EuCountryConfig {
    * splits a glued suffix ("Herengracht" -> "Heren" + "gracht").
    */
   splitSpacedType?: boolean;
+  /**
+   * When splitting a spaced type, whether the last word must *equal* a type
+   * exactly. Austrian "Landstraßer Hauptstraße" takes the whole compound last
+   * word as the type (false, default); Finnish "Läntinen Brahenkatu" instead
+   * splits *within* the compound ("Läntinen Brahen" + "katu"), so the whole-word
+   * rule only fires for a bare "... katu" (true).
+   */
+  spacedTypeExact?: boolean;
 
   /**
    * When false, the street type is echoed exactly as written (case and trailing

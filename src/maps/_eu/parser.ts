@@ -193,7 +193,9 @@ export class AddressParserEU implements AddressParserImpl {
       const lastSpace = base.lastIndexOf(" ");
       if (splitSpaced && lastSpace >= 1) {
         const lastWord = base.slice(lastSpace + 1);
-        if (lastWord.toLowerCase().endsWith(s)) {
+        const lw = lastWord.toLowerCase();
+        const isWholeType = this.config.spacedTypeExact ? lw === s : lw.endsWith(s);
+        if (isWholeType) {
           parsed.street = base.slice(0, lastSpace).replace(/[\s-]+$/, "").trim();
           parsed.type = lastWord; // normalizeType canonicalises it afterwards
           return;
