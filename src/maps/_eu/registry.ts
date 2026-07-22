@@ -12,6 +12,11 @@ import { seConfig } from "../se/config";
 import { chConfig } from "../ch/config";
 import { ptConfig } from "../pt/config";
 import { fiConfig } from "../fi/config";
+import { dkConfig } from "../dk/config";
+import { noConfig } from "../no/config";
+import { czConfig } from "../cz/config";
+import { grConfig } from "../gr/config";
+import { ieConfig } from "../ie/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -33,6 +38,11 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   ch: chConfig,
   pt: ptConfig,
   fi: fiConfig,
+  dk: dkConfig,
+  no: noConfig,
+  cz: czConfig,
+  gr: grConfig,
+  ie: ieConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);

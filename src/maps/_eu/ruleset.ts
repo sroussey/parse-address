@@ -42,7 +42,13 @@ function buildPlace(config: EuCountryConfig): string {
 
   // City stops before a comma, a region, or the country. We keep it permissive
   // (any non-comma, non-digit run) so accented and multi-word names survive.
-  const city = `(?<city>[^,\\d\\n][^,\\d\\n]*?)`;
+  const cityInner = config.cityAllowsCommas
+    ? "[^\\n]"
+    : config.cityAllowsDigits
+    ? "[^,\\n]"
+    : "[^,\\d\\n]";
+  const city = `(?<city>${cityInner}+?)`;
+  const county = config.countyPattern ?? "[^,\\d\\n]+?";
   const citySuffix = config.citySuffixPattern ? `(?:${config.citySuffixPattern})?` : "";
 
   if (config.postalPlacement === "before-city") {
@@ -57,19 +63,20 @@ function buildPlace(config: EuCountryConfig): string {
       )?`;
   }
 
-  // after-city (UK): optional post town, optional comma-delimited county, then
-  // the postcode last. The town chunk is optional so a bare "street, POSTCODE"
-  // line parses; the county carries no digits, so it can never swallow the
-  // postcode (the regex backtracks for "London, SW1A 2AA").
+  // after-city (UK/IE): post town, optional comma-delimited county, then the
+  // postcode last. Two alternatives: (A) the postcode-present form (identical to
+  // the original UK grammar -- optional town + postcode); (B) a postcode-absent
+  // form (town + optional county), for Irish addresses with no Eircode. The
+  // county carries no digits, so it never swallows a postcode.
+  const cityB = city.replace("<city>", "<city_2>");
   return `
     (?:[\\s,]+
       (?:
-        ${city}
-        ${citySuffix}
-        (?:[,][\\s]*(?<state>[^,\\d\\n]+?))?
-        [\\s,]+
-      )?
-      (?:${config.postalPattern})
+        (?:${city}${citySuffix}(?:[,][\\s]*(?<state>${county}))?[\\s,]+)?
+        (?:${config.postalPattern})
+        |
+        ${cityB}${citySuffix}(?:[,][\\s]*(?<state_2>${county}))?
+      )
       ${country}
     )?`;
 }
@@ -84,7 +91,9 @@ function buildPlaceOnly(config: EuCountryConfig): string {
   const region = config.regionPattern
     ? `(?:[\\s,]+(?:${config.regionPattern}))?`
     : "";
-  const city = `(?<city>[^,\\d\\n][^,\\d\\n]*?)`;
+  const city = config.cityAllowsDigits
+    ? `(?<city>[^,\\n][^,\\n]*?)`
+    : `(?<city>[^,\\d\\n][^,\\d\\n]*?)`;
   const citySuffix = config.citySuffixPattern ? `(?:${config.citySuffixPattern})?` : "";
 
   if (config.postalPlacement === "before-city") {

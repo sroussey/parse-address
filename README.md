@@ -45,7 +45,7 @@ intl.parseStreet('123 Main St', 'ca')                    // force CA
 
 ## European addresses
 
-Twelve European countries are supported in addition to US/CA, built on a shared,
+Eighteen European countries are supported in addition to US/CA, built on a shared,
 configuration-driven engine (`src/maps/_eu`). European addressing differs from
 the US/CA grammar along three axes the engine models per country: where the
 house number sits (before vs after the street), where the street *type* sits
@@ -88,13 +88,19 @@ new AddressParser('nl').parseLocation("Spuistraat 63, 2511 BD 's-Gravenhage")
 | `ch` | Switzerland | after street | fused (`-strasse`) **or** leading (`Rue`/`Via`) | 4-digit, before city | – |
 | `pt` | Portugal | after street | leading (`Rua`) | `PPPP-PPP`, before city | – |
 | `se` | Sweden | after street | fused suffix (`-gatan`) | `PPP PP`, before city | – |
+| `dk` | Denmark | after street | fused/spaced (`-gade`, `Allé`) | 4-digit, before city | – |
+| `no` | Norway | after street | fused/spaced (`-gata`, `gate`) | 4-digit, before city | – |
+| `fi` | Finland | after street | fused suffix (`-katu`) | 5-digit, before city | – |
+| `ie` | Ireland | before street | trailing (`Street`) | Eircode last (optional) | county → `state` |
+| `cz` | Czechia | after street | mostly none / `náměstí` | `NNN NN`, before city | – |
+| `gr` | Greece | after street | mostly none / `Λεωφόρος` | `NNN NN`, before city | – |
 
 Belgium and Switzerland are multilingual: a leading French/Italian type
 (`Rue`, `Via`) is captured as a prefix, while an untyped Dutch/German name is
 fuse-split (`Meirstraat` → `Meir` + `straat`). Each country's addressing rules,
 prior-work notes and known failure modes are documented under
 [`docs/eu-research`](docs/eu-research); the parsers are validated against 100+
-real-address fixtures per country (1900+ total) in `__tests__/eu-fixtures`.
+real-address fixtures per country (2800+ total) in `__tests__/eu-fixtures`.
 
 ### Fields
 

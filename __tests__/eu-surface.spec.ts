@@ -3,10 +3,71 @@ import { AddressParser, IntlAddressParser } from "../src/parser";
 
 describe("European AddressParser construction", () => {
   it("constructs for every supported European country", () => {
-    const codes = ["de", "fr", "gb", "it", "es", "nl", "be", "at", "pl", "ch", "pt", "se"] as const;
+    const codes = [
+      "de", "fr", "gb", "it", "es", "nl", "be", "at", "pl", "ch", "pt", "se",
+      "dk", "no", "fi", "ie", "cz", "gr",
+    ] as const;
     for (const cc of codes) {
       assert.ok(new AddressParser(cc), `failed to construct ${cc}`);
     }
+  });
+});
+
+describe("European parses (batch 3)", () => {
+  it("DK: fused type + floor/side unit", () => {
+    const p = new AddressParser("dk").parseLocation("Nørregade 12, 3. tv, 1165 København")!;
+    assert.equal(p.street, "Nørre");
+    assert.equal(p.type, "gade");
+    assert.equal(p.sec_unit_type, "sal");
+    assert.equal(p.sec_unit_num, "3. tv");
+    assert.equal(p.postal_code, "1165");
+  });
+
+  it("NO: spaced type + dwelling code", () => {
+    const p = new AddressParser("no").parseLocation("Karl Johans gate 1, 0154 Oslo")!;
+    assert.equal(p.street, "Karl Johans");
+    assert.equal(p.type, "gate");
+    assert.equal(p.postal_code, "0154");
+    assert.equal(p.city, "Oslo");
+  });
+
+  it("CZ: dual number (orientation/descriptive), spaced postcode", () => {
+    const p = new AddressParser("cz").parseLocation("Spálená 82/4, 110 00 Praha 1")!;
+    assert.equal(p.street, "Spálená");
+    assert.equal(p.number, "4");
+    assert.equal(p.civic_number_suffix, "82");
+    assert.equal(p.postal_code, "110 00");
+    assert.equal(p.city, "Praha 1");
+  });
+
+  it("GR: type-less Greek name, NNN NN postcode", () => {
+    const p = new AddressParser("gr").parseLocation("Ερμού 15, 105 63 Αθήνα")!;
+    assert.equal(p.street, "Ερμού");
+    assert.equal(p.number, "15");
+    assert.equal(p.postal_code, "105 63");
+    assert.equal(p.city, "Αθήνα");
+  });
+
+  it("IE: number first, type suffix, county, Eircode last", () => {
+    const p = new AddressParser("ie").parseLocation("17 Main St, Bray, Co. Wicklow, A98 DE34")!;
+    assert.equal(p.number, "17");
+    assert.equal(p.street, "Main");
+    assert.equal(p.type, "St");
+    assert.equal(p.city, "Bray");
+    assert.equal(p.state, "Co. Wicklow");
+    assert.equal(p.postal_code, "A98 DE34");
+  });
+});
+
+describe("IntlAddressParser detects batch-3 countries", () => {
+  const intl = new IntlAddressParser();
+  it("GR from Greek script, IE from an Eircode, names for DK/NO/FI/CZ", () => {
+    assert.equal(intl.parseLocation("Ερμού 15, 105 63 Αθήνα")!.country, "GR");
+    assert.equal(intl.parseLocation("10 Grafton Street, Dublin 2, D02 VK65")!.country, "IE");
+    assert.equal(intl.parseLocation("Nørregade 12, 1165 København, Danmark")!.country, "DK");
+    assert.equal(intl.parseLocation("Storgata 1, 0155 Oslo, Norge")!.country, "NO");
+    assert.equal(intl.parseLocation("Mannerheimintie 12, 00100 Helsinki, Suomi")!.country, "FI");
+    assert.equal(intl.parseLocation("Národní 25, 110 00 Praha, Czechia")!.country, "CZ");
   });
 });
 

@@ -117,10 +117,23 @@ function detectEuCountry(address: string): CountryMappings | null {
     ["ch", /\b(?:Schweiz|Suisse|Svizzera|Switzerland)\b/i],
     ["pt", /\bPortugal\b/i],
     ["se", /\b(?:Sverige|Sweden)\b/i],
+    ["dk", /\b(?:Danmark|Denmark)\b/i],
+    ["no", /\b(?:Norge|Noreg|Norway)\b/i],
+    ["fi", /\b(?:Suomi|Finland)\b/i],
+    ["ie", /\b(?:Ireland|Éire|Eire)\b/i],
+    ["cz", /\b(?:Česko|Česká republika|Czech Republic|Czechia)\b/i],
+    ["gr", /(?:Ελλάδα|Ελλάς|\bGreece\b|\bHellas\b)/i],
   ];
   for (const [code, re] of names) {
     if (re.test(address)) return code;
   }
+  // Greek script anywhere is an unambiguous Greece signal.
+  if (/[Ͱ-Ͽἀ-῿]/.test(address)) return "gr";
+  // Irish Eircode: routing key (letter + digit + digit/"W") + space + 4 chars.
+  // Its inward part starts with a letter, so it never matches the UK shape.
+  if (/\b[A-Za-z]\d[\dWw]\s+[A-Za-z\d]{4}\b/.test(address)) return "ie";
+  // Finnish "FI-"/"FIN-" prefixed 5-digit postcode.
+  if (/\bFIN?-\d{5}\b/i.test(address)) return "fi";
   // Distinctive dash postcodes: Polish "NN-NNN", Portuguese "PPPP-PPP". Require
   // a preceding comma (place-tail position) so a leading civic-number range like
   // the Canadian "10-123" is not misread as a Polish postcode.

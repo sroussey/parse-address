@@ -15,7 +15,13 @@ export type CountryMappings =
   | "pl"
   | "ch"
   | "pt"
-  | "se";
+  | "se"
+  | "dk"
+  | "no"
+  | "fi"
+  | "ie"
+  | "cz"
+  | "gr";
 
 export interface AddressRuleset {
   type: Pattern;

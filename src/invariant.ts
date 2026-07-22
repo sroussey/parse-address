@@ -9,7 +9,7 @@ const FILLER = new Set(["and", "at"]);
 // prefix before a postcode (Swiss "CH-1204", German "D-10115", Austrian
 // "A-1010"). These do not occur in US/CA street lines, so stripping them is a
 // no-op there.
-const NUMBER_MARKERS = /n\.?º\.?|nº|núm\.?|\bs\/n\b|\b[a-z]{1,2}-(?=\d{4})|\bche?-/gi;
+const NUMBER_MARKERS = /n\.?º\.?|nº|núm\.?|\bs\/n\b|\b[a-z]{1,2}-(?=\d{4})|\bche?-|αρ\.?/gi;
 
 // Count significant tokens. A run like "S.E." / "P.O." (single letter + period,
 // abutting another single-letter+period) collapses to one token; every other
@@ -72,6 +72,13 @@ function boundaryCandidates(
   // "233 S Wacker Dr 606066306").
   if (field === "postal_code" && typeof parsed.plus4 === "string" && parsed.plus4) {
     return [`${value}${parsed.plus4}`, value];
+  }
+  // A postcode is frequently reformatted with different internal spacing than
+  // the source ("11000" -> "110 00", "SW1A2AA" -> "SW1A 2AA"), so the source may
+  // not contain the normalized form. Also try the space-stripped spelling so the
+  // boundary is found and the postcode isn't miscounted as a lost street token.
+  if (field === "postal_code" && /\s/.test(value)) {
+    return [value, value.replace(/\s+/g, "")];
   }
   return [value];
 }

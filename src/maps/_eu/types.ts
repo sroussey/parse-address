@@ -120,6 +120,22 @@ export interface EuCountryConfig {
    * name, e.g. the French "CEDEX 08" delivery-office marker. Regex fragment.
    */
   citySuffixPattern?: string;
+  /**
+   * Allow digits inside the captured city, for places with a numbered district
+   * ("Praha 1"). Defaults to false (a digit ends the city).
+   */
+  cityAllowsDigits?: boolean;
+  /**
+   * Allow commas inside the captured city, so a comma-separated locality chain
+   * stays together (Irish "Ballsbridge, Dublin 4"). Defaults to false.
+   */
+  cityAllowsCommas?: boolean;
+  /**
+   * For after-city layouts, the pattern (regex fragment) the trailing county
+   * must match, so it is distinguished from a district that belongs to the city
+   * (Irish "Co. Cork"). Defaults to any comma-delimited word run.
+   */
+  countyPattern?: string;
 
   /** XRegExp fragment capturing `(?<state>...)` for a region/province. */
   regionPattern?: string;
