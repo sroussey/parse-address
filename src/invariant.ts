@@ -47,20 +47,14 @@ const CITY_DIRECTION_PREFIXES: readonly (readonly [string, string])[] = [
 ];
 
 // Alternate source spellings for a boundary field's value, tried in addition to
-// the value itself; the earliest match among all candidates wins.
+// the value itself; the earliest match among all candidates wins. (City is
+// handled separately by `cityBoundaryIndex` -- see its comment -- since its
+// abbreviated fallback must not compete with a found exact match.)
 function boundaryCandidates(
   field: keyof ParsedAddress,
   value: string,
   parsed: ParsedAddress
 ): string[] {
-  if (field === "city") {
-    const lower = value.toLowerCase();
-    for (const [full, abbr] of CITY_DIRECTION_PREFIXES) {
-      if (lower.startsWith(`${full} `)) {
-        return [value, `${abbr}${value.slice(full.length)}`];
-      }
-    }
-  }
   // Calibration fix: a ZIP+4 is sometimes written as one unbroken digit run
   // ("606066306"), so the stand-alone postal_code has no trailing word
   // boundary to match against; try the concatenated form first (corpus:
@@ -77,6 +71,39 @@ function firstIndexOfValue(addressLower: string, value: string): number {
   return match ? match.index : -1;
 }
 
+function lastIndexOfValue(addressLower: string, value: string): number {
+  const escaped = value.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp(`\\b${escaped}\\b`, "g");
+  let idx = -1;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(addressLower)) !== null) {
+    idx = match.index;
+  }
+  return idx;
+}
+
+// A city value's boundary position is a single candidate, not a competing
+// pair: prefer the exact parsed value when it occurs in the source at all,
+// and only fall back to the compass-abbreviated spelling ("n bay" for "North
+// Bay") when the exact form is absent. The abbreviated form can otherwise
+// match earlier, inside the street segment itself (e.g. "N Bay" as a street
+// prefix), and wrongly cut real street words into the excluded tail. When the
+// fallback is used, the city sits in the address's locational tail, so match
+// its rightmost occurrence rather than any earlier in-street collision.
+function cityBoundaryIndex(addressLower: string, value: string): number {
+  const exactIdx = firstIndexOfValue(addressLower, value);
+  if (exactIdx >= 0) return exactIdx;
+
+  const lower = value.toLowerCase();
+  for (const [full, abbr] of CITY_DIRECTION_PREFIXES) {
+    if (lower.startsWith(`${full} `)) {
+      const abbreviated = `${abbr}${value.slice(full.length)}`;
+      return lastIndexOfValue(addressLower, abbreviated);
+    }
+  }
+  return -1;
+}
+
 // The source up to the earliest locational-field occurrence (whole-word match,
 // so a short region code like "ON" does not match inside "Onondaga").
 function streetSegment(address: string, parsed: ParsedAddress): string {
@@ -85,6 +112,11 @@ function streetSegment(address: string, parsed: ParsedAddress): string {
   for (const field of BOUNDARY_FIELDS) {
     const value = parsed[field];
     if (typeof value !== "string" || !value) continue;
+    if (field === "city") {
+      const idx = cityBoundaryIndex(lower, value);
+      if (idx >= 0) cut = Math.min(cut, idx);
+      continue;
+    }
     for (const candidate of boundaryCandidates(field, value, parsed)) {
       const idx = firstIndexOfValue(lower, candidate);
       if (idx >= 0) cut = Math.min(cut, idx);
@@ -118,25 +150,6 @@ export function losesTokens(address: string, parsed: ParsedAddress | null): bool
   if (!parsed) return false;
   // Intersections carry two streets; the single-street count model does not apply.
   if (parsed.street2 || parsed.type2) return false;
-
-  // Calibration fix: rural-route / bare box shape. The grammar drops all
-  // locational detail after a bare box designator, and the "box" word itself
-  // lands in `street` (e.g. "RR 1, Box 123, Smiths Falls, ON K7A 4S4"). With no
-  // city/province/state/postal_code to bound it, the street segment would
-  // otherwise swallow that whole (uncaptured, not dropped) locational tail.
-  // Scoped to when locational context is entirely absent -- if any of those
-  // fields are present, nothing was left uncaptured and this must not mask a
-  // genuine street-token drop (e.g. "100 Box Canyon Road, Springfield, IL
-  // 62701").
-  const missingLocationalContext = !(
-    parsed.city || parsed.province || parsed.state || parsed.postal_code
-  );
-  if (
-    missingLocationalContext &&
-    parsed.street &&
-    /^(?:p\.?o\.?\s*)?box$/i.test(parsed.street.trim())
-  )
-    return false;
 
   const segment = streetSegment(address, parsed);
   const requiredCount = countSignificantTokens(segment) - fractionDiscount(segment, parsed);

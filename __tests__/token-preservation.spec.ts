@@ -12,6 +12,18 @@ const corpus: AddressTestCaseMap = {
   ...canadianAddresses,
 };
 
+// Corpus keys excluded from this calibration's never-lose-data baseline: each
+// entry's EXPECTED parse itself drops locational (or otherwise non-street)
+// content, so it is not a valid input for asserting `losesTokens === false`.
+const CALIBRATION_EXCLUDED_KEYS = new Set<string>([
+  // "RR 1, Box 123, Smiths Falls, ON K7A 4S4" expects
+  // {sec_unit_type:"RR", sec_unit_num:"1", street:"Box", country:"CA"} --
+  // the city/province/postal_code tail is expected to be dropped by this
+  // parse, not preserved, so it is not a lossless baseline. (In production
+  // this correctly triggers the Tier-2 lossless fallback.)
+  "RR 1, Box 123, Smiths Falls, ON K7A 4S4",
+]);
+
 describe("token-preservation detector catches genuine street-token drops", () => {
   it("canary: dropped street-name token ('Parc') with no locational fields at all", () => {
     assert.equal(
@@ -107,6 +119,36 @@ describe("token-preservation detector catches genuine street-token drops", () =>
       "detector must catch the dropped 'Extra' token"
     );
   });
+
+  it("Fix A repro: abbreviated compass-direction city boundary cuts the segment too early", () => {
+    assert.equal(
+      losesTokens("100 N Bay Extra Ave, North Bay, ON P1B 8G5", {
+        number: "100",
+        prefix: "N",
+        street: "Bay",
+        type: "Ave",
+        province: "ON",
+        city: "North Bay",
+        postal_code: "P1B 8G5",
+        country: "CA",
+      }),
+      true,
+      "detector must catch the dropped 'Extra' token despite the 'n bay' compass-abbrev collision inside the street"
+    );
+  });
+
+  it("Fix B repro: PO-box/rural-route exemption masked a real drop after the box", () => {
+    assert.equal(
+      losesTokens("RR 1, Box 123, Old Mill Road, Smiths Falls, ON K7A 4S4", {
+        sec_unit_type: "RR",
+        sec_unit_num: "1",
+        street: "Box",
+        country: "CA",
+      }),
+      true,
+      "detector must catch the dropped 'Old Mill Road' tokens"
+    );
+  });
 });
 
 describe("token-preservation detector does not false-trigger on a correct parse", () => {
@@ -134,6 +176,9 @@ describe("token-preservation detector does not false-trigger on the corpus", () 
     // suite in parse-address.spec.ts too) -- not "known-good", so they are not
     // part of this calibration's baseline.
     if (testCase.__skipTest) return;
+    // See CALIBRATION_EXCLUDED_KEYS above: this entry's expected parse itself
+    // drops locational content, so it is not a valid never-lose-data baseline.
+    if (CALIBRATION_EXCLUDED_KEYS.has(address)) return;
     it(`preserves tokens for (${address})`, () => {
       const parsed = parser.parseLocation(address);
       assert.equal(
