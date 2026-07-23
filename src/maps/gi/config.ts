@@ -30,6 +30,7 @@ export const giConfig: EuCountryConfig = {
   typePlacement: "suffix",
   postalPlacement: "after-city",
   normalizeTypeCase: false,
+  countyPattern: "(?!x)x", // no county/state field in these jurisdictions
   // Only "Midtown" is a dropped district; Ocean Village / Marina Bay etc. are
   // streets or building names in real usage, so they are NOT listed here.
   areaNames: ["Midtown"],

@@ -33,6 +33,7 @@ export const kyConfig: EuCountryConfig = {
   typePlacement: "suffix",
   postalPlacement: "after-city",
   normalizeTypeCase: false,
+  countyPattern: "(?!x)x", // no county/state field in these jurisdictions
   // The island ("Grand Cayman") functions as the post town: when a district
   // (George Town) is the city, the island trails it and is dropped, not emitted.
   citySuffixPattern: "[,\\s]+(?:Grand\\s+Cayman|Cayman\\s+Brac|Little\\s+Cayman)",

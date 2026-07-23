@@ -30,6 +30,7 @@ export const bmConfig: EuCountryConfig = {
   typePlacement: "suffix",
   postalPlacement: "after-city",
   normalizeTypeCase: false,
+  countyPattern: "(?!x)x", // no county/state field in these jurisdictions
 
   // Two letters + optional space + two alphanumerics ("HM 11", "FL07", "DV BX").
   postalPattern: "(?<postal_code>[A-Za-z]{2}\\s*[A-Za-z0-9]{2})",

@@ -34,6 +34,7 @@ export const jeConfig: EuCountryConfig = {
   typePlacement: "suffix",
   postalPlacement: "after-city",
   normalizeTypeCase: false,
+  countyPattern: "(?!x)x", // no county/state field in these jurisdictions
 
   // UK-format postcode with the fixed Jersey area letters.
   postalPattern: "(?<postal_code>JE\\d\\s*\\d[A-Za-z]{2})",

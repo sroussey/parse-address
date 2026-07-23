@@ -31,6 +31,7 @@ export const vgConfig: EuCountryConfig = {
   typePlacement: "suffix",
   postalPlacement: "after-city",
   normalizeTypeCase: false,
+  countyPattern: "(?!x)x", // no county/state field in these jurisdictions
   // The island ("Tortola", "Virgin Gorda", ...) trails the settlement and is
   // dropped when the settlement is the city.
   citySuffixPattern:

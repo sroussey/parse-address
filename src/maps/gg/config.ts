@@ -35,6 +35,9 @@ export const ggConfig: EuCountryConfig = {
   typePlacement: "suffix",
   postalPlacement: "after-city",
   normalizeTypeCase: false,
+  // Only the islands are a region; the country line ("Guernsey") must not be
+  // grabbed into state.
+  countyPattern: "(?:Alderney|Sark|Herm)",
 
   // UK-format postcode with the fixed Guernsey area (one OR two outward digits).
   postalPattern: "(?<postal_code>GY\\d{1,2}\\s*\\d[A-Za-z]{2})",
