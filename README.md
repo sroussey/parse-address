@@ -169,9 +169,24 @@ ambiguous with a US ZIP, so unless the input carries an explicit country name
 they fall through to the US default — **pass a `country` argument** to any
 `IntlAddressParser`/`AddressParser` method when you already know the country.
 
-Canadian provinces are also recognized by SEC EDGAR's `A0`–`B0` / `Z4` region
-codes, which normalize to the canonical two-letter code (e.g. `A8` → `QC`), so an
-EDGAR-sourced address parses without pre-mapping the code.
+## SEC EDGAR region codes
+
+Addresses sourced from SEC EDGAR filings encode Canadian provinces and
+territories with EDGAR's own `A0`–`B0` / `Z4` codes rather than the Canada Post
+two-letter codes. The Canadian parser recognizes both and normalizes the EDGAR
+code to the canonical province code, so an EDGAR-sourced address parses without
+any pre-mapping:
+
+```ts
+new AddressParser('ca').parseLocation('123 Main St, Montreal, A8 H2X 3P6')
+// { number: '123', street: 'Main', type: 'St', city: 'Montreal',
+//   province: 'QC', postal_code: 'H2X 3P6', fsa: 'H2X', ldu: '3P6', country: 'CA' }
+//   ^ EDGAR "A8" normalized to "QC"
+```
+
+The EDGAR codes are deliberately **not** used for country auto-detection (they
+collide with unit tokens such as `Apt A8`); an EDGAR Canadian address is detected
+by its postal code, then the code is resolved by the CA parser.
 
 ## Guarantee: no dropped street tokens
 
