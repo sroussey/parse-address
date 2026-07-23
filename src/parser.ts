@@ -40,26 +40,32 @@ export class AddressParser implements AddressParserImpl {
   normalizeAddress(parts) {
     return this.parser.normalizeAddress(parts);
   }
+  private get ignored(): string[] | undefined {
+    return this.parser.droppableTokens?.();
+  }
   parseAddress(address: string) {
-    return enforceTokenPreservation(address, this.parser.parseAddress(address));
+    return enforceTokenPreservation(address, this.parser.parseAddress(address), this.ignored);
   }
   parseStreet(address: string) {
-    return enforceTokenPreservation(address, this.parser.parseStreet(address));
+    return enforceTokenPreservation(address, this.parser.parseStreet(address), this.ignored);
   }
   parseInformalAddress(address: string) {
-    return enforceTokenPreservation(address, this.parser.parseInformalAddress(address));
+    return enforceTokenPreservation(address, this.parser.parseInformalAddress(address), this.ignored);
   }
   parsePoAddress(address: string) {
-    return enforceTokenPreservation(address, this.parser.parsePoAddress(address));
+    return enforceTokenPreservation(address, this.parser.parsePoAddress(address), this.ignored);
   }
   parseLocation(address: string) {
-    return enforceTokenPreservation(address, this.parser.parseLocation(address));
+    return enforceTokenPreservation(address, this.parser.parseLocation(address), this.ignored);
   }
   parseIntersection(address: string) {
     return this.parser.parseIntersection(address);
   }
   findStreetTypeShortCode(streetType?: string): string {
     return this.parser.findStreetTypeShortCode(streetType);
+  }
+  droppableTokens(): string[] {
+    return this.parser.droppableTokens?.() ?? [];
   }
 }
 
@@ -123,10 +129,28 @@ function detectEuCountry(address: string): CountryMappings | null {
     ["ie", /\b(?:Ireland|Éire|Eire)\b/i],
     ["cz", /\b(?:Česko|Česká republika|Czech Republic|Czechia)\b/i],
     ["gr", /(?:Ελλάδα|Ελλάς|\bGreece\b|\bHellas\b)/i],
+    // Offshore jurisdictions / Crown Dependencies. "Jersey" is guarded against
+    // the US state "New Jersey".
+    ["ky", /\bCayman Islands\b/i],
+    ["vg", /\b(?:British Virgin Islands|BVI|B\.V\.I\.)\b/i],
+    ["bm", /\bBermuda\b/i],
+    ["gi", /\bGibraltar\b/i],
+    ["je", /(?<!New\s)\bJersey\b/i],
+    ["gg", /\b(?:Guernsey|Alderney|Sark)\b/i],
   ];
   for (const [code, re] of names) {
     if (re.test(address)) return code;
   }
+  // Offshore postcodes, matched BEFORE the generic UK shape below (JE/GY/GX all
+  // fit the UK outward+inward pattern, so they must be claimed first).
+  if (/\bKY[1-3]-\d{4}\b/i.test(address)) return "ky";
+  if (/\bVG\d{4}\b/i.test(address)) return "vg";
+  if (/\bGX\d{2}\s*\d[A-Za-z]{2}\b/i.test(address)) return "gi";
+  if (/\bJE\d\s*\d[A-Za-z]{2}\b/i.test(address)) return "je";
+  if (/\bGY\d{1,2}\s*\d[A-Za-z]{2}\b/i.test(address)) return "gg";
+  // Bermuda: a parish/city two-letter code + two chars at the very end.
+  if (/\b(?:HM|CR|FL|HS|DV|PG|WK|SN|MA|SB|GE|DD)\s*[0-9A-Z]{2}\s*$/.test(address))
+    return "bm";
   // Greek script anywhere is an unambiguous Greece signal.
   if (/[Ͱ-Ͽἀ-῿]/.test(address)) return "gr";
   // Irish Eircode: routing key (letter + digit + digit/"W") + space + 4 chars.

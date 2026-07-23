@@ -5,11 +5,113 @@ describe("European AddressParser construction", () => {
   it("constructs for every supported European country", () => {
     const codes = [
       "de", "fr", "gb", "it", "es", "nl", "be", "at", "pl", "ch", "pt", "se",
-      "dk", "no", "fi", "ie", "cz", "gr",
+      "dk", "no", "fi", "ie", "cz", "gr", "je", "gg", "ky", "vg", "bm", "gi",
     ] as const;
     for (const cc of codes) {
       assert.ok(new AddressParser(cc), `failed to construct ${cc}`);
     }
+  });
+});
+
+describe("Offshore / Crown Dependency parses (batch 4)", () => {
+  it("KY: building + street + district, island dropped, postcode last", () => {
+    const p = new AddressParser("ky").parseLocation(
+      "Ugland House, South Church Street, George Town, Grand Cayman, KY1-1104"
+    )!;
+    assert.equal(p.building, "Ugland House");
+    assert.equal(p.street, "South Church");
+    assert.equal(p.type, "Street");
+    assert.equal(p.city, "George Town");
+    assert.equal(p.postal_code, "KY1-1104");
+    assert.equal(p.country, "KY");
+  });
+
+  it("KY: PO box + building, bare island as city", () => {
+    const p = new AddressParser("ky").parseLocation(
+      "PO Box 309, Ugland House, Grand Cayman, KY1-1104"
+    )!;
+    assert.equal(p.sec_unit_type, "PO Box");
+    assert.equal(p.sec_unit_num, "309");
+    assert.equal(p.building, "Ugland House");
+    assert.equal(p.city, "Grand Cayman");
+  });
+
+  it("VG: building leads the box, island dropped, optional postcode", () => {
+    const p = new AddressParser("vg").parseLocation(
+      "Sea Meadow House, PO Box 116, Road Town, Tortola, VG1110"
+    )!;
+    assert.equal(p.building, "Sea Meadow House");
+    assert.equal(p.sec_unit_type, "PO Box");
+    assert.equal(p.sec_unit_num, "116");
+    assert.equal(p.city, "Road Town");
+    assert.equal(p.postal_code, "VG1110");
+  });
+
+  it("BM: type-word building + numbered street, no comma before postcode", () => {
+    const p = new AddressParser("bm").parseLocation(
+      "Canon's Court, 22 Victoria Street, Hamilton HM 12"
+    )!;
+    assert.equal(p.building, "Canon's Court");
+    assert.equal(p.number, "22");
+    assert.equal(p.street, "Victoria");
+    assert.equal(p.type, "Street");
+    assert.equal(p.city, "Hamilton");
+    assert.equal(p.postal_code, "HM 12");
+  });
+
+  it("GI: building + type-less street, city Gibraltar, single postcode", () => {
+    const p = new AddressParser("gi").parseLocation(
+      "Burns House, 19 Town Range, Gibraltar, GX11 1AA"
+    )!;
+    assert.equal(p.building, "Burns House");
+    assert.equal(p.number, "19");
+    assert.equal(p.street, "Town Range");
+    assert.equal(p.city, "Gibraltar");
+    assert.equal(p.postal_code, "GX11 1AA");
+  });
+
+  it("JE: '44 Esplanade' parses as number + street (no building)", () => {
+    const p = new AddressParser("je").parseLocation(
+      "44 Esplanade, St Helier, Jersey, JE4 9WG"
+    )!;
+    assert.equal(p.number, "44");
+    assert.equal(p.street, "Esplanade");
+    assert.equal(p.building, undefined);
+    assert.equal(p.city, "St Helier");
+    assert.equal(p.postal_code, "JE4 9WG");
+  });
+
+  it("JE: named building + 'The Esplanade' street", () => {
+    const p = new AddressParser("je").parseLocation(
+      "Ogier House, The Esplanade, St Helier, Jersey, JE4 9WG"
+    )!;
+    assert.equal(p.building, "Ogier House");
+    assert.equal(p.street, "The Esplanade");
+    assert.equal(p.city, "St Helier");
+  });
+
+  it("GG: country code GG from a GY postcode, island as state", () => {
+    const p = new AddressParser("gg").parseLocation(
+      "23 Victoria Street, St Anne, Alderney, Guernsey, GY9 3TA"
+    )!;
+    assert.equal(p.number, "23");
+    assert.equal(p.street, "Victoria");
+    assert.equal(p.city, "St Anne");
+    assert.equal(p.state, "Alderney");
+    assert.equal(p.postal_code, "GY9 3TA");
+    assert.equal(p.country, "GG");
+  });
+});
+
+describe("IntlAddressParser detects offshore jurisdictions", () => {
+  const intl = new IntlAddressParser();
+  it("detects KY/VG/BM/GI/JE/GG by postcode or name", () => {
+    assert.equal(intl.parseLocation("121 South Church Street, George Town, Grand Cayman, KY1-1104")!.country, "KY");
+    assert.equal(intl.parseLocation("Sea Meadow House, PO Box 116, Road Town, Tortola, VG1110")!.country, "VG");
+    assert.equal(intl.parseLocation("2 Church Street, Hamilton HM 11, Bermuda")!.country, "BM");
+    assert.equal(intl.parseLocation("Burns House, 19 Town Range, Gibraltar, GX11 1AA")!.country, "GI");
+    assert.equal(intl.parseLocation("44 Esplanade, St Helier, Jersey, JE4 9WG")!.country, "JE");
+    assert.equal(intl.parseLocation("Trafalgar Court, Les Banques, St Peter Port, Guernsey, GY1 3DA")!.country, "GG");
   });
 });
 

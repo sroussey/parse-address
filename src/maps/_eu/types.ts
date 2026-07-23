@@ -184,6 +184,33 @@ export interface EuCountryConfig {
   buildingKeywords?: string[];
 
   /**
+   * Building keywords that are ALSO street types in this country ("Court",
+   * "Place", "Square", "Mall"). A leading segment ending in one of these is
+   * treated as a building ONLY when a house number immediately follows
+   * ("Victoria Place, 31 Victoria Street, ...") -- distinguishing it from a real
+   * street whose type is that word ("9 Halkett Place, St Helier"), where the
+   * locality follows instead. Kept separate from `buildingKeywords` so the pure
+   * building words stay unconditional.
+   */
+  buildingTypeKeywords?: string[];
+
+  /**
+   * Override for the PO-box number pattern (an XRegExp fragment, no capture).
+   * Defaults to a digit run. Bermuda boxes carry a parish-letter prefix
+   * ("PO Box HM 1561"), so it sets `[A-Za-z]{2}\\s*\\d+`.
+   */
+  poBoxNumberPattern?: string;
+
+  /**
+   * Development / area names that are written like a locality but are not the
+   * routing city and carry no street type (offshore "Cricket Square",
+   * "Camana Bay", "Wickhams Cay 1", Gibraltar "Midtown"). When present, an
+   * occurrence right after a building (and the island name after the city) is
+   * consumed but not emitted, matching how these are dropped in real filings.
+   */
+  areaNames?: string[];
+
+  /**
    * PO-box lead-in words (e.g. ["Postfach"], ["BP", "Boîte Postale"]). Used to
    * detect and parse box addresses that replace the street entirely.
    */

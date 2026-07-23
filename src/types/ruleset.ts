@@ -21,7 +21,14 @@ export type CountryMappings =
   | "fi"
   | "ie"
   | "cz"
-  | "gr";
+  | "gr"
+  // Offshore jurisdictions / Crown Dependencies (UK-style grammar)
+  | "je"
+  | "gg"
+  | "ky"
+  | "vg"
+  | "bm"
+  | "gi";
 
 export interface AddressRuleset {
   type: Pattern;

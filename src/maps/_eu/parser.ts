@@ -14,17 +14,17 @@ export class AddressParserEU implements AddressParserImpl {
   readonly config: EuCountryConfig;
   private readonly ruleset: EuRuleset;
   // Precomputed once per country (these are invariant across parse calls).
-  private readonly poDetectRe: RegExp;
+  private readonly poAnywhereRe: RegExp;
   private readonly fusedSuffixesSorted: Array<[string, string]>;
   private readonly unsplittablePrefixRe: RegExp | null;
 
   constructor(config: EuCountryConfig) {
     this.config = config;
     this.ruleset = buildEuRuleset(config);
-    this.poDetectRe = XRegExp(
-      `^\\s*(?:${this.ruleset.po_box})(?![A-Za-z])`,
-      "xi"
-    );
+    // Detect the PO-box word anywhere: it may lead the line, or sit after a
+    // leading building ("Sea Meadow House, PO Box 116, ..."). The anchored
+    // po_address grammar simply returns null when it does not actually fit.
+    this.poAnywhereRe = XRegExp(`(?:${this.ruleset.po_box})(?![A-Za-z])`, "xi");
     // Longest suffix first so "strasse" wins over "str" regardless of config order.
     this.fusedSuffixesSorted = [...(config.fusedTypeSuffixes ?? [])].sort(
       (a, b) => b[0].length - a[0].length
@@ -58,7 +58,7 @@ export class AddressParserEU implements AddressParserImpl {
   }
 
   parseLocation(address: string) {
-    if (this.poDetectRe.test(address)) {
+    if (this.poAnywhereRe.test(address)) {
       const po = this.parsePoAddress(address);
       if (po) return po;
     }
@@ -76,6 +76,26 @@ export class AddressParserEU implements AddressParserImpl {
       if (placeOnly) return placeOnly;
     }
 
+    // A settlement-only line ("Bodden Town, Grand Cayman, KY1-1601") has no
+    // street; its required island suffix keeps it from claiming a real street,
+    // so try it before parseAddress (which would take the settlement as street).
+    if (this.ruleset.settlement_only) {
+      const s = this.normalizeAddress(
+        XRegExp.exec(address, this.ruleset.settlement_only)
+      );
+      if (s) return s;
+    }
+
+    // A building-only line ("OMC Chambers, Wickhams Cay 1, Road Town, ...") has
+    // no street of its own; its mandatory area marker keeps it from competing
+    // with an ordinary building-then-street line, so try it before parseAddress.
+    if (this.ruleset.building_address) {
+      const b = this.normalizeAddress(
+        XRegExp.exec(address, this.ruleset.building_address)
+      );
+      if (b) return b;
+    }
+
     return this.parseAddress(address) || this.parseInformalAddress(address);
   }
 
@@ -83,6 +103,10 @@ export class AddressParserEU implements AddressParserImpl {
   // method for interface parity but return null.
   parseIntersection(_address: string) {
     return null;
+  }
+
+  droppableTokens(): string[] {
+    return this.config.areaNames ?? [];
   }
 
   findStreetTypeShortCode(streetType?: string): string {

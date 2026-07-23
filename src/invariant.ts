@@ -178,7 +178,25 @@ function fractionDiscount(segment: string, parsed: ParsedAddress): number {
   return match ? countSignificantTokens(match[1] ?? "") : 0;
 }
 
-export function losesTokens(address: string, parsed: ParsedAddress | null): boolean {
+// Remove any intentionally-dropped phrases (development/area names a country's
+// config discards, e.g. "Cricket Square", "Wickhams Cay 1") from a segment
+// before counting, so a legitimately dropped area is not scored as a lost
+// street token. Matched case-insensitively, longest first.
+function stripIgnored(segment: string, ignored?: string[]): string {
+  if (!ignored?.length) return segment;
+  let out = segment;
+  for (const phrase of [...ignored].sort((a, b) => b.length - a.length)) {
+    const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    out = out.replace(new RegExp(escaped, "gi"), " ");
+  }
+  return out;
+}
+
+export function losesTokens(
+  address: string,
+  parsed: ParsedAddress | null,
+  ignored?: string[]
+): boolean {
   if (!parsed) return false;
   // Intersections carry two streets; the single-street count model does not apply.
   if (parsed.street2 || parsed.type2) return false;
@@ -187,7 +205,7 @@ export function losesTokens(address: string, parsed: ParsedAddress | null): bool
   // so the street-token model does not apply. There is no street to preserve.
   if (!parsed.street && !parsed.number && parsed.sec_unit_type) return false;
 
-  const segment = streetSegment(address, parsed);
+  const segment = stripIgnored(streetSegment(address, parsed), ignored);
   const requiredCount = countSignificantTokens(segment) - fractionDiscount(segment, parsed);
   return outputStreetTokenCount(parsed) < requiredCount;
 }
@@ -247,8 +265,9 @@ export function minimalLosslessParse(address: string, parsed: ParsedAddress): Pa
  */
 export function enforceTokenPreservation(
   address: string,
-  parsed: ParsedAddress | null
+  parsed: ParsedAddress | null,
+  ignored?: string[]
 ): ParsedAddress | null {
-  if (!losesTokens(address, parsed)) return parsed;
+  if (!losesTokens(address, parsed, ignored)) return parsed;
   return minimalLosslessParse(address, parsed as ParsedAddress);
 }

@@ -21,6 +21,12 @@ import { noSamples } from "./eu-fixtures/no";
 import { czSamples } from "./eu-fixtures/cz";
 import { grSamples } from "./eu-fixtures/gr";
 import { ieSamples } from "./eu-fixtures/ie";
+import { jeSamples } from "./eu-fixtures/je";
+import { ggSamples } from "./eu-fixtures/gg";
+import { kySamples } from "./eu-fixtures/ky";
+import { vgSamples } from "./eu-fixtures/vg";
+import { bmSamples } from "./eu-fixtures/bm";
+import { giSamples } from "./eu-fixtures/gi";
 
 // The address fields we assert against the ground truth (locational + street).
 const ASSERTED_FIELDS: (keyof EuSample)[] = [
@@ -30,6 +36,7 @@ const ASSERTED_FIELDS: (keyof EuSample)[] = [
   "type",
   "sec_unit_type",
   "sec_unit_num",
+  "building",
   "postal_code",
   "city",
   "state",
@@ -54,6 +61,12 @@ const CORPORA: Record<string, EuSample[]> = {
   cz: czSamples,
   gr: grSamples,
   ie: ieSamples,
+  je: jeSamples,
+  gg: ggSamples,
+  ky: kySamples,
+  vg: vgSamples,
+  bm: bmSamples,
+  gi: giSamples,
 };
 
 function runCountry(code: CountryMappings, samples: EuSample[]) {
@@ -87,8 +100,9 @@ function runCountry(code: CountryMappings, samples: EuSample[]) {
         assert.strictEqual(parsed!.country, sample.country ?? code.toUpperCase());
 
         // The library's core guarantee: no street token is silently dropped.
+        // (Development/area names the config intentionally drops are exempt.)
         assert.strictEqual(
-          losesTokens(sample.input, parsed as any),
+          losesTokens(sample.input, parsed as any, parser.droppableTokens()),
           false,
           `token loss detected for "${title}"`
         );

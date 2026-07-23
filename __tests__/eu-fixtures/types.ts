@@ -10,6 +10,7 @@ export interface EuSample {
   type?: string;
   sec_unit_type?: string;
   sec_unit_num?: string;
+  building?: string;
   postal_code?: string;
   city?: string;
   state?: string;

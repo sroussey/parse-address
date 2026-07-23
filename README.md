@@ -102,6 +102,42 @@ prior-work notes and known failure modes are documented under
 [`docs/eu-research`](docs/eu-research); the parsers are validated against 100+
 real-address fixtures per country (2800+ total) in `__tests__/eu-fixtures`.
 
+## Offshore financial centres & Crown Dependencies
+
+Six offshore jurisdictions share the same engine. Their real-world data is
+dominated by **corporate registered-agent addresses** that lead with a named
+building and/or a PO box, so these parsers additionally populate a `building`
+field and understand the box appearing before or after the street.
+
+```ts
+new AddressParser('ky').parseLocation('Ugland House, South Church Street, George Town, Grand Cayman, KY1-1104')
+// { building: 'Ugland House', street: 'South Church', type: 'Street',
+//   city: 'George Town', postal_code: 'KY1-1104', country: 'KY' }
+
+new AddressParser('bm').parseLocation("Canon's Court, 22 Victoria Street, Hamilton HM 12")
+// { building: "Canon's Court", number: '22', street: 'Victoria', type: 'Street',
+//   city: 'Hamilton', postal_code: 'HM 12', country: 'BM' }
+
+new AddressParser('je').parseLocation('Ogier House, The Esplanade, St Helier, Jersey, JE4 9WG')
+// { building: 'Ogier House', street: 'The Esplanade', city: 'St Helier',
+//   postal_code: 'JE4 9WG', country: 'JE' }
+```
+
+| Code | Jurisdiction | Postcode | Notes |
+|------|--------------|----------|-------|
+| `ky` | Cayman Islands | `KY[1-3]-NNNN`, last | island (Grand Cayman) dropped after a district |
+| `vg` | British Virgin Islands | `VGNNNN`, last, **optional** | island (Tortola) dropped; `Wickhams Cay` is an area |
+| `bm` | Bermuda | `AA NN` / `AA XX`, last, no comma | parish code (`HM`,`CR`,…) as post town |
+| `gi` | Gibraltar | `GX11 1AA`, last, **optional** | one territory-wide postcode; city = Gibraltar |
+| `je` | Jersey | `JEN NAA`, last | UK-format; parish as city; `Esplanade` kept whole |
+| `gg` | Guernsey | `GYN[N] NAA`, last | ISO code `GG`; covers Alderney/Sark (island → `state`) |
+
+These addresses are frequently written with a leading company/agent name, a
+floating PO box, or a stacked floor+box that the ground truth discards; such
+permutations are documented as out-of-scope skips in the fixtures. Sources and
+failure modes are under [`docs/eu-research`](docs/eu-research)
+(`ky-vg.md`, `bm-gi.md`, `je-gg.md`).
+
 ### Fields
 
 US and CA share the street fields (`number`, `civic_number_suffix`, `prefix`,
@@ -109,7 +145,8 @@ US and CA share the street fields (`number`, `civic_number_suffix`, `prefix`,
 `province`, `postal_code`, `fsa`, `ldu`; US results add `postal_code`, `plus4`,
 `state`. European results use the shared street fields plus `postal_code`, `city`,
 and (where applicable) `state` for the province/county; the street `type` carries
-a `short_street_type` code as in US/CA.
+a `short_street_type` code as in US/CA. Offshore results may additionally set
+`building` for a named building that leads a corporate/registered-agent address.
 
 ### SEC EDGAR region codes
 
