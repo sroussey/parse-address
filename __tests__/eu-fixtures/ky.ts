@@ -14,16 +14,6 @@ export const kySamples: EuSample[] = [
     "country": "KY"
   },
   {
-    "input": "Maples Corporate Services Limited, PO Box 309, Ugland House, Grand Cayman, KY1-1104",
-    "building": "Ugland House",
-    "sec_unit_type": "PO Box",
-    "sec_unit_num": "309",
-    "postal_code": "KY1-1104",
-    "city": "Grand Cayman",
-    "country": "KY",
-    "__skip": "leading registered-agent/company name (dropped in ground truth) is not an address field"
-  },
-  {
     "input": "PO Box 309, Ugland House, South Church Street, George Town, Grand Cayman, KY1-1104",
     "building": "Ugland House",
     "street": "South Church",
@@ -157,16 +147,6 @@ export const kySamples: EuSample[] = [
     "postal_code": "KY1-9008",
     "city": "George Town",
     "country": "KY"
-  },
-  {
-    "input": "Walkers Corporate Limited, 190 Elgin Avenue, George Town, Grand Cayman, KY1-9008",
-    "number": "190",
-    "street": "Elgin",
-    "type": "Avenue",
-    "postal_code": "KY1-9008",
-    "city": "George Town",
-    "country": "KY",
-    "__skip": "leading registered-agent/company name (dropped in ground truth) is not an address field"
   },
   {
     "input": "PO Box 265, 190 Elgin Avenue, George Town, Grand Cayman, KY1-9008",

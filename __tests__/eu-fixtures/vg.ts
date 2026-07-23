@@ -14,16 +14,6 @@ export const vgSamples: EuSample[] = [
     "country": "VG"
   },
   {
-    "input": "ICS Corporate Services (BVI) Limited, Sea Meadow House, PO Box 116, Road Town, Tortola, VG1110",
-    "building": "Sea Meadow House",
-    "sec_unit_type": "PO Box",
-    "sec_unit_num": "116",
-    "postal_code": "VG1110",
-    "city": "Road Town",
-    "country": "VG",
-    "__skip": "leading registered-agent/company name (dropped in ground truth) is not an address field"
-  },
-  {
     "input": "PO Box 3159, Road Town, Tortola, VG1110",
     "sec_unit_type": "PO Box",
     "sec_unit_num": "3159",
@@ -43,18 +33,6 @@ export const vgSamples: EuSample[] = [
     "country": "VG"
   },
   {
-    "input": "Clermont Corporate Services Limited, Harbour House, Waterfront Drive, PO Box 905, Road Town, Tortola, VG1110",
-    "building": "Harbour House",
-    "street": "Waterfront",
-    "type": "Drive",
-    "sec_unit_type": "PO Box",
-    "sec_unit_num": "905",
-    "postal_code": "VG1110",
-    "city": "Road Town",
-    "country": "VG",
-    "__skip": "leading registered-agent/company name (dropped in ground truth) is not an address field"
-  },
-  {
     "input": "171 Main Street, PO Box 92, Road Town, Tortola, VG1110",
     "number": "171",
     "street": "Main",
@@ -64,18 +42,6 @@ export const vgSamples: EuSample[] = [
     "postal_code": "VG1110",
     "city": "Road Town",
     "country": "VG"
-  },
-  {
-    "input": "Walkers Corporate (BVI) Limited, 171 Main Street, PO Box 92, Road Town, Tortola, VG1110",
-    "number": "171",
-    "street": "Main",
-    "type": "Street",
-    "sec_unit_type": "PO Box",
-    "sec_unit_num": "92",
-    "postal_code": "VG1110",
-    "city": "Road Town",
-    "country": "VG",
-    "__skip": "leading registered-agent/company name (dropped in ground truth) is not an address field"
   },
   {
     "input": "PO Box 3085, Road Town, Tortola, VG1110",
@@ -129,27 +95,11 @@ export const vgSamples: EuSample[] = [
     "country": "VG"
   },
   {
-    "input": "Overseas Management Company Trust (BVI) Ltd, OMC Chambers, Wickhams Cay 1, Road Town, Tortola, VG1110",
-    "building": "OMC Chambers",
-    "postal_code": "VG1110",
-    "city": "Road Town",
-    "country": "VG",
-    "__skip": "leading registered-agent/company name (dropped in ground truth) is not an address field"
-  },
-  {
     "input": "Vistra Corporate Services Centre, Wickhams Cay II, Road Town, Tortola, VG1110",
     "building": "Vistra Corporate Services Centre",
     "postal_code": "VG1110",
     "city": "Road Town",
     "country": "VG"
-  },
-  {
-    "input": "Vistra (BVI) Limited, Vistra Corporate Services Centre, Wickhams Cay II, Road Town, Tortola, VG1110",
-    "building": "Vistra Corporate Services Centre",
-    "postal_code": "VG1110",
-    "city": "Road Town",
-    "country": "VG",
-    "__skip": "leading registered-agent/company name (dropped in ground truth) is not an address field"
   },
   {
     "input": "Palm Grove House, Wickhams Cay 1, PO Box 438, Road Town, Tortola, VG1110",
@@ -219,16 +169,6 @@ export const vgSamples: EuSample[] = [
     "postal_code": "VG1110",
     "city": "Road Town",
     "country": "VG"
-  },
-  {
-    "input": "Maples Corporate Services (BVI) Limited, Kingston Chambers, PO Box 173, Road Town, Tortola, VG1110",
-    "building": "Kingston Chambers",
-    "sec_unit_type": "PO Box",
-    "sec_unit_num": "173",
-    "postal_code": "VG1110",
-    "city": "Road Town",
-    "country": "VG",
-    "__skip": "leading registered-agent/company name (dropped in ground truth) is not an address field"
   },
   {
     "input": "Nemours Chambers, PO Box 3170, Road Town, Tortola, VG1110",

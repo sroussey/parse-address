@@ -265,39 +265,6 @@ export const bmSamples: EuSample[] = [
     "country": "BM"
   },
   {
-    "input": "c/o Conyers Corporate Services (Bermuda) Limited, Clarendon House, 2 Church Street, Hamilton HM 11",
-    "number": "2",
-    "building": "Clarendon House",
-    "street": "Church",
-    "type": "Street",
-    "postal_code": "HM 11",
-    "city": "Hamilton",
-    "country": "BM",
-    "__skip": "leading registered-agent/company name (dropped in ground truth) is not an address field"
-  },
-  {
-    "input": "EMC International Company, Clarendon House, 2 Church Street, Hamilton HM 11",
-    "number": "2",
-    "building": "Clarendon House",
-    "street": "Church",
-    "type": "Street",
-    "postal_code": "HM 11",
-    "city": "Hamilton",
-    "country": "BM",
-    "__skip": "leading registered-agent/company name (dropped in ground truth) is not an address field"
-  },
-  {
-    "input": "Appleby Services (Bermuda) Ltd, Canon's Court, 22 Victoria Street, Hamilton HM 12",
-    "number": "22",
-    "building": "Canon's Court",
-    "street": "Victoria",
-    "type": "Street",
-    "postal_code": "HM 12",
-    "city": "Hamilton",
-    "country": "BM",
-    "__skip": "leading registered-agent/company name (dropped in ground truth) is not an address field"
-  },
-  {
     "input": "Clarendon House, 2 Church Street, Hamilton HM11",
     "number": "2",
     "building": "Clarendon House",

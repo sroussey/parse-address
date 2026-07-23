@@ -132,11 +132,13 @@ new AddressParser('je').parseLocation('Ogier House, The Esplanade, St Helier, Je
 | `je` | Jersey | `JEN NAA`, last | UK-format; parish as city; `Esplanade` kept whole |
 | `gg` | Guernsey | `GYN[N] NAA`, last | ISO code `GG`; covers Alderney/Sark (island → `state`) |
 
-These addresses are frequently written with a leading company/agent name, a
-floating PO box, or a stacked floor+box that the ground truth discards; such
-permutations are documented as out-of-scope skips in the fixtures. Sources and
-failure modes are under [`docs/eu-research`](docs/eu-research)
-(`ky-vg.md`, `bm-gi.md`, `je-gg.md`).
+There is no field for a leading company/agent name (the registered entity),
+so addresses that lead with one — e.g. `Maples Corporate Services Limited,
+PO Box 309, …` — are out of scope and excluded from the corpus. Other
+documented permutations (a floating PO box, a stacked floor+box, an
+un-suffixed building name) remain as skipped fixtures. Sources and failure
+modes are under [`docs/eu-research`](docs/eu-research) (`ky-vg.md`,
+`bm-gi.md`, `je-gg.md`).
 
 ### Fields
 
