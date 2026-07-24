@@ -48,7 +48,15 @@ export type CountryMappings =
   | "lu"
   | "is"
   | "mt"
-  | "cy";
+  | "cy"
+  | "uy"
+  | "ec"
+  | "ve"
+  | "bo"
+  | "ro"
+  | "hr"
+  | "sk"
+  | "si";
 
 export interface AddressRuleset {
   type: Pattern;
