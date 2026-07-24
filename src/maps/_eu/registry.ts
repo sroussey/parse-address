@@ -201,6 +201,10 @@ import { ehConfig } from "../eh/config";
 import { iqConfig } from "../iq/config";
 import { omConfig } from "../om/config";
 import { yeConfig } from "../ye/config";
+import { joConfig } from "../jo/config";
+import { lbConfig } from "../lb/config";
+import { syConfig } from "../sy/config";
+import { psConfig } from "../ps/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -411,6 +415,10 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   iq: iqConfig,
   om: omConfig,
   ye: yeConfig,
+  jo: joConfig,
+  lb: lbConfig,
+  sy: syConfig,
+  ps: psConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);

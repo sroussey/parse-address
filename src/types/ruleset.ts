@@ -208,7 +208,11 @@ export type CountryMappings =
   | "eh"
   | "iq"
   | "om"
-  | "ye";
+  | "ye"
+  | "jo"
+  | "lb"
+  | "sy"
+  | "ps";
 
 export interface AddressRuleset {
   type: Pattern;
