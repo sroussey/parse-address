@@ -172,6 +172,16 @@ import { shConfig } from "../sh/config";
 import { cvConfig } from "../cv/config";
 import { gwConfig } from "../gw/config";
 import { stConfig } from "../st/config";
+import { awConfig } from "../aw/config";
+import { axConfig } from "../ax/config";
+import { sjConfig } from "../sj/config";
+import { vaConfig } from "../va/config";
+import { gqConfig } from "../gq/config";
+import { scConfig } from "../sc/config";
+import { fkConfig } from "../fk/config";
+import { nfConfig } from "../nf/config";
+import { tkConfig } from "../tk/config";
+import { pnConfig } from "../pn/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -353,6 +363,16 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   cv: cvConfig,
   gw: gwConfig,
   st: stConfig,
+  aw: awConfig,
+  ax: axConfig,
+  sj: sjConfig,
+  va: vaConfig,
+  gq: gqConfig,
+  sc: scConfig,
+  fk: fkConfig,
+  nf: nfConfig,
+  tk: tkConfig,
+  pn: pnConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);

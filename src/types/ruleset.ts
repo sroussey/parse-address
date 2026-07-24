@@ -179,7 +179,17 @@ export type CountryMappings =
   | "sh"
   | "cv"
   | "gw"
-  | "st";
+  | "st"
+  | "aw"
+  | "ax"
+  | "sj"
+  | "va"
+  | "gq"
+  | "sc"
+  | "fk"
+  | "nf"
+  | "tk"
+  | "pn";
 
 export interface AddressRuleset {
   type: Pattern;
