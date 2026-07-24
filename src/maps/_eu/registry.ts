@@ -74,6 +74,10 @@ import { mcConfig } from "../mc/config";
 import { liConfig } from "../li/config";
 import { adConfig } from "../ad/config";
 import { smConfig } from "../sm/config";
+import { ngConfig } from "../ng/config";
+import { keConfig } from "../ke/config";
+import { ghConfig } from "../gh/config";
+import { muConfig } from "../mu/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -157,6 +161,10 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   li: liConfig,
   ad: adConfig,
   sm: smConfig,
+  ng: ngConfig,
+  ke: keConfig,
+  gh: ghConfig,
+  mu: muConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);

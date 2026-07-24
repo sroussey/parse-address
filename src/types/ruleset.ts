@@ -81,7 +81,11 @@ export type CountryMappings =
   | "mc"
   | "li"
   | "ad"
-  | "sm";
+  | "sm"
+  | "ng"
+  | "ke"
+  | "gh"
+  | "mu";
 
 export interface AddressRuleset {
   type: Pattern;
