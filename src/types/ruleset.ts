@@ -89,7 +89,11 @@ export type CountryMappings =
   | "jm"
   | "tt"
   | "bs"
-  | "py";
+  | "py"
+  | "ma"
+  | "tn"
+  | "sn"
+  | "ci";
 
 export interface AddressRuleset {
   type: Pattern;

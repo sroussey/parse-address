@@ -82,6 +82,10 @@ import { jmConfig } from "../jm/config";
 import { ttConfig } from "../tt/config";
 import { bsConfig } from "../bs/config";
 import { pyConfig } from "../py/config";
+import { maConfig } from "../ma/config";
+import { tnConfig } from "../tn/config";
+import { snConfig } from "../sn/config";
+import { ciConfig } from "../ci/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -173,6 +177,10 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   tt: ttConfig,
   bs: bsConfig,
   py: pyConfig,
+  ma: maConfig,
+  tn: tnConfig,
+  sn: snConfig,
+  ci: ciConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);
