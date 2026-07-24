@@ -1,4 +1,4 @@
-import type { EuCountryConfig } from "/home/user/parse-address/src/maps/_eu/types";
+import type { EuCountryConfig } from "../_eu/types";
 
 // KM (Comoros / Comores) address configuration -- French, number-first, prefix
 // voie type. Numbers frequently absent; B.P. (Boîte Postale) is the dominant
