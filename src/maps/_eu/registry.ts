@@ -134,6 +134,11 @@ import { lcConfig } from "../lc/config";
 import { msConfig } from "../ms/config";
 import { tcConfig } from "../tc/config";
 import { vcConfig } from "../vc/config";
+import { prConfig } from "../pr/config";
+import { viConfig } from "../vi/config";
+import { guConfig } from "../gu/config";
+import { asConfig } from "../as/config";
+import { mpConfig } from "../mp/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -277,6 +282,11 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   ms: msConfig,
   tc: tcConfig,
   vc: vcConfig,
+  pr: prConfig,
+  vi: viConfig,
+  gu: guConfig,
+  as: asConfig,
+  mp: mpConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);

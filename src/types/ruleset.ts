@@ -141,7 +141,12 @@ export type CountryMappings =
   | "lc"
   | "ms"
   | "tc"
-  | "vc";
+  | "vc"
+  | "pr"
+  | "vi"
+  | "gu"
+  | "as"
+  | "mp";
 
 export interface AddressRuleset {
   type: Pattern;
