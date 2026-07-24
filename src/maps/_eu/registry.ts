@@ -161,6 +161,17 @@ import { cgConfig } from "../cg/config";
 import { cdConfig } from "../cd/config";
 import { mgConfig } from "../mg/config";
 import { mrConfig } from "../mr/config";
+import { gmConfig } from "../gm/config";
+import { lsConfig } from "../ls/config";
+import { lrConfig } from "../lr/config";
+import { mwConfig } from "../mw/config";
+import { rwConfig } from "../rw/config";
+import { slConfig } from "../sl/config";
+import { szConfig } from "../sz/config";
+import { shConfig } from "../sh/config";
+import { cvConfig } from "../cv/config";
+import { gwConfig } from "../gw/config";
+import { stConfig } from "../st/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -331,6 +342,17 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   cd: cdConfig,
   mg: mgConfig,
   mr: mrConfig,
+  gm: gmConfig,
+  ls: lsConfig,
+  lr: lrConfig,
+  mw: mwConfig,
+  rw: rwConfig,
+  sl: slConfig,
+  sz: szConfig,
+  sh: shConfig,
+  cv: cvConfig,
+  gw: gwConfig,
+  st: stConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);

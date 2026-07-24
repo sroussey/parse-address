@@ -168,7 +168,18 @@ export type CountryMappings =
   | "cg"
   | "cd"
   | "mg"
-  | "mr";
+  | "mr"
+  | "gm"
+  | "ls"
+  | "lr"
+  | "mw"
+  | "rw"
+  | "sl"
+  | "sz"
+  | "sh"
+  | "cv"
+  | "gw"
+  | "st";
 
 export interface AddressRuleset {
   type: Pattern;
