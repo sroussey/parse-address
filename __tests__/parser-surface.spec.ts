@@ -9,10 +9,19 @@ describe("AddressParser constructor", () => {
 
   it("throws for an unsupported country", () => {
     assert.throws(
-      // @ts-expect-error intentionally passing an unsupported country at runtime
-      () => new AddressParser("mx"),
-      /Unsupported country "mx"; supported: us, ca/
+      () => new AddressParser("zz"),
+      /Unsupported country "zz"/
     );
+  });
+
+  it("accepts a SEC EDGAR code that maps to a supported grammar", () => {
+    // E9 = Cayman Islands -> ky
+    assert.equal(new AddressParser("E9").parser.findStreetTypeShortCode("Street"), "ST");
+  });
+
+  it("throws a descriptive error for a SEC code without a grammar yet", () => {
+    assert.throws(() => new AddressParser("K3"), /Hong Kong.*no address grammar yet/);
+    assert.throws(() => new AddressParser("G5"), /obsolete jurisdiction/);
   });
 });
 
@@ -67,13 +76,127 @@ describe("postal_code is the sole postal field", () => {
   });
 });
 
+describe("EDGAR-style concatenated records (leading entity + country description)", () => {
+  const intl = new IntlAddressParser();
+
+  it("strips a leading legal entity and detects the country from its name", () => {
+    // street1 (entity) + street2 + city+postcode + country DESCRIPTION, no code.
+    const p = intl.parseLocation(
+      "BANK OF BERMUDA (CAYMAN) LIMITED, 6 FRONT STREET, HAMILTON HM11, BERMUDA"
+    )!;
+    assert.equal(p.country, "BM");
+    assert.equal(p.number, "6");
+    assert.equal(p.street, "FRONT");
+    assert.equal(p.city, "HAMILTON");
+    assert.equal(p.postal_code, "HM 11");
+  });
+
+  it("handles a 'c/o' agent prefix", () => {
+    const p = intl.parseLocation(
+      "c/o Conyers Corporate Services (Bermuda) Limited, Clarendon House, 2 Church Street, Hamilton HM 11"
+    )!;
+    assert.equal(p.country, "BM");
+    assert.equal(p.building, "Clarendon House");
+    assert.equal(p.number, "2");
+    assert.equal(p.street, "Church");
+  });
+
+  it("does not strip a real leading street (segment starting with a number)", () => {
+    const p = new AddressParser("us").parseLocation("1005 Gravenstein Hwy, Sebastopol, CA 95472")!;
+    assert.equal(p.number, "1005");
+    assert.equal(p.street, "Gravenstein");
+  });
+
+  it("does not treat an ordinary word ending in 'co'/'sa' as an entity", () => {
+    // "Calle San Francisco" must not be stripped on the "co" of Francisco.
+    const p = new AddressParser("es").parseLocation("Calle San Francisco, 10, 04001 Almería")!;
+    assert.equal(p.street, "San Francisco");
+    assert.equal(p.number, "10");
+  });
+});
+
 describe("IntlAddressParser unsupported-country override", () => {
   it("throws a clear error instead of an opaque TypeError", () => {
     const intl = new IntlAddressParser();
     assert.throws(
-      // @ts-expect-error intentionally passing an unsupported country at runtime
-      () => intl.parseLocation("123 Main St", "mx"),
-      /Unsupported country "mx"; supported: us, ca/
+      () => intl.parseLocation("123 Main St", "zz"),
+      /Unsupported country "zz"/
     );
+  });
+
+  it("rejects an Object.prototype member as a country (no prototype pollution)", () => {
+    assert.throws(() => new AddressParser("constructor"), /Unsupported country/);
+    assert.throws(() => new AddressParser("__proto__"), /Unsupported country/);
+    assert.throws(() => new AddressParser("toString"), /Unsupported country/);
+  });
+});
+
+describe("review-hardening regressions", () => {
+  it("does not delete a street whose last word is an org-suffix word", () => {
+    // "Capital" is in the org-suffix set, but "Avenida Capital" is a street.
+    const p = new AddressParser("co").parseLocation("Avenida Capital, 12, Bogota")!;
+    assert.ok(
+      /Avenida Capital/.test(String(p.street)),
+      `expected the street to survive, got ${JSON.stringify(p)}`
+    );
+  });
+
+  it("peels stacked leading entities (entity + entity)", () => {
+    const p = new AddressParser("bm").parseLocation(
+      "MLF CAYMAN GP LTD, BANK OF BERMUDA (CAYMAN) LIMITED, 6 FRONT STREET, HAMILTON HM11"
+    )!;
+    assert.equal(p.number, "6");
+    assert.equal(p.street, "FRONT");
+  });
+
+  it("peels a stacked entity + c/o agent", () => {
+    const p = new AddressParser("ky").parseLocation(
+      "ABC HOLDINGS LTD, c/o Maples Corporate Services Limited, PO Box 309, Ugland House, Grand Cayman, KY1-1104"
+    )!;
+    assert.equal(p.building, "Ugland House");
+    assert.equal(p.city, "Grand Cayman");
+    assert.equal(p.sec_unit_num, "309");
+  });
+
+  it("auto-detects a spelled-out country across the whole registry", () => {
+    const intl = new IntlAddressParser();
+    assert.equal(
+      intl.parseLocation("10 Collins Street, Melbourne VIC 3000, Australia")!.country,
+      "AU"
+    );
+    assert.equal(
+      intl.parseLocation("300 Kempston Road, Port Elizabeth, 6001, South Africa")!.country,
+      "ZA"
+    );
+    assert.equal(
+      intl.parseLocation("12 MG Road, Bangalore 560001, India")!.country,
+      "IN"
+    );
+  });
+
+  it("does not let a leading entity hijack auto-detection", () => {
+    const intl = new IntlAddressParser();
+    // Without stripping, 'Cayman Islands' in the entity would force KY.
+    assert.equal(
+      intl.parseLocation(
+        "CAYMAN ISLANDS HOLDINGS LTD, 10 Downing Street, London SW1A 2AA"
+      )!.country,
+      "GB"
+    );
+  });
+
+  it("surfaces the stripped organization rather than discarding it", () => {
+    const p = new AddressParser("bm").parseLocation(
+      "BANK OF BERMUDA (CAYMAN) LIMITED, 6 FRONT STREET, HAMILTON HM11"
+    )!;
+    assert.equal(p.organization, "BANK OF BERMUDA (CAYMAN) LIMITED");
+    assert.equal(p.street, "FRONT");
+  });
+
+  it("droppableTokens() is not stale after a failed parse", () => {
+    const p = new AddressParser("za");
+    p.parseLocation("300 Kempston Road, Sydenham, Port Elizabeth, 6001");
+    p.parseLocation("");
+    assert.deepEqual(p.droppableTokens(), []);
   });
 });

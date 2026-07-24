@@ -3,11 +3,22 @@ import type { ParsedAddress } from "./types/address";
 // Intersection connector words that appear in source but are not addressable tokens.
 const FILLER = new Set(["and", "at"]);
 
+// Non-addressable "number" markers that a normalized parse legitimately drops
+// (they label the house/door number rather than name a street): the Spanish
+// número (nº / núm. / n.º) and sin número (s/n), and a 1-2 letter country
+// prefix before a postcode (Swiss "CH-1204", German "D-10115", Austrian
+// "A-1010"). These do not occur in US/CA street lines, so stripping them is a
+// no-op there.
+const NUMBER_MARKERS = /n\.?º\.?|nº|núm\.?|\bs\/n\b|\b[a-z]{1,2}-(?=\d{4})|\bche?-|αρ\.?|\bno\.?:?\s*(?=\d)|\bnu\.?:?\s*(?=\d)/gi;
+
 // Count significant tokens. A run like "S.E." / "P.O." (single letter + period,
 // abutting another single-letter+period) collapses to one token; every other
 // period, comma, hash, slash, or hyphen is a separator.
 export function countSignificantTokens(text: string): number {
-  const collapsed = text.toLowerCase().replace(/\b([a-z])\.(?=[a-z]\b)/g, "$1");
+  const collapsed = text
+    .toLowerCase()
+    .replace(NUMBER_MARKERS, " ")
+    .replace(/\b([a-z])\.(?=[a-z]\b)/g, "$1");
   return collapsed
     .replace(/[.,#/\-]/g, " ")
     .split(/\s+/)
@@ -17,7 +28,7 @@ export function countSignificantTokens(text: string): number {
 // Street-relevant output fields. Locational fields are deliberately excluded.
 const STREET_FIELDS = [
   "number", "civic_number_suffix", "prefix", "street", "type", "suffix",
-  "sec_unit_type", "sec_unit_num",
+  "sec_unit_type", "sec_unit_num", "building",
 ] as const;
 
 // Locational values mark where the street segment ends. `country` is synthetic
@@ -62,26 +73,45 @@ function boundaryCandidates(
   if (field === "postal_code" && typeof parsed.plus4 === "string" && parsed.plus4) {
     return [`${value}${parsed.plus4}`, value];
   }
+  // A postcode is frequently reformatted with different internal spacing than
+  // the source ("11000" -> "110 00", "SW1A2AA" -> "SW1A 2AA"), so the source may
+  // not contain the normalized form. Also try the space-stripped spelling so the
+  // boundary is found and the postcode isn't miscounted as a lost street token.
+  if (field === "postal_code" && /\s/.test(value)) {
+    return [value, value.replace(/\s+/g, "")];
+  }
   return [value];
 }
 
-// A whole-word (\b-anchored) matcher for a lowercased boundary value, with regex
-// metacharacters escaped. Shared by the first/last occurrence lookups.
+// A whole-word (\b-anchored), case-insensitive matcher for a boundary value,
+// with regex metacharacters escaped. Shared by the first/last occurrence lookups.
+//
+// Matching is case-insensitive (`i`) against the ORIGINAL (non-lowercased)
+// address rather than pre-lowercasing both sides. Pre-lowercasing broke index
+// alignment: `String.toLowerCase()` is not length-preserving for a handful of
+// characters (Turkish/Azerbaijani "İ" U+0130 -> "i̇", German "ẞ" -> "ss", the
+// f-ligatures), so an index found in the lowercased string pointed at the wrong
+// offset in the original -- shifting `streetSegment`'s cut and falsely reporting
+// token loss for any street containing such a character.
 function wholeWordRegExp(value: string, flags = ""): RegExp {
-  const escaped = value.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return new RegExp(`\\b${escaped}\\b`, flags);
+  const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  // Unicode-aware word boundaries: JS `\b` treats `\w` as ASCII only, so a value
+  // that starts or ends with an accented letter ("Bogotá", "Ñuñoa", "İzmir")
+  // would never match, making streetSegment miss the boundary and falsely report
+  // token loss. Letter/number lookarounds fix that for every script.
+  return new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, flags + "iu");
 }
 
-function firstIndexOfValue(addressLower: string, value: string): number {
-  const match = wholeWordRegExp(value).exec(addressLower);
+function firstIndexOfValue(address: string, value: string): number {
+  const match = wholeWordRegExp(value).exec(address);
   return match ? match.index : -1;
 }
 
-function lastIndexOfValue(addressLower: string, value: string): number {
+function lastIndexOfValue(address: string, value: string): number {
   const re = wholeWordRegExp(value, "g");
   let idx = -1;
   let match: RegExpExecArray | null;
-  while ((match = re.exec(addressLower)) !== null) {
+  while ((match = re.exec(address)) !== null) {
     idx = match.index;
   }
   return idx;
@@ -95,15 +125,15 @@ function lastIndexOfValue(addressLower: string, value: string): number {
 // prefix), and wrongly cut real street words into the excluded tail. When the
 // fallback is used, the city sits in the address's locational tail, so match
 // its rightmost occurrence rather than any earlier in-street collision.
-function cityBoundaryIndex(addressLower: string, value: string): number {
-  const exactIdx = firstIndexOfValue(addressLower, value);
+function cityBoundaryIndex(address: string, value: string): number {
+  const exactIdx = firstIndexOfValue(address, value);
   if (exactIdx >= 0) return exactIdx;
 
   const lower = value.toLowerCase();
   for (const [full, abbr] of CITY_DIRECTION_PREFIXES) {
     if (lower.startsWith(`${full} `)) {
       const abbreviated = `${abbr}${value.slice(full.length)}`;
-      return lastIndexOfValue(addressLower, abbreviated);
+      return lastIndexOfValue(address, abbreviated);
     }
   }
   return -1;
@@ -121,18 +151,17 @@ function cityBoundaryIndex(addressLower: string, value: string): number {
 // (the fallback then rebuilds losslessly). Revisit this if a grammar change ever
 // lets a partial-middle street drop through.
 export function streetSegment(address: string, parsed: ParsedAddress): string {
-  const lower = address.toLowerCase();
   let cut = address.length;
   for (const field of BOUNDARY_FIELDS) {
     const value = parsed[field];
     if (typeof value !== "string" || !value) continue;
     if (field === "city") {
-      const idx = cityBoundaryIndex(lower, value);
+      const idx = cityBoundaryIndex(address, value);
       if (idx >= 0) cut = Math.min(cut, idx);
       continue;
     }
     for (const candidate of boundaryCandidates(field, value, parsed)) {
-      const idx = firstIndexOfValue(lower, candidate);
+      const idx = firstIndexOfValue(address, candidate);
       if (idx >= 0) cut = Math.min(cut, idx);
     }
   }
@@ -160,12 +189,37 @@ function fractionDiscount(segment: string, parsed: ParsedAddress): number {
   return match ? countSignificantTokens(match[1] ?? "") : 0;
 }
 
-export function losesTokens(address: string, parsed: ParsedAddress | null): boolean {
+// Remove any intentionally-dropped phrases (development/area names a country's
+// config discards, e.g. "Cricket Square", "Wickhams Cay 1") from a segment
+// before counting, so a legitimately dropped area is not scored as a lost
+// street token. Matched case-insensitively, longest first.
+function stripIgnored(segment: string, ignored?: string[]): string {
+  if (!ignored?.length) return segment;
+  let out = segment;
+  for (const phrase of [...ignored].sort((a, b) => b.length - a.length)) {
+    if (!phrase) continue;
+    // Whole-word (Unicode-aware) match, NOT a bare substring: a short dropped
+    // token like "Ho" or "5" must not split "Chowdhury" into "C wdhury" or blank
+    // a digit inside "25". wholeWordRegExp anchors on letter/number lookarounds.
+    out = out.replace(wholeWordRegExp(phrase, "g"), " ");
+  }
+  return out;
+}
+
+export function losesTokens(
+  address: string,
+  parsed: ParsedAddress | null,
+  ignored?: string[]
+): boolean {
   if (!parsed) return false;
   // Intersections carry two streets; the single-street count model does not apply.
   if (parsed.street2 || parsed.type2) return false;
+  // Unit-only results (a PO box / Postfach with no street line) legitimately
+  // reformat their box number -- e.g. grouped digits "10 01 20" -> "100120" --
+  // so the street-token model does not apply. There is no street to preserve.
+  if (!parsed.street && !parsed.number && parsed.sec_unit_type) return false;
 
-  const segment = streetSegment(address, parsed);
+  const segment = stripIgnored(streetSegment(address, parsed), ignored);
   const requiredCount = countSignificantTokens(segment) - fractionDiscount(segment, parsed);
   return outputStreetTokenCount(parsed) < requiredCount;
 }
@@ -225,8 +279,9 @@ export function minimalLosslessParse(address: string, parsed: ParsedAddress): Pa
  */
 export function enforceTokenPreservation(
   address: string,
-  parsed: ParsedAddress | null
+  parsed: ParsedAddress | null,
+  ignored?: string[]
 ): ParsedAddress | null {
-  if (!losesTokens(address, parsed)) return parsed;
+  if (!losesTokens(address, parsed, ignored)) return parsed;
   return minimalLosslessParse(address, parsed as ParsedAddress);
 }

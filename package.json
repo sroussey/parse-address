@@ -1,7 +1,7 @@
 {
   "name": "@sroussey/parse-address",
   "version": "3.0.0",
-  "description": "USA/Canada Street Address Parser",
+  "description": "International street address parser for 220 jurisdictions (US, CA + 218 countries and territories), with SEC EDGAR country-code resolution",
   "type": "module",
   "main": "./dist/parser.js",
   "types": "./dist/parser.d.ts",
@@ -32,6 +32,14 @@
     "street",
     "US",
     "Canada",
+    "Europe",
+    "Germany",
+    "France",
+    "UK",
+    "Italy",
+    "Spain",
+    "Netherlands",
+    "international",
     "Geo::StreetAddress::US",
     "geo"
   ],
