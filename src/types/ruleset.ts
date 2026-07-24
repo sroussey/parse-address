@@ -56,7 +56,22 @@ export type CountryMappings =
   | "ro"
   | "hr"
   | "sk"
-  | "si";
+  | "si"
+  | "sa"
+  | "qa"
+  | "kw"
+  | "bh"
+  | "pa"
+  | "gt"
+  | "do"
+  | "ee"
+  | "lv"
+  | "lt"
+  | "hu"
+  | "th"
+  | "ph"
+  | "id"
+  | "pk";
 
 export interface AddressRuleset {
   type: Pattern;

@@ -50,6 +50,21 @@ import { roConfig } from "../ro/config";
 import { hrConfig } from "../hr/config";
 import { skConfig } from "../sk/config";
 import { siConfig } from "../si/config";
+import { saConfig } from "../sa/config";
+import { qaConfig } from "../qa/config";
+import { kwConfig } from "../kw/config";
+import { bhConfig } from "../bh/config";
+import { paConfig } from "../pa/config";
+import { gtConfig } from "../gt/config";
+import { doConfig } from "../do/config";
+import { eeConfig } from "../ee/config";
+import { lvConfig } from "../lv/config";
+import { ltConfig } from "../lt/config";
+import { huConfig } from "../hu/config";
+import { thConfig } from "../th/config";
+import { phConfig } from "../ph/config";
+import { idConfig } from "../id/config";
+import { pkConfig } from "../pk/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -109,6 +124,21 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   hr: hrConfig,
   sk: skConfig,
   si: siConfig,
+  sa: saConfig,
+  qa: qaConfig,
+  kw: kwConfig,
+  bh: bhConfig,
+  pa: paConfig,
+  gt: gtConfig,
+  do: doConfig,
+  ee: eeConfig,
+  lv: lvConfig,
+  lt: ltConfig,
+  hu: huConfig,
+  th: thConfig,
+  ph: phConfig,
+  id: idConfig,
+  pk: pkConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);
