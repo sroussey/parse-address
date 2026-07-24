@@ -76,6 +76,45 @@ describe("postal_code is the sole postal field", () => {
   });
 });
 
+describe("EDGAR-style concatenated records (leading entity + country description)", () => {
+  const intl = new IntlAddressParser();
+
+  it("strips a leading legal entity and detects the country from its name", () => {
+    // street1 (entity) + street2 + city+postcode + country DESCRIPTION, no code.
+    const p = intl.parseLocation(
+      "BANK OF BERMUDA (CAYMAN) LIMITED, 6 FRONT STREET, HAMILTON HM11, BERMUDA"
+    )!;
+    assert.equal(p.country, "BM");
+    assert.equal(p.number, "6");
+    assert.equal(p.street, "FRONT");
+    assert.equal(p.city, "HAMILTON");
+    assert.equal(p.postal_code, "HM 11");
+  });
+
+  it("handles a 'c/o' agent prefix", () => {
+    const p = intl.parseLocation(
+      "c/o Conyers Corporate Services (Bermuda) Limited, Clarendon House, 2 Church Street, Hamilton HM 11"
+    )!;
+    assert.equal(p.country, "BM");
+    assert.equal(p.building, "Clarendon House");
+    assert.equal(p.number, "2");
+    assert.equal(p.street, "Church");
+  });
+
+  it("does not strip a real leading street (segment starting with a number)", () => {
+    const p = new AddressParser("us").parseLocation("1005 Gravenstein Hwy, Sebastopol, CA 95472")!;
+    assert.equal(p.number, "1005");
+    assert.equal(p.street, "Gravenstein");
+  });
+
+  it("does not treat an ordinary word ending in 'co'/'sa' as an entity", () => {
+    // "Calle San Francisco" must not be stripped on the "co" of Francisco.
+    const p = new AddressParser("es").parseLocation("Calle San Francisco, 10, 04001 Almería")!;
+    assert.equal(p.street, "San Francisco");
+    assert.equal(p.number, "10");
+  });
+});
+
 describe("IntlAddressParser unsupported-country override", () => {
   it("throws a clear error instead of an opaque TypeError", () => {
     const intl = new IntlAddressParser();

@@ -8,6 +8,7 @@ import { stateCodesMap } from "./maps/us/states";
 import { provinceCodesMap } from "./maps/ca/provinces";
 import { enforceTokenPreservation } from "./invariant";
 import { secCountryCodes } from "./maps/sec-countries";
+import { stripLeadingOrganization } from "./preprocess";
 
 const SUPPORTED_COUNTRIES: CountryMappings[] = [
   "us",
@@ -76,20 +77,30 @@ export class AddressParser implements AddressParserImpl {
   private get ignored(): string[] | undefined {
     return this.parser.droppableTokens?.();
   }
+  // Strip a leading legal-entity / "c/o" segment (EDGAR "street1") so the real
+  // address parses; the cleaned string drives both the parse and the token check.
+  private clean(address: string): string {
+    return stripLeadingOrganization(address).cleaned;
+  }
   parseAddress(address: string) {
-    return enforceTokenPreservation(address, this.parser.parseAddress(address), this.ignored);
+    const a = this.clean(address);
+    return enforceTokenPreservation(a, this.parser.parseAddress(a), this.ignored);
   }
   parseStreet(address: string) {
-    return enforceTokenPreservation(address, this.parser.parseStreet(address), this.ignored);
+    const a = this.clean(address);
+    return enforceTokenPreservation(a, this.parser.parseStreet(a), this.ignored);
   }
   parseInformalAddress(address: string) {
-    return enforceTokenPreservation(address, this.parser.parseInformalAddress(address), this.ignored);
+    const a = this.clean(address);
+    return enforceTokenPreservation(a, this.parser.parseInformalAddress(a), this.ignored);
   }
   parsePoAddress(address: string) {
-    return enforceTokenPreservation(address, this.parser.parsePoAddress(address), this.ignored);
+    const a = this.clean(address);
+    return enforceTokenPreservation(a, this.parser.parsePoAddress(a), this.ignored);
   }
   parseLocation(address: string) {
-    return enforceTokenPreservation(address, this.parser.parseLocation(address), this.ignored);
+    const a = this.clean(address);
+    return enforceTokenPreservation(a, this.parser.parseLocation(a), this.ignored);
   }
   parseIntersection(address: string) {
     return this.parser.parseIntersection(address);
