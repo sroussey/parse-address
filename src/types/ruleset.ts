@@ -72,7 +72,12 @@ export type CountryMappings =
   | "th"
   | "ph"
   | "id"
-  | "pk";
+  | "pk"
+  | "al"
+  | "rs"
+  | "ba"
+  | "me"
+  | "ci";
 
 export interface AddressRuleset {
   type: Pattern;
