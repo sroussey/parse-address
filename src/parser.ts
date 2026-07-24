@@ -115,6 +115,8 @@ export class AddressParser implements AddressParserImpl {
       const stripped = parse(cleaned);
       const strippedIgnored = this.ignored;
       if (stripped && !losesTokens(cleaned, stripped, strippedIgnored)) {
+        // Surface the removed entity so no part of the input is silently lost.
+        stripped.organization = organization;
         return stripped;
       }
     }

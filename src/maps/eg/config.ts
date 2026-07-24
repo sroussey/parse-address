@@ -1,4 +1,5 @@
 import type { EuCountryConfig } from "../_eu/types";
+import { keepLastLocality } from "../_eu/localityChain";
 
 /**
  * Egypt (EG) address configuration — Latin (romanized) form.
@@ -98,13 +99,7 @@ export const egConfig: EuCountryConfig = {
       }
     }
     // Drop earlier district(s), keep the last locality as the routing city.
-    if (typeof parsed.city === "string" && parsed.city.includes(",")) {
-      const parts = parsed.city.split(",").map((s) => s.trim()).filter(Boolean);
-      if (parts.length) {
-        parsed.city = parts[parts.length - 1];
-        parsed.__dropped = parts.slice(0, -1);
-      }
-    }
+    keepLastLocality(parsed);
   },
 
   // Flat / floor / apartment / building lead-in ("Apartment 5", "Floor 3").

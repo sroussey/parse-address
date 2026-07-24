@@ -1,4 +1,5 @@
 import type { EuCountryConfig } from "../_eu/types";
+import { keepLastLocality } from "../_eu/localityChain";
 
 /**
  * Eswatini (SZ) address configuration.
@@ -119,17 +120,7 @@ export const szConfig: EuCountryConfig = {
 
   // Collapse the "area, town" chain; the "Plot" lead-in is consumed but not
   // emitted, so it is exempted from the token-preservation guard.
-  postNormalize: (parsed: Record<string, any>) => {
-    const dropped: string[] = ["Plot"];
-    if (typeof parsed.city === "string" && parsed.city.includes(",")) {
-      const parts = parsed.city.split(",").map((s: string) => s.trim()).filter(Boolean);
-      if (parts.length) {
-        parsed.city = parts[parts.length - 1];
-        for (const p of parts.slice(0, -1)) dropped.push(p);
-      }
-    }
-    parsed.__dropped = dropped;
-  },
+  postNormalize: (parsed: Record<string, any>) => keepLastLocality(parsed, ["Plot"]),
 };
 
 export default szConfig;

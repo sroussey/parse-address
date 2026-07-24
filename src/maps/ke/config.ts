@@ -1,4 +1,5 @@
 import type { EuCountryConfig } from "../_eu/types";
+import { keepLastLocality } from "../_eu/localityChain";
 
 /**
  * Kenya (KE) address configuration.
@@ -116,13 +117,7 @@ export const keConfig: EuCountryConfig = {
         if (!parsed.postal_code) parsed.postal_code = m[2];
       }
     }
-    if (typeof parsed.city === "string" && parsed.city.includes(",")) {
-      const parts = parsed.city.split(",").map((s: string) => s.trim()).filter(Boolean);
-      if (parts.length) {
-        parsed.city = parts[parts.length - 1];
-        parsed.__dropped = parts.slice(0, -1);
-      }
-    }
+    keepLastLocality(parsed);
   },
 };
 

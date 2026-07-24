@@ -1,4 +1,5 @@
 import type { EuCountryConfig } from "../_eu/types";
+import { keepLastLocality } from "../_eu/localityChain";
 
 /**
  * Nigeria (NG) address configuration.
@@ -165,13 +166,7 @@ export const ngConfig: EuCountryConfig = {
       if (!parsed.state) parsed.state = REGION_MAP[key] ?? parsed.ng_state;
       delete parsed.ng_state;
     }
-    if (typeof parsed.city === "string" && parsed.city.includes(",")) {
-      const parts = parsed.city.split(",").map((s: string) => s.trim()).filter(Boolean);
-      if (parts.length) {
-        parsed.city = parts[parts.length - 1];
-        parsed.__dropped = parts.slice(0, -1);
-      }
-    }
+    keepLastLocality(parsed);
   },
 };
 

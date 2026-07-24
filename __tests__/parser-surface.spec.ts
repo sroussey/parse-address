@@ -185,6 +185,14 @@ describe("review-hardening regressions", () => {
     );
   });
 
+  it("surfaces the stripped organization rather than discarding it", () => {
+    const p = new AddressParser("bm").parseLocation(
+      "BANK OF BERMUDA (CAYMAN) LIMITED, 6 FRONT STREET, HAMILTON HM11"
+    )!;
+    assert.equal(p.organization, "BANK OF BERMUDA (CAYMAN) LIMITED");
+    assert.equal(p.street, "FRONT");
+  });
+
   it("droppableTokens() is not stale after a failed parse", () => {
     const p = new AddressParser("za");
     p.parseLocation("300 Kempston Road, Sydenham, Port Elizabeth, 6001");

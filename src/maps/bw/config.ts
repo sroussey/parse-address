@@ -1,4 +1,5 @@
 import type { EuCountryConfig } from "../_eu/types";
+import { keepLastLocality } from "../_eu/localityChain";
 
 /**
  * Botswana (BW) address configuration.
@@ -110,15 +111,7 @@ export const bwConfig: EuCountryConfig = {
   },
 
   // Collapse a "suburb, town" chain to the routing town + dropped suburb(s).
-  postNormalize: (parsed: Record<string, any>) => {
-    if (typeof parsed.city === "string" && parsed.city.includes(",")) {
-      const parts = parsed.city.split(",").map((s: string) => s.trim()).filter(Boolean);
-      if (parts.length) {
-        parsed.city = parts[parts.length - 1];
-        parsed.__dropped = parts.slice(0, -1);
-      }
-    }
-  },
+  postNormalize: (parsed: Record<string, any>) => keepLastLocality(parsed),
 };
 
 export default bwConfig;

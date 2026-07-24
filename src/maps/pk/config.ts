@@ -1,4 +1,5 @@
 import type { EuCountryConfig } from "../_eu/types";
+import { keepLastLocality } from "../_eu/localityChain";
 
 /**
  * Pakistan (PK) address configuration.
@@ -130,15 +131,7 @@ export const pkConfig: EuCountryConfig = {
       if (!parsed.state) parsed.state = REGION_MAP[key] ?? parsed.pk_state;
       delete parsed.pk_state;
     }
-    const dropped: string[] = ["House", "Plot"];
-    if (typeof parsed.city === "string" && parsed.city.includes(",")) {
-      const parts = parsed.city.split(",").map((s) => s.trim()).filter(Boolean);
-      if (parts.length) {
-        parsed.city = parts[parts.length - 1];
-        dropped.push(...parts.slice(0, -1));
-      }
-    }
-    parsed.__dropped = dropped;
+    keepLastLocality(parsed, ["House", "Plot"]);
   },
 };
 
