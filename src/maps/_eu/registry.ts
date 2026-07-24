@@ -70,6 +70,10 @@ import { alConfig } from "../al/config";
 import { rsConfig } from "../rs/config";
 import { baConfig } from "../ba/config";
 import { meConfig } from "../me/config";
+import { mcConfig } from "../mc/config";
+import { liConfig } from "../li/config";
+import { adConfig } from "../ad/config";
+import { smConfig } from "../sm/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -149,6 +153,10 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   rs: rsConfig,
   ba: baConfig,
   me: meConfig,
+  mc: mcConfig,
+  li: liConfig,
+  ad: adConfig,
+  sm: smConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);

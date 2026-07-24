@@ -77,7 +77,11 @@ export type CountryMappings =
   | "rs"
   | "ba"
   | "me"
-  | "ci";
+  | "ci"
+  | "mc"
+  | "li"
+  | "ad"
+  | "sm";
 
 export interface AddressRuleset {
   type: Pattern;
