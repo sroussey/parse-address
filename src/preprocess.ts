@@ -30,32 +30,39 @@ export function stripLeadingOrganization(address: string): {
   cleaned: string;
   organization?: string;
 } {
-  const trimmed = address.trim();
-  const comma = trimmed.indexOf(",");
-  if (comma < 0) return { cleaned: address };
+  let current = address.trim();
+  const removed: string[] = [];
 
-  const first = trimmed.slice(0, comma).trim();
-  const rest = trimmed.slice(comma + 1).trim();
-  if (!first || !rest) return { cleaned: address };
+  // Peel leading org / "c/o" segments one at a time: EDGAR records routinely
+  // STACK them ("ABC HOLDINGS LTD, c/o Maples Corporate Services Limited, PO
+  // Box 309, Ugland House, ..."), so a single strip would leave an agent line
+  // at the head of the address.
+  for (;;) {
+    const comma = current.indexOf(",");
+    if (comma < 0) break;
+    const first = current.slice(0, comma).trim();
+    const rest = current.slice(comma + 1).trim();
+    if (!first || !rest) break;
 
-  // A segment that starts with a house number (or #/PO box) is an address line,
-  // never an organization.
-  if (/^[#\d]/.test(first) || /^p\.?o\.?\s*box\b/i.test(first)) {
-    return { cleaned: address };
+    // A segment that starts with a house number (or #/PO box) is an address
+    // line, never an organization -- stop peeling here.
+    if (/^[#\d]/.test(first) || /^p\.?o\.?\s*box\b/i.test(first)) break;
+
+    const isCareOf = CO_PREFIX.test(first);
+    // Compare the last word against the org-suffix set (ignoring a trailing
+    // parenthetical like "(Bermuda)" and any trailing period/paren).
+    const lastWord = first
+      .replace(/\([^)]*\)\s*$/, "")
+      .trim()
+      .split(/\s+/)
+      .pop() ?? "";
+    const looksOrg = ORG_SUFFIX.test(lastWord);
+
+    if (!isCareOf && !looksOrg) break;
+    removed.push(first);
+    current = rest;
   }
 
-  const isCareOf = CO_PREFIX.test(first);
-  // Compare the last word against the org-suffix set (ignoring a trailing
-  // parenthetical like "(Bermuda)" and any trailing period/paren).
-  const lastWord = first
-    .replace(/\([^)]*\)\s*$/, "")
-    .trim()
-    .split(/\s+/)
-    .pop() ?? "";
-  const looksOrg = ORG_SUFFIX.test(lastWord);
-
-  if (isCareOf || looksOrg) {
-    return { cleaned: rest, organization: first };
-  }
-  return { cleaned: address };
+  if (!removed.length) return { cleaned: address };
+  return { cleaned: current, organization: removed.join(", ") };
 }

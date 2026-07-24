@@ -1,10 +1,14 @@
 # parse-address
 
-A forgiving, regex-based street-address parser for **26 jurisdictions**: the
-United States, Canada, 18 European countries, and 6 offshore financial centres /
-Crown Dependencies. Give it a messy, human-typed address string and it returns a
-structured breakdown — house number, street, type, unit, city, region, postcode,
-country — being as lenient as possible about formatting.
+A forgiving, regex-based street-address parser for **220 jurisdictions**: the
+United States, Canada, and essentially every country and territory mapped by a
+SEC EDGAR "State or Country" code — Europe, the Americas, Africa, the Middle
+East, South/Central/Southeast Asia, the Pacific, the Caribbean, the offshore
+financial centres, and the Crown Dependencies. Give it a messy, human-typed
+address string and it returns a structured breakdown — house number, street,
+type, unit, city, region, postcode, country — being as lenient as possible about
+formatting. Non-Latin-script and big-endian address systems (CJK, the East-Slavic
+Cyrillic set, and several South/Southeast-Asian scripts) are not yet covered.
 
 It began life as a TypeScript port of the Perl
 [`Geo::StreetAddress::US`](https://metacpan.org/pod/Geo::StreetAddress::US) and

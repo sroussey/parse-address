@@ -10,7 +10,7 @@ describe("AddressParser constructor", () => {
   it("throws for an unsupported country", () => {
     assert.throws(
       () => new AddressParser("zz"),
-      /Unsupported country "zz"; supported: us, ca/
+      /Unsupported country "zz"/
     );
   });
 
@@ -120,7 +120,75 @@ describe("IntlAddressParser unsupported-country override", () => {
     const intl = new IntlAddressParser();
     assert.throws(
       () => intl.parseLocation("123 Main St", "zz"),
-      /Unsupported country "zz"; supported: us, ca/
+      /Unsupported country "zz"/
     );
+  });
+
+  it("rejects an Object.prototype member as a country (no prototype pollution)", () => {
+    assert.throws(() => new AddressParser("constructor"), /Unsupported country/);
+    assert.throws(() => new AddressParser("__proto__"), /Unsupported country/);
+    assert.throws(() => new AddressParser("toString"), /Unsupported country/);
+  });
+});
+
+describe("review-hardening regressions", () => {
+  it("does not delete a street whose last word is an org-suffix word", () => {
+    // "Capital" is in the org-suffix set, but "Avenida Capital" is a street.
+    const p = new AddressParser("co").parseLocation("Avenida Capital, 12, Bogota")!;
+    assert.ok(
+      /Avenida Capital/.test(String(p.street)),
+      `expected the street to survive, got ${JSON.stringify(p)}`
+    );
+  });
+
+  it("peels stacked leading entities (entity + entity)", () => {
+    const p = new AddressParser("bm").parseLocation(
+      "MLF CAYMAN GP LTD, BANK OF BERMUDA (CAYMAN) LIMITED, 6 FRONT STREET, HAMILTON HM11"
+    )!;
+    assert.equal(p.number, "6");
+    assert.equal(p.street, "FRONT");
+  });
+
+  it("peels a stacked entity + c/o agent", () => {
+    const p = new AddressParser("ky").parseLocation(
+      "ABC HOLDINGS LTD, c/o Maples Corporate Services Limited, PO Box 309, Ugland House, Grand Cayman, KY1-1104"
+    )!;
+    assert.equal(p.building, "Ugland House");
+    assert.equal(p.city, "Grand Cayman");
+    assert.equal(p.sec_unit_num, "309");
+  });
+
+  it("auto-detects a spelled-out country across the whole registry", () => {
+    const intl = new IntlAddressParser();
+    assert.equal(
+      intl.parseLocation("10 Collins Street, Melbourne VIC 3000, Australia")!.country,
+      "AU"
+    );
+    assert.equal(
+      intl.parseLocation("300 Kempston Road, Port Elizabeth, 6001, South Africa")!.country,
+      "ZA"
+    );
+    assert.equal(
+      intl.parseLocation("12 MG Road, Bangalore 560001, India")!.country,
+      "IN"
+    );
+  });
+
+  it("does not let a leading entity hijack auto-detection", () => {
+    const intl = new IntlAddressParser();
+    // Without stripping, 'Cayman Islands' in the entity would force KY.
+    assert.equal(
+      intl.parseLocation(
+        "CAYMAN ISLANDS HOLDINGS LTD, 10 Downing Street, London SW1A 2AA"
+      )!.country,
+      "GB"
+    );
+  });
+
+  it("droppableTokens() is not stale after a failed parse", () => {
+    const p = new AddressParser("za");
+    p.parseLocation("300 Kempston Road, Sydenham, Port Elizabeth, 6001");
+    p.parseLocation("");
+    assert.deepEqual(p.droppableTokens(), []);
   });
 });

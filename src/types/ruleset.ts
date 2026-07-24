@@ -93,7 +93,6 @@ export type CountryMappings =
   | "ma"
   | "tn"
   | "sn"
-  | "ci"
   | "lk"
   | "bd"
   | "np"

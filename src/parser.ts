@@ -6,7 +6,8 @@ import { euConfigs, euCountryCodes } from "./maps/_eu/registry";
 import { AddressParserImpl } from "./types/parser";
 import { stateCodesMap } from "./maps/us/states";
 import { provinceCodesMap } from "./maps/ca/provinces";
-import { enforceTokenPreservation } from "./invariant";
+import { enforceTokenPreservation, losesTokens } from "./invariant";
+import type { ParsedAddress } from "./types/address";
 import { secCountryCodes } from "./maps/sec-countries";
 import { stripLeadingOrganization } from "./preprocess";
 
@@ -18,7 +19,14 @@ const SUPPORTED_COUNTRIES: CountryMappings[] = [
 
 /** True when we have a dedicated address grammar for this internal key. */
 function isSupportedKey(key: string): key is CountryMappings {
-  return key === "us" || key === "ca" || Boolean(euConfigs[key]);
+  // `hasOwnProperty`, not `Boolean(euConfigs[key])`: the latter is truthy for
+  // inherited Object.prototype members ("constructor", "__proto__", "toString"),
+  // which would then resolve as "supported" and blow up with an opaque TypeError.
+  return (
+    key === "us" ||
+    key === "ca" ||
+    Object.prototype.hasOwnProperty.call(euConfigs, key)
+  );
 }
 
 /**
@@ -46,7 +54,7 @@ export function resolveCountryKey(input: string): CountryMappings {
     );
   }
   throw new Error(
-    `Unsupported country "${input}"; supported: ${SUPPORTED_COUNTRIES.join(", ")}`
+    `Unsupported country "${input}" (${SUPPORTED_COUNTRIES.length} supported ISO/SEC codes; pass a valid ISO alpha-2 or SEC "State or Country" code)`
   );
 }
 
@@ -77,30 +85,69 @@ export class AddressParser implements AddressParserImpl {
   private get ignored(): string[] | undefined {
     return this.parser.droppableTokens?.();
   }
-  // Strip a leading legal-entity / "c/o" segment (EDGAR "street1") so the real
-  // address parses; the cleaned string drives both the parse and the token check.
-  private clean(address: string): string {
-    return stripLeadingOrganization(address).cleaned;
+  // Parse `address` as written first; strip a leading legal-entity / "c/o"
+  // segment (EDGAR "street1") ONLY when the address does not already parse
+  // losslessly. In street-first (number-after) layouts the leading segment IS
+  // the street, and words like "Capital"/"Group"/"Trust" collide with the
+  // org-suffix set -- an unconditional strip would delete the real street. A
+  // genuine EDGAR record loses tokens un-stripped, which triggers the strip.
+  // `ignored` is read immediately after each parse so it reflects that parse's
+  // dropped tokens (droppableTokens() is stateful).
+  private run(
+    parse: (a: string) => ParsedAddress | null,
+    address: string
+  ): ParsedAddress | null {
+    // A leading legal-entity / "c/o" segment is stripped ONLY when it is a real
+    // organization -- not when it is a street. In street-first (number-after)
+    // layouts the leading segment IS the street ("Avenida Capital, 12, ...") and
+    // its last word ("Capital"/"Group"/"Trust") collides with the org-suffix
+    // set; `looksLikeStreet` rejects those (they parse to a street type/number),
+    // while a genuine filer name ("Bank of Bermuda (Cayman) Limited") does not.
+    // The strip is tried FIRST for a genuine org, because the un-stripped parse
+    // of an EDGAR record is often "lossless" only by dumping the org name into
+    // `street`, which would otherwise fool the token guard.
+    const { cleaned, organization } = stripLeadingOrganization(address);
+    if (
+      cleaned !== address &&
+      organization &&
+      !this.looksLikeStreet(parse, organization)
+    ) {
+      const stripped = parse(cleaned);
+      const strippedIgnored = this.ignored;
+      if (stripped && !losesTokens(cleaned, stripped, strippedIgnored)) {
+        return stripped;
+      }
+    }
+    const asIs = parse(address);
+    const asIsIgnored = this.ignored;
+    return enforceTokenPreservation(address, asIs, asIsIgnored);
+  }
+  // A removed leading segment is a real STREET, not an organization, when it
+  // parses to a street type or a house number under this country's grammar
+  // ("Avenida Capital" -> type "Avenida"). Such a segment must never be stripped,
+  // even though its last word ("Capital", "Group", "Trust") is in the org-suffix
+  // set; a genuine filer name ("Cayman Islands Holdings Ltd") yields neither.
+  private looksLikeStreet(
+    parse: (a: string) => ParsedAddress | null,
+    segment: string
+  ): boolean {
+    const p = parse(segment);
+    return !!(p && (p.type || p.number));
   }
   parseAddress(address: string) {
-    const a = this.clean(address);
-    return enforceTokenPreservation(a, this.parser.parseAddress(a), this.ignored);
+    return this.run((a) => this.parser.parseAddress(a), address);
   }
   parseStreet(address: string) {
-    const a = this.clean(address);
-    return enforceTokenPreservation(a, this.parser.parseStreet(a), this.ignored);
+    return this.run((a) => this.parser.parseStreet(a), address);
   }
   parseInformalAddress(address: string) {
-    const a = this.clean(address);
-    return enforceTokenPreservation(a, this.parser.parseInformalAddress(a), this.ignored);
+    return this.run((a) => this.parser.parseInformalAddress(a), address);
   }
   parsePoAddress(address: string) {
-    const a = this.clean(address);
-    return enforceTokenPreservation(a, this.parser.parsePoAddress(a), this.ignored);
+    return this.run((a) => this.parser.parsePoAddress(a), address);
   }
   parseLocation(address: string) {
-    const a = this.clean(address);
-    return enforceTokenPreservation(a, this.parser.parseLocation(a), this.ignored);
+    return this.run((a) => this.parser.parseLocation(a), address);
   }
   parseIntersection(address: string) {
     return this.parser.parseIntersection(address);
@@ -232,6 +279,57 @@ function detectEuCountry(address: string): CountryMappings | null {
 }
 
 /**
+ * Explicit country-name matchers built once from every registry config's
+ * `countryNames`. Only "full" names are kept (>= 4 chars, and NOT colliding
+ * with a US state or CA province name -- so "Georgia" the country never steals
+ * a US "..., Georgia" address; that ambiguity is left to state detection). Each
+ * matcher requires the name to BE the address's final comma segment (optionally
+ * after a postcode), which is where a spelled-out country sits -- so a street
+ * named "Jordan" or "Chad" mid-address does not misroute.
+ */
+const COUNTRY_NAME_MATCHERS: [CountryMappings, RegExp][] = (() => {
+  const usNames = new Set(
+    Object.keys(stateCodesMap).map((s) => s.toLowerCase())
+  );
+  const caNames = new Set(
+    Object.keys(provinceCodesMap).map((s) => s.toLowerCase())
+  );
+  const out: [CountryMappings, RegExp][] = [];
+  for (const code of euCountryCodes) {
+    const cfg = euConfigs[code]!;
+    const names = (cfg.countryNames ?? []).filter((n) => {
+      const l = n.toLowerCase();
+      return n.length >= 4 && !usNames.has(l) && !caNames.has(l);
+    });
+    if (!names.length) continue;
+    const alt = names
+      .map((n) =>
+        n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+")
+      )
+      .sort((a, b) => b.length - a.length)
+      .join("|");
+    out.push([code as CountryMappings, new RegExp(`(?:^|\\s)(?:${alt})\\s*$`, "i")]);
+  }
+  return out;
+})();
+
+/**
+ * Detect a country from an explicit country name spelled out as the final
+ * segment of the address ("..., Melbourne VIC 3000, Australia" -> "au"). Every
+ * registry config already declares its `countryNames`; this consults them all,
+ * so a spelled-out country routes correctly for every grammar, not just the
+ * original two dozen.
+ */
+function detectCountryByName(address: string): CountryMappings | null {
+  const lastSeg = address.split(",").pop()?.trim();
+  if (!lastSeg) return null;
+  for (const [code, re] of COUNTRY_NAME_MATCHERS) {
+    if (re.test(lastSeg)) return code;
+  }
+  return null;
+}
+
+/**
  * Check for province or state names (full names)
  */
 function detectCountryByRegionNames(address: string): CountryMappings | null {
@@ -326,6 +424,14 @@ function detectCountry(address: string): CountryMappings {
     return euCountry;
   }
 
+  // A country spelled out as the final segment routes to its grammar for the
+  // full registry (Australia, India, South Africa, UAE, Brasil, ...), not just
+  // the two dozen detectEuCountry hardcodes.
+  const namedCountry = detectCountryByName(address);
+  if (namedCountry) {
+    return namedCountry;
+  }
+
   // Check postal code formats (more reliable than province/state codes)
   const postalCodeCountry = detectCountryByPostalCode(address);
   if (postalCodeCountry) {
@@ -355,22 +461,23 @@ function detectCountry(address: string): CountryMappings {
 }
 
 export class IntlAddressParser {
-  private parsers: Partial<Record<CountryMappings, AddressParser>>;
-  constructor() {
-    this.parsers = {};
-    for (const code of SUPPORTED_COUNTRIES) {
-      this.parsers[code] = new AddressParser(code);
-    }
-  }
+  // Parsers are built on first use, not up front: eagerly constructing all ~220
+  // country parsers compiled every XRegExp grammar on instantiation (~700 ms)
+  // even when the caller only ever touches one country.
+  private parsers: Partial<Record<CountryMappings, AddressParser>> = {};
 
   // country accepts an internal ISO key or a SEC EDGAR code ("K3"); omit to auto-detect.
   private pick(address: string, country?: string): AddressParser {
-    const resolved = country ? resolveCountryKey(country) : detectCountry(address);
-    const parser = this.parsers[resolved];
+    // Auto-detection runs on the org-stripped string so a leading legal-entity
+    // segment ("CAYMAN ISLANDS HOLDINGS LTD, 10 Downing Street, London ...")
+    // cannot hijack the country -- the parse itself already strips on demand.
+    const resolved = country
+      ? resolveCountryKey(country)
+      : detectCountry(stripLeadingOrganization(address).cleaned);
+    let parser = this.parsers[resolved];
     if (!parser) {
-      throw new Error(
-        `Unsupported country "${resolved}"; supported: ${SUPPORTED_COUNTRIES.join(", ")}`
-      );
+      parser = new AddressParser(resolved);
+      this.parsers[resolved] = parser;
     }
     return parser;
   }

@@ -197,8 +197,11 @@ function stripIgnored(segment: string, ignored?: string[]): string {
   if (!ignored?.length) return segment;
   let out = segment;
   for (const phrase of [...ignored].sort((a, b) => b.length - a.length)) {
-    const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    out = out.replace(new RegExp(escaped, "gi"), " ");
+    if (!phrase) continue;
+    // Whole-word (Unicode-aware) match, NOT a bare substring: a short dropped
+    // token like "Ho" or "5" must not split "Chowdhury" into "C wdhury" or blank
+    // a digit inside "25". wholeWordRegExp anchors on letter/number lookarounds.
+    out = out.replace(wholeWordRegExp(phrase, "g"), " ");
   }
   return out;
 }

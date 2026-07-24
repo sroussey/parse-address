@@ -131,6 +131,9 @@ export class AddressParserEU implements AddressParserImpl {
   // --- normalization --------------------------------------------------------
 
   normalizeAddress(parts: Record<string, any> | null) {
+    // Reset per call so a failed match (or an empty parse) never leaves the
+    // previous address's dropped tokens visible through droppableTokens().
+    this.lastDropped = [];
     if (!parts) return null;
 
     const parsed: Record<string, any> = {};
