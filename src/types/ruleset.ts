@@ -196,7 +196,10 @@ export type CountryMappings =
   | "gn"
   | "td"
   | "dj"
-  | "km";
+  | "km"
+  | "tl"
+  | "vn"
+  | "az";
 
 export interface AddressRuleset {
   type: Pattern;

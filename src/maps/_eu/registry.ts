@@ -189,6 +189,9 @@ import { gnConfig } from "../gn/config";
 import { tdConfig } from "../td/config";
 import { djConfig } from "../dj/config";
 import { kmConfig } from "../km/config";
+import { tlConfig } from "../tl/config";
+import { vnConfig } from "../vn/config";
+import { azConfig } from "../az/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -387,6 +390,9 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   td: tdConfig,
   dj: djConfig,
   km: kmConfig,
+  tl: tlConfig,
+  vn: vnConfig,
+  az: azConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);
