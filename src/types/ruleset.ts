@@ -146,7 +146,19 @@ export type CountryMappings =
   | "vi"
   | "gu"
   | "as"
-  | "mp";
+  | "mp"
+  | "ws"
+  | "to"
+  | "vu"
+  | "sb"
+  | "ki"
+  | "fm"
+  | "mh"
+  | "pw"
+  | "ck"
+  | "nr"
+  | "tv"
+  | "nu";
 
 export interface AddressRuleset {
   type: Pattern;

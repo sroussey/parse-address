@@ -139,6 +139,18 @@ import { viConfig } from "../vi/config";
 import { guConfig } from "../gu/config";
 import { asConfig } from "../as/config";
 import { mpConfig } from "../mp/config";
+import { wsConfig } from "../ws/config";
+import { toConfig } from "../to/config";
+import { vuConfig } from "../vu/config";
+import { sbConfig } from "../sb/config";
+import { kiConfig } from "../ki/config";
+import { fmConfig } from "../fm/config";
+import { mhConfig } from "../mh/config";
+import { pwConfig } from "../pw/config";
+import { ckConfig } from "../ck/config";
+import { nrConfig } from "../nr/config";
+import { tvConfig } from "../tv/config";
+import { nuConfig } from "../nu/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -287,6 +299,18 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   gu: guConfig,
   as: asConfig,
   mp: mpConfig,
+  ws: wsConfig,
+  to: toConfig,
+  vu: vuConfig,
+  sb: sbConfig,
+  ki: kiConfig,
+  fm: fmConfig,
+  mh: mhConfig,
+  pw: pwConfig,
+  ck: ckConfig,
+  nr: nrConfig,
+  tv: tvConfig,
+  nu: nuConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);
