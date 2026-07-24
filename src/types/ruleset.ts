@@ -212,7 +212,10 @@ export type CountryMappings =
   | "jo"
   | "lb"
   | "sy"
-  | "ps";
+  | "ps"
+  | "so"
+  | "et"
+  | "er";
 
 export interface AddressRuleset {
   type: Pattern;

@@ -205,6 +205,9 @@ import { joConfig } from "../jo/config";
 import { lbConfig } from "../lb/config";
 import { syConfig } from "../sy/config";
 import { psConfig } from "../ps/config";
+import { soConfig } from "../so/config";
+import { etConfig } from "../et/config";
+import { erConfig } from "../er/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -419,6 +422,9 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   lb: lbConfig,
   sy: syConfig,
   ps: psConfig,
+  so: soConfig,
+  et: etConfig,
+  er: erConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);
