@@ -17,6 +17,10 @@ export class AddressParserEU implements AddressParserImpl {
   private readonly poAnywhereRe: RegExp;
   private readonly fusedSuffixesSorted: Array<[string, string]>;
   private readonly unsplittablePrefixRe: RegExp | null;
+  // Locational tokens the most recent parse deliberately dropped (e.g. a ZA
+  // suburb superseded by the routing city), so the token-preservation guard
+  // does not score them as lost. postNormalize records them via `parsed.__dropped`.
+  private lastDropped: string[] = [];
 
   constructor(config: EuCountryConfig) {
     this.config = config;
@@ -106,7 +110,7 @@ export class AddressParserEU implements AddressParserImpl {
   }
 
   droppableTokens(): string[] {
-    return this.config.areaNames ?? [];
+    return [...(this.config.areaNames ?? []), ...this.lastDropped];
   }
 
   findStreetTypeShortCode(streetType?: string): string {
@@ -130,6 +134,10 @@ export class AddressParserEU implements AddressParserImpl {
     if (!parts) return null;
 
     const parsed: Record<string, any> = {};
+    // Values captured by a `drop` group (a neighbourhood/bairro/colonia the
+    // grammar consumes but does not emit) are recorded as dropped so the
+    // token-preservation guard does not score them as lost.
+    const dropped: string[] = [];
     Object.keys(parts).forEach((part) => {
       if (["input", "index"].includes(part) || NUMERIC.test(part)) return;
       // Group names may carry a numeric disambiguation suffix (street_1); the
@@ -142,7 +150,9 @@ export class AddressParserEU implements AddressParserImpl {
       const value = parts[part];
       if (value == null) return;
       const cleaned = this.cleanValue(String(value));
-      if (cleaned) parsed[key] = cleaned;
+      if (!cleaned) return;
+      if (key === "drop") dropped.push(cleaned);
+      else parsed[key] = cleaned;
     });
 
     if (Object.keys(parsed).length === 0) return null;
@@ -156,7 +166,17 @@ export class AddressParserEU implements AddressParserImpl {
     this.normalizeRegion(parsed);
     this.tidyCity(parsed);
 
+    this.lastDropped = dropped;
     if (this.config.postNormalize) this.config.postNormalize(parsed);
+    // postNormalize may report further dropped locational tokens (open-ended
+    // values that cannot be listed in `areaNames`), exempting them too.
+    if (Array.isArray(parsed.__dropped)) {
+      this.lastDropped = [
+        ...dropped,
+        ...parsed.__dropped.filter((t: unknown) => typeof t === "string"),
+      ];
+      delete parsed.__dropped;
+    }
 
     parsed.country = this.config.country;
     return parsed;

@@ -6,10 +6,76 @@ describe("European AddressParser construction", () => {
     const codes = [
       "de", "fr", "gb", "it", "es", "nl", "be", "at", "pl", "ch", "pt", "se",
       "dk", "no", "fi", "ie", "cz", "gr", "je", "gg", "ky", "vg", "bm", "gi",
+      "au", "nz", "sg", "il", "za", "tr", "br", "mx", "ar",
     ] as const;
     for (const cc of codes) {
       assert.ok(new AddressParser(cc), `failed to construct ${cc}`);
     }
+  });
+});
+
+describe("International parses (batch 5: non-European)", () => {
+  it("AU: number-street, suffix type, state peeled before postcode", () => {
+    const p = new AddressParser("au").parseLocation("10 Collins Street, Melbourne VIC 3000")!;
+    assert.equal(p.number, "10");
+    assert.equal(p.street, "Collins");
+    assert.equal(p.type, "Street");
+    assert.equal(p.city, "Melbourne");
+    assert.equal(p.state, "VIC");
+    assert.equal(p.postal_code, "3000");
+    assert.equal(p.country, "AU");
+  });
+
+  it("SG: block/number + road + #floor-unit + 6-digit postcode", () => {
+    const p = new AddressParser("sg").parseLocation("10 Anson Road, Singapore 079903")!;
+    assert.equal(p.number, "10");
+    assert.equal(p.street, "Anson");
+    assert.equal(p.postal_code, "079903");
+    assert.equal(p.country, "SG");
+  });
+
+  it("IL: number-first, multi-word type-less street, 7-digit postcode last", () => {
+    const p = new AddressParser("il").parseLocation("3 Ben Yehuda, Tel Aviv-Yafo, 6380301")!;
+    assert.equal(p.number, "3");
+    assert.equal(p.street, "Ben Yehuda");
+    assert.equal(p.city, "Tel Aviv-Yafo");
+    assert.equal(p.postal_code, "6380301");
+    assert.equal(p.country, "IL");
+  });
+
+  it("ZA: suburb dropped, routing city kept, 4-digit postcode", () => {
+    const p = new AddressParser("za").parseLocation("300 Kempston Road, Sydenham, Port Elizabeth, 6001")!;
+    assert.equal(p.number, "300");
+    assert.equal(p.street, "Kempston");
+    assert.equal(p.type, "Road");
+    assert.equal(p.city, "Port Elizabeth");
+    assert.equal(p.postal_code, "6001");
+  });
+
+  it("TR: trailing type, No: number, district/province split", () => {
+    const p = new AddressParser("tr").parseLocation("Bağdat Caddesi No:200, 34728 Kadıköy")!;
+    assert.equal(p.street, "Bağdat");
+    assert.equal(p.type, "Caddesi");
+    assert.equal(p.number, "200");
+    assert.equal(p.postal_code, "34728");
+    assert.equal(p.city, "Kadıköy");
+  });
+
+  it("BR: prefix type, number after street, bairro dropped, CEP + UF", () => {
+    const p = new AddressParser("br").parseLocation("Rua Augusta, 900, Consolação, 01304-001 São Paulo - SP")!;
+    assert.equal(p.type, "Rua");
+    assert.equal(p.street, "Augusta");
+    assert.equal(p.number, "900");
+    assert.equal(p.postal_code, "01304-001");
+    assert.equal(p.city, "São Paulo");
+    assert.equal(p.state, "SP");
+    assert.equal(p.country, "BR");
+  });
+
+  it("resolves these via their SEC EDGAR codes", () => {
+    assert.equal(new AddressParser("C3").parseLocation("10 Collins Street, Melbourne VIC 3000")!.country, "AU");
+    assert.equal(new AddressParser("L3").parseLocation("3 Ben Yehuda, Tel Aviv-Yafo, 6380301")!.country, "IL");
+    assert.equal(new AddressParser("D5").parseLocation("Rua Augusta, 900, 01304-001 São Paulo - SP")!.country, "BR");
   });
 });
 

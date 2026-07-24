@@ -23,6 +23,15 @@ import { kyConfig } from "../ky/config";
 import { vgConfig } from "../vg/config";
 import { bmConfig } from "../bm/config";
 import { giConfig } from "../gi/config";
+import { auConfig } from "../au/config";
+import { nzConfig } from "../nz/config";
+import { sgConfig } from "../sg/config";
+import { ilConfig } from "../il/config";
+import { zaConfig } from "../za/config";
+import { trConfig } from "../tr/config";
+import { brConfig } from "../br/config";
+import { mxConfig } from "../mx/config";
+import { arConfig } from "../ar/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -55,6 +64,15 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   vg: vgConfig,
   bm: bmConfig,
   gi: giConfig,
+  au: auConfig,
+  nz: nzConfig,
+  sg: sgConfig,
+  il: ilConfig,
+  za: zaConfig,
+  tr: trConfig,
+  br: brConfig,
+  mx: mxConfig,
+  ar: arConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);

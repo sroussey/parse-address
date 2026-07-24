@@ -28,7 +28,17 @@ export type CountryMappings =
   | "ky"
   | "vg"
   | "bm"
-  | "gi";
+  | "gi"
+  // Batch 1 (non-European, street-based)
+  | "au"
+  | "nz"
+  | "sg"
+  | "il"
+  | "za"
+  | "tr"
+  | "br"
+  | "mx"
+  | "ar";
 
 export interface AddressRuleset {
   type: Pattern;

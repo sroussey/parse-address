@@ -9,7 +9,7 @@ const FILLER = new Set(["and", "at"]);
 // prefix before a postcode (Swiss "CH-1204", German "D-10115", Austrian
 // "A-1010"). These do not occur in US/CA street lines, so stripping them is a
 // no-op there.
-const NUMBER_MARKERS = /n\.?º\.?|nº|núm\.?|\bs\/n\b|\b[a-z]{1,2}-(?=\d{4})|\bche?-|αρ\.?/gi;
+const NUMBER_MARKERS = /n\.?º\.?|nº|núm\.?|\bs\/n\b|\b[a-z]{1,2}-(?=\d{4})|\bche?-|αρ\.?|\bno\.?:?\s*(?=\d)|\bnu\.?:?\s*(?=\d)/gi;
 
 // Count significant tokens. A run like "S.E." / "P.O." (single letter + period,
 // abutting another single-letter+period) collapses to one token; every other
