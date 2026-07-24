@@ -199,7 +199,16 @@ export type CountryMappings =
   | "km"
   | "tl"
   | "vn"
-  | "az";
+  | "az"
+  | "ir"
+  | "af"
+  | "eg"
+  | "ly"
+  | "sd"
+  | "eh"
+  | "iq"
+  | "om"
+  | "ye";
 
 export interface AddressRuleset {
   type: Pattern;

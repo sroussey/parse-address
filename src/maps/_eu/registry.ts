@@ -192,6 +192,15 @@ import { kmConfig } from "../km/config";
 import { tlConfig } from "../tl/config";
 import { vnConfig } from "../vn/config";
 import { azConfig } from "../az/config";
+import { irConfig } from "../ir/config";
+import { afConfig } from "../af/config";
+import { egConfig } from "../eg/config";
+import { lyConfig } from "../ly/config";
+import { sdConfig } from "../sd/config";
+import { ehConfig } from "../eh/config";
+import { iqConfig } from "../iq/config";
+import { omConfig } from "../om/config";
+import { yeConfig } from "../ye/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -393,6 +402,15 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   tl: tlConfig,
   vn: vnConfig,
   az: azConfig,
+  ir: irConfig,
+  af: afConfig,
+  eg: egConfig,
+  ly: lyConfig,
+  sd: sdConfig,
+  eh: ehConfig,
+  iq: iqConfig,
+  om: omConfig,
+  ye: yeConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);
