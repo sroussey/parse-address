@@ -1,10 +1,11 @@
 # parse-address
 
-A forgiving, regex-based street-address parser for **26 jurisdictions**: the
-United States, Canada, 18 European countries, and 6 offshore financial centres /
-Crown Dependencies. Give it a messy, human-typed address string and it returns a
-structured breakdown — house number, street, type, unit, city, region, postcode,
-country — being as lenient as possible about formatting.
+A forgiving, regex-based street-address parser for **220 jurisdictions**: the
+United States, Canada, and 218 further countries and territories (Europe,
+Africa, the Americas, Asia-Pacific, the Middle East, plus the offshore financial
+centres / Crown Dependencies). Give it a messy, human-typed address string and it
+returns a structured breakdown — house number, street, type, unit, city, region,
+postcode, country — being as lenient as possible about formatting.
 
 It began life as a TypeScript port of the Perl
 [`Geo::StreetAddress::US`](https://metacpan.org/pod/Geo::StreetAddress::US) and
@@ -58,13 +59,30 @@ intl.parseStreet('Via Roma 15', 'it')                     // force IT
 
 ## Supported jurisdictions
 
+Every jurisdiction is addressed by its lowercase ISO 3166-1 alpha-2 code. The
+canonical, always-current list is the parser itself:
+
+```ts
+import { euCountryCodes } from '@sroussey/parse-address'
+// plus 'us' and 'ca', which have their own dedicated grammars
+```
+
 | Region | Codes |
 |--------|-------|
 | North America | `us`, `ca` |
-| Western Europe | `de`, `fr`, `gb`, `it`, `es`, `nl`, `be`, `at`, `ch`, `ie` |
-| Nordic | `se`, `dk`, `no`, `fi` |
-| Central / Southern Europe | `pl`, `cz`, `pt`, `gr` |
-| Offshore / Crown Dependencies | `ky`, `vg`, `bm`, `gi`, `je`, `gg` |
+| Western Europe | `de`, `fr`, `gb`, `it`, `es`, `nl`, `be`, `at`, `ch`, `ie`, `lu`, `mc`, `li`, `ad`, `sm`, `va`, `mt`, `cy` |
+| Nordic | `se`, `dk`, `no`, `fi`, `is`, `fo`, `gl`, `ax`, `sj` |
+| Central / Eastern / Southern Europe | `pl`, `cz`, `sk`, `hu`, `ro`, `bg`, `hr`, `si`, `rs`, `ba`, `me`, `mk`, `al`, `gr`, `pt`, `ee`, `lv`, `lt`, `md` |
+| Offshore / Crown Dependencies | `ky`, `vg`, `bm`, `gi`, `je`, `gg`, `im` |
+| Latin America & Caribbean | `br`, `mx`, `ar`, `cl`, `co`, `pe`, `uy`, `ec`, `ve`, `bo`, `py`, `cr`, `pa`, `gt`, `do`, `ni`, `hn`, `sv`, `cu`, `ht`, `jm`, `tt`, `bs`, `bb`, `bz`, `gy`, `sr`, `ag`, `ai`, `dm`, `gd`, `kn`, `lc`, `ms`, `tc`, `vc`, `aw` |
+| US territories (SEC-mapped as foreign) | `pr`, `vi`, `gu`, `as`, `mp` |
+| Middle East & North Africa | `il`, `tr`, `ae`, `sa`, `qa`, `kw`, `bh`, `om`, `ye`, `jo`, `lb`, `sy`, `ps`, `iq`, `ir`, `af`, `eg`, `ly`, `dz`, `ma`, `tn`, `eh`, `sd` |
+| Sub-Saharan Africa | `za`, `ng`, `ke`, `gh`, `mu`, `sn`, `ci`, `tz`, `ug`, `zm`, `zw`, `cm`, `bw`, `na`, `ao`, `mz`, `bf`, `bj`, `ml`, `ne`, `tg`, `ga`, `cg`, `cd`, `mg`, `mr`, `gm`, `ls`, `lr`, `mw`, `rw`, `sl`, `sz`, `sh`, `cv`, `gw`, `st`, `gq`, `sc`, `bi`, `cf`, `gn`, `td`, `dj`, `km`, `so`, `et`, `er` |
+| Asia | `in`, `my`, `sg`, `th`, `ph`, `id`, `pk`, `lk`, `bd`, `np`, `bn`, `vn`, `tl` |
+| Caucasus & Central Asia | `ge`, `am`, `az`, `kz`, `kg`, `uz`, `tj`, `tm` |
+| Pacific | `au`, `nz`, `fj`, `pg`, `ws`, `to`, `vu`, `sb`, `ki`, `fm`, `mh`, `pw`, `ck`, `nr`, `tv`, `nu`, `nf`, `tk`, `pn` |
+| French overseas | `gf`, `gp`, `mq`, `re`, `yt`, `nc`, `pf`, `wf`, `pm`, `bl`, `mf` |
+| South Atlantic | `fk` |
 
 ## European addresses
 
@@ -168,6 +186,55 @@ The continental countries (DE/FR/IT/ES) share a bare 5-digit postcode that is
 ambiguous with a US ZIP, so unless the input carries an explicit country name
 they fall through to the US default — **pass a `country` argument** to any
 `IntlAddressParser`/`AddressParser` method when you already know the country.
+
+## SEC EDGAR country codes
+
+Any method that takes a country also accepts an SEC EDGAR "State or Country"
+code, resolved to the modern ISO country before dispatch:
+
+```ts
+new AddressParser('C3').parseLocation('10 Collins Street, Melbourne VIC 3000')
+// { ..., country: 'AU' }   ^ EDGAR "C3" resolved to Australia
+```
+
+An obsolete code with no successor, or a real country without a grammar yet,
+throws a descriptive error rather than silently mis-parsing:
+
+```ts
+new AddressParser('K3')  // Error: ... resolves to Hong Kong (HK), which has no address grammar yet
+new AddressParser('G5')  // Error: ... is an obsolete jurisdiction with no modern country
+```
+
+> **Caution:** EDGAR's field mixes country codes with **US state** codes, and
+> several two-letter US state codes are also ISO country codes this library
+> supports (`IN` India vs Indiana, `PA` Panama vs Pennsylvania, `MD` Moldova vs
+> Maryland, `DE` Germany vs Delaware, …). A bare two-letter code is always read
+> as the **country**. Filter US rows out before calling, or pass `'us'`.
+
+The raw table is exported as `secCountryCodes` (with `secCodeToIso`) if you need
+to resolve codes yourself.
+
+## Leading entity names and `c/o` lines
+
+Filing addresses routinely prepend a legal-entity or agent segment to the street
+line. A recognizable leading organization is stripped so the real address
+parses, and returned on the result as `organization` — nothing from the input is
+discarded:
+
+```ts
+new AddressParser('bm').parseLocation(
+  'BANK OF BERMUDA (CAYMAN) LIMITED, 6 FRONT STREET, HAMILTON HM11'
+)
+// { number: '6', street: 'FRONT', type: 'STREET', city: 'HAMILTON',
+//   postal_code: 'HM 11', country: 'BM',
+//   organization: 'BANK OF BERMUDA (CAYMAN) LIMITED' }
+```
+
+Stacked segments (`'ACME LTD, c/o Agent Limited, PO Box 1, …'`) are all removed
+and joined into `organization`. A segment is only treated as an organization
+when it ends in a legal-form marker (`Limited`, `Ltd`, `Inc`, `GmbH`, `S.A.`, …)
+or begins with `c/o` / `Attn`, so an ordinary street segment — including one
+ending in a word like `Capital` or `Trust` — is left alone.
 
 ## SEC EDGAR region codes
 

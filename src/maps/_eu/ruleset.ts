@@ -203,7 +203,9 @@ export function buildEuRuleset(config: EuCountryConfig): EuRuleset {
 
   // An optional development/area name ("Cricket Square", "Wickhams Cay 1") that
   // trails a building but is not the routing city; consumed, never emitted.
-  const areaAlt = (config.areaNames ?? [])
+  // Copy before sorting: `config` is a shared module-level singleton and
+  // `droppableTokens()` hands `config.areaNames` straight to callers.
+  const areaAlt = [...(config.areaNames ?? [])]
     .sort((a, b) => b.length - a.length)
     .map(lit)
     .join("|");

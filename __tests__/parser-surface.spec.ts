@@ -1,5 +1,6 @@
 import assert from "assert";
 import { AddressParser, IntlAddressParser } from "../src/parser";
+import { losesTokens } from "../src/invariant";
 
 describe("AddressParser constructor", () => {
   it("constructs for supported countries", () => {
@@ -22,6 +23,15 @@ describe("AddressParser constructor", () => {
   it("throws a descriptive error for a SEC code without a grammar yet", () => {
     assert.throws(() => new AddressParser("K3"), /Hong Kong.*no address grammar yet/);
     assert.throws(() => new AddressParser("G5"), /obsolete jurisdiction/);
+  });
+
+  it("rejects inherited Object.prototype keys instead of failing opaquely", () => {
+    // `euConfigs["constructor"]` / `["__proto__"]` are truthy via the prototype
+    // chain, so a plain truthiness check would hand a non-config to the EU
+    // parser and throw an unrelated TypeError.
+    for (const key of ["constructor", "__proto__", "toString", "valueOf"]) {
+      assert.throws(() => new AddressParser(key), /Unsupported country/);
+    }
   });
 });
 
@@ -112,6 +122,152 @@ describe("EDGAR-style concatenated records (leading entity + country description
     const p = new AddressParser("es").parseLocation("Calle San Francisco, 10, 04001 Almería")!;
     assert.equal(p.street, "San Francisco");
     assert.equal(p.number, "10");
+  });
+
+  it("keeps the removed entity on the result instead of discarding it", () => {
+    const p = new AddressParser("bm").parseLocation(
+      "BANK OF BERMUDA (CAYMAN) LIMITED, 6 FRONT STREET, HAMILTON HM11"
+    )!;
+    assert.equal(p.organization, "BANK OF BERMUDA (CAYMAN) LIMITED");
+    assert.equal(p.number, "6");
+  });
+
+  it("strips stacked leading entity segments, not just the first", () => {
+    const p = new AddressParser("ky").parseLocation(
+      "ABC HOLDINGS LTD, c/o Maples Corporate Services Limited, PO Box 309, Ugland House, Grand Cayman, KY1-1104"
+    )!;
+    assert.equal(p.sec_unit_type, "PO Box");
+    assert.equal(p.sec_unit_num, "309");
+    assert.equal(p.building, "Ugland House");
+    assert.equal(
+      p.organization,
+      "ABC HOLDINGS LTD, c/o Maples Corporate Services Limited"
+    );
+  });
+
+  it("strips an all-caps / dotted legal-form abbreviation (EDGAR records are all-caps)", () => {
+    for (const input of [
+      "ACME HOLDINGS S.A., 6 FRONT STREET, HAMILTON HM 11",
+      "ACME HOLDINGS SA, 6 FRONT STREET, HAMILTON HM 11",
+      "ACME HOLDINGS N.V., 6 FRONT STREET, HAMILTON HM 11",
+      "ACME HOLDINGS BV, 6 FRONT STREET, HAMILTON HM 11",
+      "ACME CO, 6 FRONT STREET, HAMILTON HM 11",
+    ]) {
+      const p = new AddressParser("bm").parseLocation(input)!;
+      assert.ok(p.organization, `did not strip the entity in "${input}"`);
+      assert.equal(p.number, "6", `for "${input}"`);
+      assert.equal(p.city, "HAMILTON", `for "${input}"`);
+    }
+  });
+
+  it("keeps a title-cased 'Co'/'Sa' inside a street name", () => {
+    // Only the dotted or all-caps spellings mark a legal form.
+    const p = new AddressParser("pt").parseLocation("Rua da Sa, 12, 1100-053 Lisboa")!;
+    assert.equal(p.organization, undefined);
+  });
+
+  it("does not strip a multi-word street followed by a bare house number", () => {
+    // Street-first layouts write the number alone in the next segment, so a
+    // segment followed by a bare number is a STREET, never an organization --
+    // even when its last word is an org-ish noun ("Capital", "Group").
+    for (const [cc, input] of [
+      ["br", "Rua Cidade Capital, 100, 01304-001 Sao Paulo"],
+      ["co", "Avenida Simon Bolivar Capital, 12, Bogota"],
+      ["es", "Calle Gran Via Group, 10, 28013 Madrid"],
+    ] as const) {
+      const p = new AddressParser(cc).parseLocation(input)!;
+      assert.equal(p.organization, undefined, `stripped the street of "${input}"`);
+    }
+  });
+
+  it("does not strip a street whose last word is an org-ish noun", () => {
+    // Number-after-street layouts get no protection from the "starts with a
+    // digit" guard, so "Avenida Capital" / "Rua da Sa" must survive on the
+    // strength of the suffix rules alone.
+    for (const [cc, input] of [
+      ["co", "Avenida Capital, 12, Bogota"],
+      ["pt", "Rua da Sa, 12, 1100-053 Lisboa"],
+      ["bm", "Harbour Trust, 5 Front Street, Hamilton HM 11"],
+    ] as const) {
+      const parser = new AddressParser(cc);
+      const p = parser.parseLocation(input)!;
+      assert.equal(p.organization, undefined, `stripped an address segment in ${input}`);
+      // The leading segment must still be accounted for by the parse (either
+      // structured or in the lossless fallback), not silently deleted.
+      assert.strictEqual(
+        losesTokens(input, p, parser.droppableTokens()),
+        false,
+        `lost the leading segment of ${input}: ${JSON.stringify(p)}`
+      );
+    }
+  });
+
+  it("detects the country from the address, not from a leading entity name", () => {
+    const p = intl.parseLocation(
+      "CAYMAN ISLANDS HOLDINGS LTD, 10 Downing Street, London SW1A 2AA"
+    )!;
+    assert.equal(p.country, "GB");
+    assert.equal(p.postal_code, "SW1A 2AA");
+  });
+});
+
+describe("auto-detection covers every configured country name", () => {
+  const intl = new IntlAddressParser();
+
+  it("detects a country spelled out in the trailing segment", () => {
+    const cases: [string, string][] = [
+      ["AU", "10 Collins Street, Melbourne VIC 3000, Australia"],
+      ["IN", "12 MG Road, Bengaluru 560001, India"],
+      ["ZA", "300 Kempston Road, Port Elizabeth, 6001, South Africa"],
+      ["AE", "PO Box 9222, Dubai, United Arab Emirates"],
+      ["BR", "Rua Augusta, 900, 01304-001 Sao Paulo - SP, Brasil"],
+    ];
+    for (const [want, input] of cases) {
+      assert.equal(intl.parseLocation(input)!.country, want, `for "${input}"`);
+    }
+  });
+
+  it("does not mistake a US place name for a country", () => {
+    // "New Mexico" / "Lebanon" / "Peru" are US localities; a country name only
+    // counts when it is the whole trailing comma segment.
+    assert.equal(
+      intl.parseLocation("22 Cumbres Pass, Santa Fe, New Mexico 87508")!.country,
+      "US"
+    );
+    assert.equal(intl.parseLocation("123 Main St, Lebanon, OH 45036")!.country, "US");
+    assert.equal(intl.parseLocation("123 Main St, Peru, IL 61607")!.country, "US");
+  });
+
+  it("does not mistake the US state Georgia for the country GE", () => {
+    // "Georgia" names both a US state (GA) and a country (GE); the state is the
+    // overwhelmingly likelier reading of a trailing segment on a US line.
+    assert.equal(intl.parseLocation("1 Peachtree Rd, Atlanta, Georgia")!.country, "US");
+    assert.equal(
+      intl.parseLocation("1 Peachtree Rd, Atlanta, Georgia 30301")!.country,
+      "US"
+    );
+  });
+
+  it("still detects a US territory that is also an EDGAR region", () => {
+    // Unlike Georgia, these name the SAME jurisdiction as our grammar, so the
+    // configured-name detection must keep them.
+    assert.equal(intl.parseLocation("1 Calle Luna, San Juan, Puerto Rico")!.country, "PR");
+    assert.equal(intl.parseLocation("100 Marine Corps Dr, Tamuning, Guam")!.country, "GU");
+  });
+
+  it("does not read a Crown-Dependency name out of an ordinary US place name", () => {
+    // "Jersey"/"Sark" only signal JE/GG when they are a whole comma segment.
+    assert.equal(
+      intl.parseLocation("100 Washington St, Jersey City, NJ 07302")!.country,
+      "US"
+    );
+    assert.equal(intl.parseLocation("220 Sark Ln, Springfield, MO 65807")!.country, "US");
+    // ...and the real thing still resolves.
+    assert.equal(intl.parseLocation("44 Esplanade, St Helier, Jersey")!.country, "JE");
+    assert.equal(
+      intl.parseLocation("Trafalgar Court, Les Banques, St Peter Port, Guernsey")!.country,
+      "GG"
+    );
   });
 });
 

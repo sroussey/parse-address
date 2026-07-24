@@ -1,4 +1,4 @@
-import type { EuCountryConfig } from "/home/user/parse-address/src/maps/_eu/types";
+import type { EuCountryConfig } from "../_eu/types";
 
 /**
  * Åland Islands (AX) address configuration — Finnish/Swedish (near-clone of FI).

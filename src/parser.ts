@@ -1,4 +1,5 @@
 import type { CountryMappings } from "./types/ruleset";
+import type { ParsedAddress } from "./types/address";
 import { AddressParserUS } from "./maps/us/parser";
 import { AddressParserCA } from "./maps/ca/parser";
 import { AddressParserEU } from "./maps/_eu/parser";
@@ -16,9 +17,28 @@ const SUPPORTED_COUNTRIES: CountryMappings[] = [
   ...(euCountryCodes as CountryMappings[]),
 ];
 
-/** True when we have a dedicated address grammar for this internal key. */
+/**
+ * True when we have a dedicated address grammar for this internal key.
+ * Uses an own-property check: a plain `euConfigs[key]` truthiness test also
+ * accepts inherited `Object.prototype` members ("constructor", "__proto__"),
+ * which would then be handed to `AddressParserEU` as a config and blow up with
+ * an opaque TypeError instead of the descriptive "unsupported country" error.
+ */
 function isSupportedKey(key: string): key is CountryMappings {
-  return key === "us" || key === "ca" || Boolean(euConfigs[key]);
+  return (
+    key === "us" ||
+    key === "ca" ||
+    Object.prototype.hasOwnProperty.call(euConfigs, key)
+  );
+}
+
+// The full supported list is ~220 codes; naming them all makes an unreadable
+// ~900-character error. Show a sample and the total instead.
+function supportedSummary(): string {
+  const head = SUPPORTED_COUNTRIES.slice(0, 12).join(", ");
+  return SUPPORTED_COUNTRIES.length > 12
+    ? `${head}, ... (${SUPPORTED_COUNTRIES.length} total)`
+    : head;
 }
 
 /**
@@ -45,9 +65,7 @@ export function resolveCountryKey(input: string): CountryMappings {
       `SEC code "${input}" resolves to ${sec.name} (${sec.iso2}), which has no address grammar yet`
     );
   }
-  throw new Error(
-    `Unsupported country "${input}"; supported: ${SUPPORTED_COUNTRIES.join(", ")}`
-  );
+  throw new Error(`Unsupported country "${input}"; supported: ${supportedSummary()}`);
 }
 
 export type {
@@ -57,6 +75,9 @@ export type {
 } from "./types/address";
 export type { CountryMappings, AddressRuleset } from "./types/ruleset";
 export { AddressParserImpl } from "./types/parser";
+export { stripLeadingOrganization } from "./preprocess";
+export { secCountryCodes, secCodeToIso } from "./maps/sec-countries";
+export { euCountryCodes } from "./maps/_eu/registry";
 
 export class AddressParser implements AddressParserImpl {
   parser: AddressParserImpl;
@@ -77,33 +98,47 @@ export class AddressParser implements AddressParserImpl {
   private get ignored(): string[] | undefined {
     return this.parser.droppableTokens?.();
   }
-  // Strip a leading legal-entity / "c/o" segment (EDGAR "street1") so the real
-  // address parses; the cleaned string drives both the parse and the token check.
-  private clean(address: string): string {
-    return stripLeadingOrganization(address).cleaned;
+  /**
+   * Strip a leading legal-entity / "c/o" segment (EDGAR "street1") so the real
+   * address parses, run `parse` on the cleaned string (so the token-preservation
+   * check sees exactly what was parsed), and carry the removed entity through to
+   * the result as `organization` -- it was in the caller's input, so it must not
+   * be silently destroyed.
+   */
+  private run(
+    address: string,
+    parse: (a: string) => ParsedAddress | null
+  ): ParsedAddress | null {
+    const { cleaned, organization } = stripLeadingOrganization(address);
+    // `this.ignored` must be read AFTER the parse: the EU parser records the
+    // tokens the matched grammar dropped while parsing.
+    const parsed = parse(cleaned);
+    const result = enforceTokenPreservation(cleaned, parsed, this.ignored);
+    if (result && organization) result.organization = organization;
+    return result;
   }
   parseAddress(address: string) {
-    const a = this.clean(address);
-    return enforceTokenPreservation(a, this.parser.parseAddress(a), this.ignored);
+    return this.run(address, (a) => this.parser.parseAddress(a));
   }
   parseStreet(address: string) {
-    const a = this.clean(address);
-    return enforceTokenPreservation(a, this.parser.parseStreet(a), this.ignored);
+    return this.run(address, (a) => this.parser.parseStreet(a));
   }
   parseInformalAddress(address: string) {
-    const a = this.clean(address);
-    return enforceTokenPreservation(a, this.parser.parseInformalAddress(a), this.ignored);
+    return this.run(address, (a) => this.parser.parseInformalAddress(a));
   }
   parsePoAddress(address: string) {
-    const a = this.clean(address);
-    return enforceTokenPreservation(a, this.parser.parsePoAddress(a), this.ignored);
+    return this.run(address, (a) => this.parser.parsePoAddress(a));
   }
   parseLocation(address: string) {
-    const a = this.clean(address);
-    return enforceTokenPreservation(a, this.parser.parseLocation(a), this.ignored);
+    return this.run(address, (a) => this.parser.parseLocation(a));
   }
   parseIntersection(address: string) {
-    return this.parser.parseIntersection(address);
+    // Same leading-entity handling as the other entry points (the token-
+    // preservation guard does not apply: an intersection carries two streets).
+    const { cleaned, organization } = stripLeadingOrganization(address);
+    const result = this.parser.parseIntersection(cleaned) as ParsedAddress | null;
+    if (result && organization) result.organization = organization;
+    return result;
   }
   findStreetTypeShortCode(streetType?: string): string {
     return this.parser.findStreetTypeShortCode(streetType);
@@ -146,6 +181,80 @@ function detectCountryByPostalCode(address: string): CountryMappings | null {
 }
 
 /**
+ * Country names declared by the country configs themselves, keyed by lowercase
+ * name. Built once. Only names that are unambiguous (claimed by exactly one
+ * config) and long enough not to collide with an ordinary address word are
+ * kept: a 2-3 letter alias ("AU", "ZAF") would match unit numbers and initials,
+ * and "USA"/"United States" is claimed by five US-territory configs.
+ *
+ * A name that is ALSO a US state/territory name is only kept when it names the
+ * same jurisdiction: "Puerto Rico"/"Guam"/"American Samoa" are both an EDGAR
+ * region and one of our grammars, so detecting them is right, but "Georgia" the
+ * country (GE) and Georgia the US state (GA) are different places and the state
+ * is by far the likelier reading of "..., Atlanta, Georgia".
+ */
+const CONFIGURED_COUNTRY_NAMES: ReadonlyMap<string, CountryMappings> = (() => {
+  const usNames = stateCodesMap as Record<string, string>;
+  const claims = new Map<string, Set<string>>();
+  for (const [code, config] of Object.entries(euConfigs)) {
+    for (const name of config.countryNames ?? []) {
+      const key = String(name).toLowerCase().trim();
+      if (key.length < 4) continue;
+      const usCode = usNames[key];
+      if (usCode && usCode.toLowerCase() !== code) continue;
+      if (!claims.has(key)) claims.set(key, new Set());
+      claims.get(key)!.add(code);
+    }
+  }
+  const unique = new Map<string, CountryMappings>();
+  for (const [name, codes] of claims) {
+    if (codes.size === 1) unique.set(name, [...codes][0] as CountryMappings);
+  }
+  return unique;
+})();
+
+/**
+ * Detect the country when the address's final comma segment IS a country name
+ * ("..., Melbourne VIC 3000, Australia"). Deliberately an exact match on a
+ * dedicated segment rather than a search anywhere in the text: country names
+ * collide heavily with US place names ("Lebanon OH", "Santa Fe New Mexico",
+ * "Peru IN"), and those never sit alone in the trailing segment -- a US line
+ * ends with its state and ZIP.
+ */
+function detectByConfiguredCountryName(address: string): CountryMappings | null {
+  const segments = address.split(",");
+  if (segments.length < 2) return null;
+  const tail = (segments[segments.length - 1] ?? "")
+    .trim()
+    .replace(/[.\s]+$/, "")
+    .toLowerCase();
+  if (!tail) return null;
+  return CONFIGURED_COUNTRY_NAMES.get(tail) ?? null;
+}
+
+/**
+ * Crown-Dependency names that are also ordinary US place/street words ("Jersey
+ * City NJ", "Sark Lane"). Unlike "Cayman Islands" or "Gibraltar" these cannot be
+ * matched anywhere in the text -- they only signal the country when they occupy
+ * a WHOLE comma segment, which is how a country is actually written.
+ */
+const SEGMENT_ONLY_COUNTRY_NAMES: [CountryMappings, RegExp][] = [
+  ["je", /^(?:Jersey|Isle of Jersey)$/i],
+  ["gg", /^(?:Guernsey|Alderney|Sark|Bailiwick of Guernsey)$/i],
+];
+
+function detectBySegmentOnlyName(address: string): CountryMappings | null {
+  const segments = address.split(",").map((s) => s.trim().replace(/[.\s]+$/, ""));
+  for (const segment of segments) {
+    if (!segment) continue;
+    for (const [code, re] of SEGMENT_ONLY_COUNTRY_NAMES) {
+      if (re.test(segment)) return code;
+    }
+  }
+  return null;
+}
+
+/**
  * Strong European signals: an explicit country name, or a country-specific
  * postcode shape distinctive enough not to collide with US ZIP / CA postal.
  * The continental countries (DE/FR/IT/ES) all share a bare 5-digit postcode
@@ -173,18 +282,26 @@ function detectEuCountry(address: string): CountryMappings | null {
     ["ie", /\b(?:Ireland|Éire|Eire)\b/i],
     ["cz", /\b(?:Česko|Česká republika|Czech Republic|Czechia)\b/i],
     ["gr", /(?:Ελλάδα|Ελλάς|\bGreece\b|\bHellas\b)/i],
-    // Offshore jurisdictions / Crown Dependencies. "Jersey" is guarded against
-    // the US state "New Jersey".
+    // Offshore jurisdictions / Crown Dependencies.
     ["ky", /\bCayman Islands\b/i],
     ["vg", /\b(?:British Virgin Islands|BVI|B\.V\.I\.)\b/i],
     ["bm", /\bBermuda\b/i],
     ["gi", /\bGibraltar\b/i],
-    ["je", /(?<!New\s)\bJersey\b/i],
-    ["gg", /\b(?:Guernsey|Alderney|Sark)\b/i],
   ];
   for (const [code, re] of names) {
     if (re.test(address)) return code;
   }
+  // Jersey/Guernsey/Alderney/Sark: whole-segment only (see the comment there).
+  const segmentOnly = detectBySegmentOnlyName(address);
+  if (segmentOnly) return segmentOnly;
+  // Every country config declares its own `countryNames`; consult them so the
+  // ~200 grammars beyond the hand-tuned list above are auto-detectable too
+  // (otherwise "10 Collins Street, Melbourne VIC 3000, Australia" silently
+  // defaults to the US parser). Restricted to the address's LAST comma segment,
+  // which is where a country is actually written -- an ordinary US line
+  // ("123 Main St, Peru, IL 61607") ends with its state+ZIP, not a country name.
+  const fromRegistry = detectByConfiguredCountryName(address);
+  if (fromRegistry) return fromRegistry;
   // Offshore postcodes, matched BEFORE the generic UK shape below (JE/GY/GX all
   // fit the UK outward+inward pattern, so they must be claimed first).
   if (/\bKY[1-3]-\d{4}\b/i.test(address)) return "ky";
@@ -355,23 +472,28 @@ function detectCountry(address: string): CountryMappings {
 }
 
 export class IntlAddressParser {
-  private parsers: Partial<Record<CountryMappings, AddressParser>>;
-  constructor() {
-    this.parsers = {};
-    for (const code of SUPPORTED_COUNTRIES) {
-      this.parsers[code] = new AddressParser(code);
-    }
-  }
+  // Built on demand and memoized: eagerly constructing all ~220 country parsers
+  // compiles every grammar up front (~700ms) even though a caller typically
+  // touches one or two.
+  private parsers: Partial<Record<CountryMappings, AddressParser>> = {};
 
   // country accepts an internal ISO key or a SEC EDGAR code ("K3"); omit to auto-detect.
   private pick(address: string, country?: string): AddressParser {
-    const resolved = country ? resolveCountryKey(country) : detectCountry(address);
-    const parser = this.parsers[resolved];
-    if (!parser) {
+    // Auto-detection must see the same string the parse will: a leading entity
+    // segment ("CAYMAN ISLANDS HOLDINGS LTD, 10 Downing Street, London SW1A 2AA")
+    // otherwise hijacks the country.
+    const resolved = country
+      ? resolveCountryKey(country)
+      : detectCountry(stripLeadingOrganization(address).cleaned);
+    const existing = this.parsers[resolved];
+    if (existing) return existing;
+    if (!isSupportedKey(resolved)) {
       throw new Error(
-        `Unsupported country "${resolved}"; supported: ${SUPPORTED_COUNTRIES.join(", ")}`
+        `Unsupported country "${resolved}"; supported: ${supportedSummary()}`
       );
     }
+    const parser = new AddressParser(resolved);
+    this.parsers[resolved] = parser;
     return parser;
   }
 

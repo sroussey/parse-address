@@ -1,4 +1,4 @@
-import type { EuCountryConfig } from "/home/user/parse-address/src/maps/_eu/types";
+import type { EuCountryConfig } from "../_eu/types";
 
 /**
  * Timor-Leste (TL) address configuration — Portuguese (co-official with Tetum).

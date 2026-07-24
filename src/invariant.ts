@@ -197,8 +197,14 @@ function stripIgnored(segment: string, ignored?: string[]): string {
   if (!ignored?.length) return segment;
   let out = segment;
   for (const phrase of [...ignored].sort((a, b) => b.length - a.length)) {
-    const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    out = out.replace(new RegExp(escaped, "gi"), " ");
+    if (!phrase) continue;
+    // Whole-word, not substring. Parse-derived drops (a suburb/district the
+    // grammar consumed) can be short -- BD reports "Ho", TH reports a bare
+    // "5" -- and an unanchored replace would gut unrelated words ("Chowdhury"
+    // -> "C wdhury"), inflating the required token count and wrongly demoting a
+    // correct parse to the lossless fallback. Reuses the same Unicode-aware
+    // boundary rule as the street-segment lookups.
+    out = out.replace(wholeWordRegExp(phrase, "g"), " ");
   }
   return out;
 }

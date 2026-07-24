@@ -1,4 +1,5 @@
-import type { EuCountryConfig } from "/home/user/parse-address/src/maps/_eu/types";
+import type { EuCountryConfig } from "../_eu/types";
+import { keepLastLocality } from "../_eu/localityChain";
 
 /**
  * Lesotho (LS) address configuration.
@@ -96,17 +97,7 @@ export const lsConfig: EuCountryConfig = {
 
   // The "Plot" lead-in is consumed but not emitted, so it is exempted from the
   // token-preservation guard (as ZM does for "Stand"/"Plot").
-  postNormalize: (parsed: Record<string, any>) => {
-    const dropped: string[] = ["Plot"];
-    if (typeof parsed.city === "string" && parsed.city.includes(",")) {
-      const parts = parsed.city.split(",").map((s: string) => s.trim()).filter(Boolean);
-      if (parts.length) {
-        parsed.city = parts[parts.length - 1];
-        for (const p of parts.slice(0, -1)) dropped.push(p);
-      }
-    }
-    parsed.__dropped = dropped;
-  },
+  postNormalize: (parsed: Record<string, any>) => keepLastLocality(parsed, ["Plot"]),
 };
 
 export default lsConfig;

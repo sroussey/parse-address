@@ -1,4 +1,5 @@
-import type { EuCountryConfig } from "/home/user/parse-address/src/maps/_eu/types";
+import type { EuCountryConfig } from "../_eu/types";
+import { keepLastLocality } from "../_eu/localityChain";
 
 /**
  * Tonga (TO) address configuration.
@@ -126,15 +127,7 @@ export const toConfig: EuCountryConfig = {
 
   // The city capture may hold "suburb, city"; keep the last locality as the
   // routing city and drop the earlier suburb(s) losslessly.
-  postNormalize: (parsed: Record<string, any>) => {
-    if (typeof parsed.city === "string" && parsed.city.includes(",")) {
-      const parts = parsed.city.split(",").map((s) => s.trim()).filter(Boolean);
-      if (parts.length) {
-        parsed.city = parts[parts.length - 1];
-        parsed.__dropped = parts.slice(0, -1);
-      }
-    }
-  },
+  postNormalize: (parsed: Record<string, any>) => keepLastLocality(parsed),
 
   secUnitPlacement: "before",
   secUnitPattern:

@@ -1,4 +1,4 @@
-import type { EuCountryConfig } from "/home/user/parse-address/src/maps/_eu/types";
+import type { EuCountryConfig } from "../_eu/types";
 
 /**
  * Bosnia and Herzegovina (BA) address configuration -- LATIN script.

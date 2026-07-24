@@ -1,4 +1,5 @@
 import type { EuCountryConfig } from "../_eu/types";
+import { keepLastLocality } from "../_eu/localityChain";
 
 /**
  * Fiji (FJ) address configuration.
@@ -82,15 +83,7 @@ export const fjConfig: EuCountryConfig = {
   // an ordinary "suburb, city" pair is never mis-split with the city as state.
   countyPattern: "(?!x)x",
 
-  postNormalize: (parsed: Record<string, any>) => {
-    if (typeof parsed.city === "string" && parsed.city.includes(",")) {
-      const parts = parsed.city.split(",").map((s) => s.trim()).filter(Boolean);
-      if (parts.length) {
-        parsed.city = parts[parts.length - 1];
-        parsed.__dropped = parts.slice(0, -1);
-      }
-    }
-  },
+  postNormalize: (parsed: Record<string, any>) => keepLastLocality(parsed),
 
   // Unit/Flat/Apartment leads the address ("Ap. 5 14 Papaya Court").
   secUnitPlacement: "before",

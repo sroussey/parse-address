@@ -1,4 +1,4 @@
-import type { EuCountryConfig } from "/home/user/parse-address/src/maps/_eu/types";
+import type { EuCountryConfig } from "../_eu/types";
 
 /**
  * North Macedonia (MK) address configuration -- ROMANIZED (Latin) form used

@@ -1,4 +1,5 @@
 import type { EuCountryConfig } from "../_eu/types";
+import { keepLastLocality } from "../_eu/localityChain";
 
 /**
  * Zimbabwe (ZW) address configuration.
@@ -124,15 +125,7 @@ export const zwConfig: EuCountryConfig = {
   // are exempted from the token-preservation guard here (as PK does for
   // "House"/"Plot").
   postNormalize: (parsed: Record<string, any>) => {
-    const dropped: string[] = ["Stand", "Number", "Plot"];
-    if (typeof parsed.city === "string" && parsed.city.includes(",")) {
-      const parts = parsed.city.split(",").map((s: string) => s.trim()).filter(Boolean);
-      if (parts.length) {
-        parsed.city = parts[parts.length - 1];
-        for (const p of parts.slice(0, -1)) dropped.push(p);
-      }
-    }
-    parsed.__dropped = dropped;
+    keepLastLocality(parsed, ["Stand", "Number", "Plot"]);
   },
 };
 

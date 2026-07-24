@@ -1,4 +1,5 @@
-import type { EuCountryConfig } from "/home/user/parse-address/src/maps/_eu/types";
+import type { EuCountryConfig } from "../_eu/types";
+import { keepLastLocality } from "../_eu/localityChain";
 
 /**
  * Sudan (SD) address configuration — Latin (romanized) form.
@@ -83,13 +84,7 @@ export const sdConfig: EuCountryConfig = {
         parsed.street = m[2];
       }
     }
-    if (typeof parsed.city === "string" && parsed.city.includes(",")) {
-      const parts = parsed.city.split(",").map((s) => s.trim()).filter(Boolean);
-      if (parts.length) {
-        parsed.city = parts[parts.length - 1];
-        parsed.__dropped = parts.slice(0, -1);
-      }
-    }
+    keepLastLocality(parsed);
   },
 
   secUnitPlacement: "before",

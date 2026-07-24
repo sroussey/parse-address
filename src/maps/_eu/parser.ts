@@ -131,6 +131,11 @@ export class AddressParserEU implements AddressParserImpl {
   // --- normalization --------------------------------------------------------
 
   normalizeAddress(parts: Record<string, any> | null) {
+    // Reset first: `droppableTokens()` is public and must never report the
+    // PREVIOUS address's drops after a parse that matched nothing. Each attempt
+    // within one parseLocation() either succeeds (and sets its own drops before
+    // returning) or falls through to the next attempt, so clearing here is safe.
+    this.lastDropped = [];
     if (!parts) return null;
 
     const parsed: Record<string, any> = {};

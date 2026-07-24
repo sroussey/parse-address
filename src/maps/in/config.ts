@@ -1,4 +1,5 @@
 import type { EuCountryConfig } from "../_eu/types";
+import { keepLastLocality } from "../_eu/localityChain";
 
 /**
  * India (IN) address configuration.
@@ -185,13 +186,7 @@ export const inConfig: EuCountryConfig = {
       if (!parsed.state) parsed.state = REGION_MAP[key] ?? parsed.in_state;
       delete parsed.in_state;
     }
-    if (typeof parsed.city === "string" && parsed.city.includes(",")) {
-      const parts = parsed.city.split(",").map((s) => s.trim()).filter(Boolean);
-      if (parts.length) {
-        parsed.city = parts[parts.length - 1];
-        parsed.__dropped = parts.slice(0, -1);
-      }
-    }
+    keepLastLocality(parsed);
   },
 };
 

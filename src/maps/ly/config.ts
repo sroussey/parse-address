@@ -1,4 +1,5 @@
-import type { EuCountryConfig } from "/home/user/parse-address/src/maps/_eu/types";
+import type { EuCountryConfig } from "../_eu/types";
+import { keepLastLocality } from "../_eu/localityChain";
 
 /**
  * Libya (LY) address configuration — Latin (romanized) form.
@@ -78,13 +79,7 @@ export const lyConfig: EuCountryConfig = {
       }
     }
     // Keep the last locality as the routing city, dropping earlier districts.
-    if (typeof parsed.city === "string" && parsed.city.includes(",")) {
-      const parts = parsed.city.split(",").map((s) => s.trim()).filter(Boolean);
-      if (parts.length) {
-        parsed.city = parts[parts.length - 1];
-        parsed.__dropped = parts.slice(0, -1);
-      }
-    }
+    keepLastLocality(parsed);
   },
 
   // Flat / floor / apartment / building lead-in.

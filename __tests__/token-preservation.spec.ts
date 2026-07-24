@@ -280,3 +280,25 @@ describe("minimalLosslessParse carries over tail locational fields", () => {
     assert.equal(out.street, "Main Extra"); // the dropped "Extra" is recovered
   });
 });
+
+describe("ignored-token stripping is whole-word", () => {
+  it("a short dropped token does not split unrelated words", () => {
+    // BD reports "Ho" (the "Ho." house-number label) as dropped on every parse.
+    // An unanchored replace turned "Chowdhury" into "C wdhury", inflating the
+    // required token count and demoting a correct parse to the fallback.
+    const parsed = {
+      number: "12", street: "Chowdhury", type: "Road",
+      city: "Dhaka", postal_code: "1212", country: "BD",
+    };
+    const src = "House 12, Chowdhury Road, Gulshan, Dhaka 1212";
+    assert.strictEqual(losesTokens(src, parsed, ["House", "Ho", "Plot", "Gulshan"]), false);
+  });
+
+  it("still strips a genuine whole-word ignored phrase", () => {
+    const parsed = { number: "1", street: "Elgin", type: "Ave", city: "George Town", country: "KY" };
+    assert.strictEqual(
+      losesTokens("1 Elgin Ave, Cricket Square, George Town", parsed, ["Cricket Square"]),
+      false
+    );
+  });
+});
