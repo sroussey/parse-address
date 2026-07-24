@@ -113,7 +113,15 @@ export type CountryMappings =
   | "cm"
   | "dz"
   | "fj"
-  | "pg";
+  | "pg"
+  | "ni"
+  | "hn"
+  | "sv"
+  | "cu"
+  | "bw"
+  | "na"
+  | "ao"
+  | "mz";
 
 export interface AddressRuleset {
   type: Pattern;

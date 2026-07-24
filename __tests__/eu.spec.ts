@@ -110,6 +110,14 @@ import { cmSamples } from "./eu-fixtures/cm";
 import { dzSamples } from "./eu-fixtures/dz";
 import { fjSamples } from "./eu-fixtures/fj";
 import { pgSamples } from "./eu-fixtures/pg";
+import { niSamples } from "./eu-fixtures/ni";
+import { hnSamples } from "./eu-fixtures/hn";
+import { svSamples } from "./eu-fixtures/sv";
+import { cuSamples } from "./eu-fixtures/cu";
+import { bwSamples } from "./eu-fixtures/bw";
+import { naSamples } from "./eu-fixtures/na";
+import { aoSamples } from "./eu-fixtures/ao";
+import { mzSamples } from "./eu-fixtures/mz";
 
 // The address fields we assert against the ground truth (locational + street).
 const ASSERTED_FIELDS: (keyof EuSample)[] = [
@@ -233,6 +241,14 @@ const CORPORA: Record<string, EuSample[]> = {
   dz: dzSamples,
   fj: fjSamples,
   pg: pgSamples,
+  ni: niSamples,
+  hn: hnSamples,
+  sv: svSamples,
+  cu: cuSamples,
+  bw: bwSamples,
+  na: naSamples,
+  ao: aoSamples,
+  mz: mzSamples,
 };
 
 function runCountry(code: CountryMappings, samples: EuSample[]) {
