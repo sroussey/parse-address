@@ -9,10 +9,19 @@ describe("AddressParser constructor", () => {
 
   it("throws for an unsupported country", () => {
     assert.throws(
-      // @ts-expect-error intentionally passing an unsupported country at runtime
-      () => new AddressParser("mx"),
-      /Unsupported country "mx"; supported: us, ca/
+      () => new AddressParser("zz"),
+      /Unsupported country "zz"; supported: us, ca/
     );
+  });
+
+  it("accepts a SEC EDGAR code that maps to a supported grammar", () => {
+    // E9 = Cayman Islands -> ky
+    assert.equal(new AddressParser("E9").parser.findStreetTypeShortCode("Street"), "ST");
+  });
+
+  it("throws a descriptive error for a SEC code without a grammar yet", () => {
+    assert.throws(() => new AddressParser("K3"), /Hong Kong.*no address grammar yet/);
+    assert.throws(() => new AddressParser("G5"), /obsolete jurisdiction/);
   });
 });
 
@@ -71,9 +80,8 @@ describe("IntlAddressParser unsupported-country override", () => {
   it("throws a clear error instead of an opaque TypeError", () => {
     const intl = new IntlAddressParser();
     assert.throws(
-      // @ts-expect-error intentionally passing an unsupported country at runtime
-      () => intl.parseLocation("123 Main St", "mx"),
-      /Unsupported country "mx"; supported: us, ca/
+      () => intl.parseLocation("123 Main St", "zz"),
+      /Unsupported country "zz"; supported: us, ca/
     );
   });
 });

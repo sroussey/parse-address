@@ -7,12 +7,47 @@ import { AddressParserImpl } from "./types/parser";
 import { stateCodesMap } from "./maps/us/states";
 import { provinceCodesMap } from "./maps/ca/provinces";
 import { enforceTokenPreservation } from "./invariant";
+import { secCountryCodes } from "./maps/sec-countries";
 
 const SUPPORTED_COUNTRIES: CountryMappings[] = [
   "us",
   "ca",
   ...(euCountryCodes as CountryMappings[]),
 ];
+
+/** True when we have a dedicated address grammar for this internal key. */
+function isSupportedKey(key: string): key is CountryMappings {
+  return key === "us" || key === "ca" || Boolean(euConfigs[key]);
+}
+
+/**
+ * Resolve a country selector to an internal parser key. Accepts our internal
+ * ISO alpha-2 keys ("us", "de", "ky", …) and SEC EDGAR "State or Country" codes
+ * ("K3" → Hong Kong, "L3" → Israel, …). A SEC code is resolved to its modern
+ * ISO country; an obsolete code with no successor, or a real country we do not
+ * have a grammar for yet, throws a descriptive error.
+ */
+export function resolveCountryKey(input: string): CountryMappings {
+  const lower = input.trim().toLowerCase();
+  if (isSupportedKey(lower)) return lower;
+
+  const sec = secCountryCodes[input.trim().toUpperCase()];
+  if (sec) {
+    if (!sec.iso2) {
+      throw new Error(
+        `SEC code "${input}" (${sec.name}) is an obsolete jurisdiction with no modern country`
+      );
+    }
+    const key = sec.iso2.toLowerCase();
+    if (isSupportedKey(key)) return key;
+    throw new Error(
+      `SEC code "${input}" resolves to ${sec.name} (${sec.iso2}), which has no address grammar yet`
+    );
+  }
+  throw new Error(
+    `Unsupported country "${input}"; supported: ${SUPPORTED_COUNTRIES.join(", ")}`
+  );
+}
 
 export type {
   ParsedAddress,
@@ -24,17 +59,15 @@ export { AddressParserImpl } from "./types/parser";
 
 export class AddressParser implements AddressParserImpl {
   parser: AddressParserImpl;
-  constructor(country: CountryMappings = "us") {
-    if (country === "us") {
+  // Accepts an internal ISO key ("us", "de", "ky") or a SEC EDGAR code ("K3").
+  constructor(country: string = "us") {
+    const key = resolveCountryKey(country);
+    if (key === "us") {
       this.parser = new AddressParserUS();
-    } else if (country === "ca") {
+    } else if (key === "ca") {
       this.parser = new AddressParserCA();
-    } else if (euConfigs[country]) {
-      this.parser = new AddressParserEU(euConfigs[country]);
     } else {
-      throw new Error(
-        `Unsupported country "${country}"; supported: ${SUPPORTED_COUNTRIES.join(", ")}`
-      );
+      this.parser = new AddressParserEU(euConfigs[key]!);
     }
   }
   normalizeAddress(parts) {
@@ -319,8 +352,9 @@ export class IntlAddressParser {
     }
   }
 
-  private pick(address: string, country?: CountryMappings): AddressParser {
-    const resolved = country ?? detectCountry(address);
+  // country accepts an internal ISO key or a SEC EDGAR code ("K3"); omit to auto-detect.
+  private pick(address: string, country?: string): AddressParser {
+    const resolved = country ? resolveCountryKey(country) : detectCountry(address);
     const parser = this.parsers[resolved];
     if (!parser) {
       throw new Error(
@@ -330,22 +364,22 @@ export class IntlAddressParser {
     return parser;
   }
 
-  parseLocation(address: string, country?: CountryMappings) {
+  parseLocation(address: string, country?: string) {
     return this.pick(address, country).parseLocation(address);
   }
-  parseAddress(address: string, country?: CountryMappings) {
+  parseAddress(address: string, country?: string) {
     return this.pick(address, country).parseAddress(address);
   }
-  parseInformalAddress(address: string, country?: CountryMappings) {
+  parseInformalAddress(address: string, country?: string) {
     return this.pick(address, country).parseInformalAddress(address);
   }
-  parseStreet(address: string, country?: CountryMappings) {
+  parseStreet(address: string, country?: string) {
     return this.pick(address, country).parseStreet(address);
   }
-  parsePoAddress(address: string, country?: CountryMappings) {
+  parsePoAddress(address: string, country?: string) {
     return this.pick(address, country).parsePoAddress(address);
   }
-  parseIntersection(address: string, country?: CountryMappings) {
+  parseIntersection(address: string, country?: string) {
     return this.pick(address, country).parseIntersection(address);
   }
 }
