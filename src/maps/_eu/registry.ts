@@ -50,6 +50,7 @@ import { roConfig } from "../ro/config";
 import { hrConfig } from "../hr/config";
 import { skConfig } from "../sk/config";
 import { siConfig } from "../si/config";
+import { crConfig } from "../cr/config";
 import { saConfig } from "../sa/config";
 import { qaConfig } from "../qa/config";
 import { kwConfig } from "../kw/config";
@@ -124,6 +125,7 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   hr: hrConfig,
   sk: skConfig,
   si: siConfig,
+  cr: crConfig,
   sa: saConfig,
   qa: qaConfig,
   kw: kwConfig,

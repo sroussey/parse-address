@@ -57,6 +57,7 @@ export type CountryMappings =
   | "hr"
   | "sk"
   | "si"
+  | "cr"
   | "sa"
   | "qa"
   | "kw"

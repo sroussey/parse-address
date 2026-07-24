@@ -54,6 +54,7 @@ import { roSamples } from "./eu-fixtures/ro";
 import { hrSamples } from "./eu-fixtures/hr";
 import { skSamples } from "./eu-fixtures/sk";
 import { siSamples } from "./eu-fixtures/si";
+import { crSamples } from "./eu-fixtures/cr";
 import { saSamples } from "./eu-fixtures/sa";
 import { qaSamples } from "./eu-fixtures/qa";
 import { kwSamples } from "./eu-fixtures/kw";
@@ -136,6 +137,7 @@ const CORPORA: Record<string, EuSample[]> = {
   hr: hrSamples,
   sk: skSamples,
   si: siSamples,
+  cr: crSamples,
   sa: saSamples,
   qa: qaSamples,
   kw: kwSamples,

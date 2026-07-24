@@ -6,7 +6,7 @@ describe("European AddressParser construction", () => {
     const codes = [
       "de", "fr", "gb", "it", "es", "nl", "be", "at", "pl", "ch", "pt", "se",
       "dk", "no", "fi", "ie", "cz", "gr", "je", "gg", "ky", "vg", "bm", "gi",
-      "au", "nz", "sg", "il", "za", "tr", "br", "mx", "ar", "cl", "co", "pe", "in", "my", "ae", "lu", "is", "mt", "cy", "uy", "ec", "ve", "bo", "ro", "hr", "sk", "si",
+      "au", "nz", "sg", "il", "za", "tr", "br", "mx", "ar", "cl", "co", "pe", "in", "my", "ae", "lu", "is", "mt", "cy", "uy", "ec", "ve", "bo", "ro", "hr", "sk", "si", "cr",
       "sa", "qa", "kw", "bh", "pa", "gt", "do", "ee", "lv", "lt", "hu", "th", "ph", "id", "pk",
     ] as const;
     for (const cc of codes) {
