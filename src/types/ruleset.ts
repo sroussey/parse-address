@@ -219,7 +219,12 @@ export type CountryMappings =
   | "bg"
   | "mk"
   | "ge"
-  | "am";
+  | "am"
+  | "kz"
+  | "kg"
+  | "uz"
+  | "tj"
+  | "tm";
 
 export interface AddressRuleset {
   type: Pattern;

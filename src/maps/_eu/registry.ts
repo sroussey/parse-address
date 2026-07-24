@@ -212,6 +212,11 @@ import { bgConfig } from "../bg/config";
 import { mkConfig } from "../mk/config";
 import { geConfig } from "../ge/config";
 import { amConfig } from "../am/config";
+import { kzConfig } from "../kz/config";
+import { kgConfig } from "../kg/config";
+import { uzConfig } from "../uz/config";
+import { tjConfig } from "../tj/config";
+import { tmConfig } from "../tm/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -433,6 +438,11 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   mk: mkConfig,
   ge: geConfig,
   am: amConfig,
+  kz: kzConfig,
+  kg: kgConfig,
+  uz: uzConfig,
+  tj: tjConfig,
+  tm: tmConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);
