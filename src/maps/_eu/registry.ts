@@ -182,6 +182,13 @@ import { fkConfig } from "../fk/config";
 import { nfConfig } from "../nf/config";
 import { tkConfig } from "../tk/config";
 import { pnConfig } from "../pn/config";
+import { htConfig } from "../ht/config";
+import { biConfig } from "../bi/config";
+import { cfConfig } from "../cf/config";
+import { gnConfig } from "../gn/config";
+import { tdConfig } from "../td/config";
+import { djConfig } from "../dj/config";
+import { kmConfig } from "../km/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -373,6 +380,13 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   nf: nfConfig,
   tk: tkConfig,
   pn: pnConfig,
+  ht: htConfig,
+  bi: biConfig,
+  cf: cfConfig,
+  gn: gnConfig,
+  td: tdConfig,
+  dj: djConfig,
+  km: kmConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);

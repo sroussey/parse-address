@@ -189,7 +189,14 @@ export type CountryMappings =
   | "fk"
   | "nf"
   | "tk"
-  | "pn";
+  | "pn"
+  | "ht"
+  | "bi"
+  | "cf"
+  | "gn"
+  | "td"
+  | "dj"
+  | "km";
 
 export interface AddressRuleset {
   type: Pattern;
