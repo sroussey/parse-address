@@ -93,7 +93,11 @@ export type CountryMappings =
   | "ma"
   | "tn"
   | "sn"
-  | "ci";
+  | "ci"
+  | "lk"
+  | "bd"
+  | "np"
+  | "bn";
 
 export interface AddressRuleset {
   type: Pattern;

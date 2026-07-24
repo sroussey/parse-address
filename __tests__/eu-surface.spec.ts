@@ -13,6 +13,7 @@ describe("European AddressParser construction", () => {
       "ng", "ke", "gh", "mu",
       "jm", "tt", "bs", "py",
       "ma", "tn", "sn", "ci",
+      "lk", "bd", "np", "bn",
     ] as const;
     for (const cc of codes) {
       assert.ok(new AddressParser(cc), `failed to construct ${cc}`);

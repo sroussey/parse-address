@@ -86,6 +86,10 @@ import { maConfig } from "../ma/config";
 import { tnConfig } from "../tn/config";
 import { snConfig } from "../sn/config";
 import { ciConfig } from "../ci/config";
+import { lkConfig } from "../lk/config";
+import { bdConfig } from "../bd/config";
+import { npConfig } from "../np/config";
+import { bnConfig } from "../bn/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -181,6 +185,10 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   tn: tnConfig,
   sn: snConfig,
   ci: ciConfig,
+  lk: lkConfig,
+  bd: bdConfig,
+  np: npConfig,
+  bn: bnConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);
