@@ -6,7 +6,7 @@ describe("European AddressParser construction", () => {
     const codes = [
       "de", "fr", "gb", "it", "es", "nl", "be", "at", "pl", "ch", "pt", "se",
       "dk", "no", "fi", "ie", "cz", "gr", "je", "gg", "ky", "vg", "bm", "gi",
-      "au", "nz", "sg", "il", "za", "tr", "br", "mx", "ar", "cl", "co", "pe",
+      "au", "nz", "sg", "il", "za", "tr", "br", "mx", "ar", "cl", "co", "pe", "in", "my", "ae", "lu", "is", "mt", "cy",
     ] as const;
     for (const cc of codes) {
       assert.ok(new AddressParser(cc), `failed to construct ${cc}`);
@@ -76,6 +76,47 @@ describe("International parses (batch 5: non-European)", () => {
     assert.equal(new AddressParser("C3").parseLocation("10 Collins Street, Melbourne VIC 3000")!.country, "AU");
     assert.equal(new AddressParser("L3").parseLocation("3 Ben Yehuda, Tel Aviv-Yafo, 6380301")!.country, "IL");
     assert.equal(new AddressParser("D5").parseLocation("Rua Augusta, 900, 01304-001 São Paulo - SP")!.country, "BR");
+  });
+});
+
+describe("International parses (batch 6)", () => {
+  it("CO: Calle + cross-street '#' composite kept in number", () => {
+    const p = new AddressParser("co").parseLocation("Calle 100 # 8-60, Bogotá")!;
+    assert.equal(p.type, "Calle");
+    assert.equal(p.number, "8-60");
+    assert.equal(p.city, "Bogotá");
+    assert.equal(p.country, "CO");
+  });
+
+  it("MY: Jalan prefix, 5-digit postcode before city, state after", () => {
+    const p = new AddressParser("my").parseLocation("No 12, Jalan Ampang, 50450 Kuala Lumpur, Wilayah Persekutuan")!;
+    assert.equal(p.number, "12");
+    assert.equal(p.type, "Jalan");
+    assert.equal(p.street, "Ampang");
+    assert.equal(p.postal_code, "50450");
+    assert.equal(p.city, "Kuala Lumpur");
+    assert.equal(p.country, "MY");
+  });
+
+  it("MT: number + Triq + town + 'AAA 9999' postcode", () => {
+    const p = new AddressParser("mt").parseLocation("36, Triq ir-Repubblika, Valletta VLT 1117")!;
+    assert.equal(p.number, "36");
+    assert.equal(p.type, "Triq");
+    assert.equal(p.postal_code, "VLT 1117");
+    assert.equal(p.city, "Valletta");
+    assert.equal(p.country, "MT");
+  });
+
+  it("AE: no postcode; PO box unit + emirate", () => {
+    const p = new AddressParser("ae").parseLocation("PO Box 9222, Dubai")!;
+    assert.equal(p.sec_unit_type, "PO Box");
+    assert.equal(p.sec_unit_num, "9222");
+    assert.equal(p.country, "AE");
+  });
+
+  it("resolves batch-2 via SEC codes (F8 CO, N8 MY, O1 MT)", () => {
+    assert.equal(new AddressParser("F8").parseLocation("Calle 100 # 8-60, Bogotá")!.country, "CO");
+    assert.equal(new AddressParser("O1").parseLocation("36, Triq ir-Repubblika, Valletta VLT 1117")!.country, "MT");
   });
 });
 

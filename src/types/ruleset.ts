@@ -41,7 +41,14 @@ export type CountryMappings =
   | "ar"
   | "cl"
   | "co"
-  | "pe";
+  | "pe"
+  | "in"
+  | "my"
+  | "ae"
+  | "lu"
+  | "is"
+  | "mt"
+  | "cy";
 
 export interface AddressRuleset {
   type: Pattern;
