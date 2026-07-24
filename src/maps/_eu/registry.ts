@@ -151,6 +151,16 @@ import { ckConfig } from "../ck/config";
 import { nrConfig } from "../nr/config";
 import { tvConfig } from "../tv/config";
 import { nuConfig } from "../nu/config";
+import { bfConfig } from "../bf/config";
+import { bjConfig } from "../bj/config";
+import { mlConfig } from "../ml/config";
+import { neConfig } from "../ne/config";
+import { tgConfig } from "../tg/config";
+import { gaConfig } from "../ga/config";
+import { cgConfig } from "../cg/config";
+import { cdConfig } from "../cd/config";
+import { mgConfig } from "../mg/config";
+import { mrConfig } from "../mr/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -311,6 +321,16 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   nr: nrConfig,
   tv: tvConfig,
   nu: nuConfig,
+  bf: bfConfig,
+  bj: bjConfig,
+  ml: mlConfig,
+  ne: neConfig,
+  tg: tgConfig,
+  ga: gaConfig,
+  cg: cgConfig,
+  cd: cdConfig,
+  mg: mgConfig,
+  mr: mrConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);

@@ -158,7 +158,17 @@ export type CountryMappings =
   | "ck"
   | "nr"
   | "tv"
-  | "nu";
+  | "nu"
+  | "bf"
+  | "bj"
+  | "ml"
+  | "ne"
+  | "tg"
+  | "ga"
+  | "cg"
+  | "cd"
+  | "mg"
+  | "mr";
 
 export interface AddressRuleset {
   type: Pattern;
