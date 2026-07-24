@@ -90,6 +90,18 @@ import { lkConfig } from "../lk/config";
 import { bdConfig } from "../bd/config";
 import { npConfig } from "../np/config";
 import { bnConfig } from "../bn/config";
+import { tzConfig } from "../tz/config";
+import { ugConfig } from "../ug/config";
+import { zmConfig } from "../zm/config";
+import { zwConfig } from "../zw/config";
+import { bbConfig } from "../bb/config";
+import { bzConfig } from "../bz/config";
+import { gyConfig } from "../gy/config";
+import { srConfig } from "../sr/config";
+import { mdConfig } from "../md/config";
+import { foConfig } from "../fo/config";
+import { glConfig } from "../gl/config";
+import { imConfig } from "../im/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -189,6 +201,18 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   bd: bdConfig,
   np: npConfig,
   bn: bnConfig,
+  tz: tzConfig,
+  ug: ugConfig,
+  zm: zmConfig,
+  zw: zwConfig,
+  bb: bbConfig,
+  bz: bzConfig,
+  gy: gyConfig,
+  sr: srConfig,
+  md: mdConfig,
+  fo: foConfig,
+  gl: glConfig,
+  im: imConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);

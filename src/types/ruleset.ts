@@ -97,7 +97,19 @@ export type CountryMappings =
   | "lk"
   | "bd"
   | "np"
-  | "bn";
+  | "bn"
+  | "tz"
+  | "ug"
+  | "zm"
+  | "zw"
+  | "bb"
+  | "bz"
+  | "gy"
+  | "sr"
+  | "md"
+  | "fo"
+  | "gl"
+  | "im";
 
 export interface AddressRuleset {
   type: Pattern;
