@@ -85,7 +85,11 @@ export type CountryMappings =
   | "ng"
   | "ke"
   | "gh"
-  | "mu";
+  | "mu"
+  | "jm"
+  | "tt"
+  | "bs"
+  | "py";
 
 export interface AddressRuleset {
   type: Pattern;

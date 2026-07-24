@@ -78,6 +78,10 @@ import { ngConfig } from "../ng/config";
 import { keConfig } from "../ke/config";
 import { ghConfig } from "../gh/config";
 import { muConfig } from "../mu/config";
+import { jmConfig } from "../jm/config";
+import { ttConfig } from "../tt/config";
+import { bsConfig } from "../bs/config";
+import { pyConfig } from "../py/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -165,6 +169,10 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   ke: keConfig,
   gh: ghConfig,
   mu: muConfig,
+  jm: jmConfig,
+  tt: ttConfig,
+  bs: bsConfig,
+  py: pyConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);
