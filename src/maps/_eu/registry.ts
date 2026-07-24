@@ -114,6 +114,17 @@ import { bwConfig } from "../bw/config";
 import { naConfig } from "../na/config";
 import { aoConfig } from "../ao/config";
 import { mzConfig } from "../mz/config";
+import { gfConfig } from "../gf/config";
+import { gpConfig } from "../gp/config";
+import { mqConfig } from "../mq/config";
+import { reConfig } from "../re/config";
+import { ytConfig } from "../yt/config";
+import { ncConfig } from "../nc/config";
+import { pfConfig } from "../pf/config";
+import { wfConfig } from "../wf/config";
+import { pmConfig } from "../pm/config";
+import { blConfig } from "../bl/config";
+import { mfConfig } from "../mf/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -237,6 +248,17 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   na: naConfig,
   ao: aoConfig,
   mz: mzConfig,
+  gf: gfConfig,
+  gp: gpConfig,
+  mq: mqConfig,
+  re: reConfig,
+  yt: ytConfig,
+  nc: ncConfig,
+  pf: pfConfig,
+  wf: wfConfig,
+  pm: pmConfig,
+  bl: blConfig,
+  mf: mfConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);

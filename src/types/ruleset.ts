@@ -121,7 +121,18 @@ export type CountryMappings =
   | "bw"
   | "na"
   | "ao"
-  | "mz";
+  | "mz"
+  | "gf"
+  | "gp"
+  | "mq"
+  | "re"
+  | "yt"
+  | "nc"
+  | "pf"
+  | "wf"
+  | "pm"
+  | "bl"
+  | "mf";
 
 export interface AddressRuleset {
   type: Pattern;
