@@ -215,7 +215,11 @@ export type CountryMappings =
   | "ps"
   | "so"
   | "et"
-  | "er";
+  | "er"
+  | "bg"
+  | "mk"
+  | "ge"
+  | "am";
 
 export interface AddressRuleset {
   type: Pattern;

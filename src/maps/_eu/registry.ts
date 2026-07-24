@@ -208,6 +208,10 @@ import { psConfig } from "../ps/config";
 import { soConfig } from "../so/config";
 import { etConfig } from "../et/config";
 import { erConfig } from "../er/config";
+import { bgConfig } from "../bg/config";
+import { mkConfig } from "../mk/config";
+import { geConfig } from "../ge/config";
+import { amConfig } from "../am/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -425,6 +429,10 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   so: soConfig,
   et: etConfig,
   er: erConfig,
+  bg: bgConfig,
+  mk: mkConfig,
+  ge: geConfig,
+  am: amConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);
