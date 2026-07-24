@@ -304,7 +304,10 @@ export const azSamples: EuSample[] = [
   },
   {
     "input": "İnşaatçılar prospekti 40, Nəsimi rayonu, Bakı",
-    "__skip": "street name contains 'İ' (U+0130); the upstream token-preservation guard lowercases the address and 'İ'->'i̇' changes the string length, shifting the street/boundary cut by one char and falsely flagging token loss. The parse itself is correct (street 'İnşaatçılar', type prospekti, number 40, city Bakı). Affects Azerbaijani İ-initial/İ-containing street names generally; a src-side Unicode fix would be needed."
+    "number": "40",
+    "street": "İnşaatçılar",
+    "type": "prospekti",
+    "city": "Bakı"
   },
   {
     "input": "Bülbül prospekti 8, Səbail rayonu, Bakı şəhəri",

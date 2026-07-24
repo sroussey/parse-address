@@ -83,27 +83,35 @@ function boundaryCandidates(
   return [value];
 }
 
-// A whole-word (\b-anchored) matcher for a lowercased boundary value, with regex
-// metacharacters escaped. Shared by the first/last occurrence lookups.
+// A whole-word (\b-anchored), case-insensitive matcher for a boundary value,
+// with regex metacharacters escaped. Shared by the first/last occurrence lookups.
+//
+// Matching is case-insensitive (`i`) against the ORIGINAL (non-lowercased)
+// address rather than pre-lowercasing both sides. Pre-lowercasing broke index
+// alignment: `String.toLowerCase()` is not length-preserving for a handful of
+// characters (Turkish/Azerbaijani "İ" U+0130 -> "i̇", German "ẞ" -> "ss", the
+// f-ligatures), so an index found in the lowercased string pointed at the wrong
+// offset in the original -- shifting `streetSegment`'s cut and falsely reporting
+// token loss for any street containing such a character.
 function wholeWordRegExp(value: string, flags = ""): RegExp {
-  const escaped = value.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   // Unicode-aware word boundaries: JS `\b` treats `\w` as ASCII only, so a value
   // that starts or ends with an accented letter ("Bogotá", "Ñuñoa", "İzmir")
   // would never match, making streetSegment miss the boundary and falsely report
   // token loss. Letter/number lookarounds fix that for every script.
-  return new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, flags + "u");
+  return new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, flags + "iu");
 }
 
-function firstIndexOfValue(addressLower: string, value: string): number {
-  const match = wholeWordRegExp(value).exec(addressLower);
+function firstIndexOfValue(address: string, value: string): number {
+  const match = wholeWordRegExp(value).exec(address);
   return match ? match.index : -1;
 }
 
-function lastIndexOfValue(addressLower: string, value: string): number {
+function lastIndexOfValue(address: string, value: string): number {
   const re = wholeWordRegExp(value, "g");
   let idx = -1;
   let match: RegExpExecArray | null;
-  while ((match = re.exec(addressLower)) !== null) {
+  while ((match = re.exec(address)) !== null) {
     idx = match.index;
   }
   return idx;
@@ -117,15 +125,15 @@ function lastIndexOfValue(addressLower: string, value: string): number {
 // prefix), and wrongly cut real street words into the excluded tail. When the
 // fallback is used, the city sits in the address's locational tail, so match
 // its rightmost occurrence rather than any earlier in-street collision.
-function cityBoundaryIndex(addressLower: string, value: string): number {
-  const exactIdx = firstIndexOfValue(addressLower, value);
+function cityBoundaryIndex(address: string, value: string): number {
+  const exactIdx = firstIndexOfValue(address, value);
   if (exactIdx >= 0) return exactIdx;
 
   const lower = value.toLowerCase();
   for (const [full, abbr] of CITY_DIRECTION_PREFIXES) {
     if (lower.startsWith(`${full} `)) {
       const abbreviated = `${abbr}${value.slice(full.length)}`;
-      return lastIndexOfValue(addressLower, abbreviated);
+      return lastIndexOfValue(address, abbreviated);
     }
   }
   return -1;
@@ -143,18 +151,17 @@ function cityBoundaryIndex(addressLower: string, value: string): number {
 // (the fallback then rebuilds losslessly). Revisit this if a grammar change ever
 // lets a partial-middle street drop through.
 export function streetSegment(address: string, parsed: ParsedAddress): string {
-  const lower = address.toLowerCase();
   let cut = address.length;
   for (const field of BOUNDARY_FIELDS) {
     const value = parsed[field];
     if (typeof value !== "string" || !value) continue;
     if (field === "city") {
-      const idx = cityBoundaryIndex(lower, value);
+      const idx = cityBoundaryIndex(address, value);
       if (idx >= 0) cut = Math.min(cut, idx);
       continue;
     }
     for (const candidate of boundaryCandidates(field, value, parsed)) {
-      const idx = firstIndexOfValue(lower, candidate);
+      const idx = firstIndexOfValue(address, candidate);
       if (idx >= 0) cut = Math.min(cut, idx);
     }
   }
