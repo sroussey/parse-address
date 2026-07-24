@@ -38,7 +38,10 @@ export type CountryMappings =
   | "tr"
   | "br"
   | "mx"
-  | "ar";
+  | "ar"
+  | "cl"
+  | "co"
+  | "pe";
 
 export interface AddressRuleset {
   type: Pattern;

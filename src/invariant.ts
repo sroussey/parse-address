@@ -87,7 +87,11 @@ function boundaryCandidates(
 // metacharacters escaped. Shared by the first/last occurrence lookups.
 function wholeWordRegExp(value: string, flags = ""): RegExp {
   const escaped = value.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return new RegExp(`\\b${escaped}\\b`, flags);
+  // Unicode-aware word boundaries: JS `\b` treats `\w` as ASCII only, so a value
+  // that starts or ends with an accented letter ("Bogotá", "Ñuñoa", "İzmir")
+  // would never match, making streetSegment miss the boundary and falsely report
+  // token loss. Letter/number lookarounds fix that for every script.
+  return new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, flags + "u");
 }
 
 function firstIndexOfValue(addressLower: string, value: string): number {

@@ -32,6 +32,9 @@ import { trConfig } from "../tr/config";
 import { brConfig } from "../br/config";
 import { mxConfig } from "../mx/config";
 import { arConfig } from "../ar/config";
+import { clConfig } from "../cl/config";
+import { coConfig } from "../co/config";
+import { peConfig } from "../pe/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -73,6 +76,9 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   br: brConfig,
   mx: mxConfig,
   ar: arConfig,
+  cl: clConfig,
+  co: coConfig,
+  pe: peConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);
