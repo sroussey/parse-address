@@ -102,6 +102,10 @@ import { mdConfig } from "../md/config";
 import { foConfig } from "../fo/config";
 import { glConfig } from "../gl/config";
 import { imConfig } from "../im/config";
+import { cmConfig } from "../cm/config";
+import { dzConfig } from "../dz/config";
+import { fjConfig } from "../fj/config";
+import { pgConfig } from "../pg/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -213,6 +217,10 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   fo: foConfig,
   gl: glConfig,
   im: imConfig,
+  cm: cmConfig,
+  dz: dzConfig,
+  fj: fjConfig,
+  pg: pgConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);

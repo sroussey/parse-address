@@ -109,7 +109,11 @@ export type CountryMappings =
   | "md"
   | "fo"
   | "gl"
-  | "im";
+  | "im"
+  | "cm"
+  | "dz"
+  | "fj"
+  | "pg";
 
 export interface AddressRuleset {
   type: Pattern;
