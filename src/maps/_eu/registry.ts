@@ -125,6 +125,15 @@ import { wfConfig } from "../wf/config";
 import { pmConfig } from "../pm/config";
 import { blConfig } from "../bl/config";
 import { mfConfig } from "../mf/config";
+import { agConfig } from "../ag/config";
+import { aiConfig } from "../ai/config";
+import { dmConfig } from "../dm/config";
+import { gdConfig } from "../gd/config";
+import { knConfig } from "../kn/config";
+import { lcConfig } from "../lc/config";
+import { msConfig } from "../ms/config";
+import { tcConfig } from "../tc/config";
+import { vcConfig } from "../vc/config";
 
 /**
  * Registry of the supported European country configurations, keyed by ISO
@@ -259,6 +268,15 @@ export const euConfigs: Record<string, EuCountryConfig> = {
   pm: pmConfig,
   bl: blConfig,
   mf: mfConfig,
+  ag: agConfig,
+  ai: aiConfig,
+  dm: dmConfig,
+  gd: gdConfig,
+  kn: knConfig,
+  lc: lcConfig,
+  ms: msConfig,
+  tc: tcConfig,
+  vc: vcConfig,
 };
 
 export const euCountryCodes = Object.keys(euConfigs);

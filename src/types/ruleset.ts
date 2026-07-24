@@ -132,7 +132,16 @@ export type CountryMappings =
   | "wf"
   | "pm"
   | "bl"
-  | "mf";
+  | "mf"
+  | "ag"
+  | "ai"
+  | "dm"
+  | "gd"
+  | "kn"
+  | "lc"
+  | "ms"
+  | "tc"
+  | "vc";
 
 export interface AddressRuleset {
   type: Pattern;
