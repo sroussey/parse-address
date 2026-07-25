@@ -62,6 +62,13 @@ intl.parseStreet('Via Roma 15', 'it')                     // force IT
 
 ## Supported jurisdictions
 
+**220 jurisdictions** are supported: the US, Canada, and 218 further countries
+and territories — every "State or Country" code in SEC EDGAR. The table below
+lists the jurisdictions with the most fully documented grammars; all 218
+remaining EDGAR-mapped countries and territories (the Americas, Africa, the
+Middle East, South/Central/Southeast Asia, the Pacific, and the Caribbean) are
+also supported via their ISO two-letter codes.
+
 | Region | Codes |
 |--------|-------|
 | North America | `us`, `ca` |
