@@ -8,56 +8,22 @@ import { stateCodesMap } from "./maps/us/states";
 import { provinceCodesMap } from "./maps/ca/provinces";
 import { enforceTokenPreservation, losesTokens } from "./invariant";
 import type { ParsedAddress } from "./types/address";
-import { secCountryCodes } from "./maps/sec-countries";
 import { stripLeadingOrganization } from "./preprocess";
+import { resolveCountryKey } from "./country";
+import { inspectPostalCode, normalizePostalCode } from "./postal";
+import type { PostalCodeResult } from "./types/postal";
 
-const SUPPORTED_COUNTRIES: CountryMappings[] = [
-  "us",
-  "ca",
-  ...(euCountryCodes as CountryMappings[]),
-];
-
-/** True when we have a dedicated address grammar for this internal key. */
-function isSupportedKey(key: string): key is CountryMappings {
-  // `hasOwnProperty`, not `Boolean(euConfigs[key])`: the latter is truthy for
-  // inherited Object.prototype members ("constructor", "__proto__", "toString"),
-  // which would then resolve as "supported" and blow up with an opaque TypeError.
-  return (
-    key === "us" ||
-    key === "ca" ||
-    Object.prototype.hasOwnProperty.call(euConfigs, key)
-  );
-}
-
-/**
- * Resolve a country selector to an internal parser key. Accepts our internal
- * ISO alpha-2 keys ("us", "de", "ky", …) and SEC EDGAR "State or Country" codes
- * ("K3" → Hong Kong, "L3" → Israel, …). A SEC code is resolved to its modern
- * ISO country; an obsolete code with no successor, or a real country we do not
- * have a grammar for yet, throws a descriptive error.
- */
-export function resolveCountryKey(input: string): CountryMappings {
-  const lower = input.trim().toLowerCase();
-  if (isSupportedKey(lower)) return lower;
-
-  const sec = secCountryCodes[input.trim().toUpperCase()];
-  if (sec) {
-    if (!sec.iso2) {
-      throw new Error(
-        `SEC code "${input}" (${sec.name}) is an obsolete jurisdiction with no modern country`
-      );
-    }
-    const key = sec.iso2.toLowerCase();
-    if (isSupportedKey(key)) return key;
-    throw new Error(
-      `SEC code "${input}" resolves to ${sec.name} (${sec.iso2}), which has no address grammar yet`
-    );
-  }
-  throw new Error(
-    `Unsupported country "${input}" (${SUPPORTED_COUNTRIES.length} supported ISO/SEC codes; pass a valid ISO alpha-2 or SEC "State or Country" code)`
-  );
-}
-
+export { resolveCountryKey, tryResolveCountryKey } from "./country";
+export {
+  inspectPostalCode,
+  normalizePostalCode,
+  hasPostalGrammar,
+} from "./postal";
+export type {
+  PostalCodeResult,
+  PostalCodeRejection,
+  PostalCodeRepair,
+} from "./types/postal";
 export type {
   ParsedAddress,
   AddressTestCase,
@@ -68,9 +34,12 @@ export { AddressParserImpl } from "./types/parser";
 
 export class AddressParser implements AddressParserImpl {
   parser: AddressParserImpl;
+  /** The resolved internal key, so postal lookups need not re-resolve it. */
+  readonly country: CountryMappings;
   // Accepts an internal ISO key ("us", "de", "ky") or a SEC EDGAR code ("K3").
   constructor(country: string = "us") {
     const key = resolveCountryKey(country);
+    this.country = key;
     if (key === "us") {
       this.parser = new AddressParserUS();
     } else if (key === "ca") {
@@ -81,6 +50,17 @@ export class AddressParser implements AddressParserImpl {
   }
   normalizeAddress(parts) {
     return this.parser.normalizeAddress(parts);
+  }
+  /**
+   * Normalize a postal code arriving as its own field, against this parser's
+   * country. See {@link normalizePostalCode}.
+   */
+  normalizePostalCode(value: string | null | undefined): string | null {
+    return normalizePostalCode(value, this.country);
+  }
+  /** The same check, with a reason when the value is refused. */
+  inspectPostalCode(value: string | null | undefined): PostalCodeResult {
+    return inspectPostalCode(value, this.country);
   }
   private get ignored(): string[] | undefined {
     return this.parser.droppableTokens?.();

@@ -1,3 +1,5 @@
+import type { PostalCodeRepair } from "../../types/postal";
+
 /**
  * Shared configuration model for the European address parsers.
  *
@@ -54,6 +56,15 @@ export interface EuCountryConfig {
    * single-space collapse.
    */
   postalFormat?: (raw: string) => string;
+  /**
+   * Optional field-time repair rule, used by `normalizePostalCode` when a
+   * postal code arrives as its own structured field rather than inside an
+   * address line. Omit it and the field-time normalizer falls back to this
+   * config's `postalPattern` + `postalFormat`, anchored to the whole value --
+   * correct for most countries; write one only where a corpus shows filers
+   * typing a shape the parse-time pattern is deliberately too tight to accept.
+   */
+  postalRepair?: PostalCodeRepair;
   /**
    * XRegExp fragment capturing `(?<number>...)` and, optionally,
    * `(?<civic_number_suffix>...)` (letter/bis/ter/annex).

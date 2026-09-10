@@ -38,6 +38,12 @@ export const bmConfig: EuCountryConfig = {
     const s = raw.toUpperCase().replace(/\s+/g, "");
     return `${s.slice(0, 2)} ${s.slice(2)}`;
   },
+  // Two parish letters then two characters ("HM 11", "HM CX"); the space is
+  // optional in the wild and normalized back in.
+  postalRepair: {
+    accept: ["([A-Z]{2})[-\\s]?([0-9A-Z]{2})"],
+    canonical: (m) => `${m[1]} ${m[2]}`,
+  },
   houseNumberPattern:
     "\\#?\\s*(?<number>\\d+(?:-\\d+)?)(?<civic_number_suffix>[A-Za-z](?![A-Za-z]))?",
   // Bermuda PO boxes carry a parish-letter prefix ("PO Box HM 1561").

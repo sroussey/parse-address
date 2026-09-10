@@ -45,6 +45,15 @@ export const vgConfig: EuCountryConfig = {
   // optional and falls back to the city-only path).
   postalPattern: "(?<postal_code>VG\\d{4})",
   postalFormat: (raw: string) => raw.toUpperCase().replace(/\s+/g, ""),
+  // The "VG" prefix is the constant across every code in the territory, so
+  // unlike Cayman's district digit it carries no information and a bare "1110"
+  // is not a guess -- the prefix is optional here and normalized back in. The
+  // digits are pinned to the range actually issued (VG1110 through VG1160) so
+  // the bare form cannot absorb an arbitrary four-digit value.
+  postalRepair: {
+    accept: ["(?:VG[-\\s]?)?(11[1-6]0)"],
+    canonical: (m) => `VG${m[1]}`,
+  },
   houseNumberPattern:
     "\\#?\\s*(?<number>\\d+(?:-\\d+)?)(?<civic_number_suffix>[A-Za-z](?![A-Za-z]))?",
 

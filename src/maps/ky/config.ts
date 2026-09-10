@@ -43,6 +43,19 @@ export const kyConfig: EuCountryConfig = {
 
   postalPattern: "(?<postal_code>KY[1-3]-\\d{4})",
   postalFormat: (raw: string) => raw.toUpperCase().replace(/\s+/g, ""),
+  // Field-time repair, merging both halves of the shape:
+  //   - the district digit is REAL information (KY1 Grand Cayman, KY2 Cayman
+  //     Brac, KY3 Little Cayman), so it stays pinned to 1-3 and a "KY-1104"
+  //     missing its district is refused rather than guessed at;
+  //   - the separator is NOT information, so "KY1 1104" and "KY11104" are
+  //     repaired to the canonical hyphenated form.
+  // The letters are only ever K and Y, which makes an "I" here the same
+  // unambiguous mistyped one it is in Canada.
+  postalRepair: {
+    fold: (upper) => upper.replace(/I/g, "1"),
+    accept: ["KY([1-3])[-\\s]?([0-9]{4})"],
+    canonical: (m) => `KY${m[1]}-${m[2]}`,
+  },
   houseNumberPattern:
     "(?<number>\\d+(?:-\\d+)?)(?<civic_number_suffix>[A-Za-z](?![A-Za-z]))?",
 

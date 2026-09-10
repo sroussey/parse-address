@@ -89,6 +89,19 @@ export const gbConfig: EuCountryConfig = {
   },
   // House number: a plain number or a range ("10-12"), with an optional glued
   // letter suffix ("221B", "10A").
+  // Field-time repair. Same shape as `postalPattern`, but anchored to a whole
+  // value and tolerant of the space being absent ("M11AA") or the whole code
+  // being run together, because nothing adjacent can be stolen from.
+  postalRepair: {
+    accept: [
+      "GIR\\s*0AA",
+      "[A-Z]{1,2}[0-9][A-Z0-9]?\\s*[0-9][A-Z]{2}",
+    ],
+    canonical: (m) => {
+      const s = m[0].replace(/\s+/g, "");
+      return `${s.slice(0, -3)} ${s.slice(-3)}`;
+    },
+  },
   houseNumberPattern:
     "(?<number>\\d+(?:-\\d+)?)(?<civic_number_suffix>[A-Za-z](?![A-Za-z]))?",
 
