@@ -1,6 +1,6 @@
 {
   "name": "@sroussey/parse-address",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "International street address parser for 220 jurisdictions (US, CA + 218 countries and territories), with SEC EDGAR country-code resolution",
   "type": "module",
   "main": "./dist/parser.js",
@@ -54,12 +54,12 @@
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.13.3",
+    "@types/node": "^24.13.4",
     "browserify": "^17.0.1",
-    "jest": "^30.4.2",
-    "ts-jest": "^29.4.11",
+    "jest": "^30.5.1",
+    "ts-jest": "^29.4.12",
     "ts-node": "^10.9.2",
-    "tsc-alias": "^1.9.1",
+    "tsc-alias": "^1.9.4",
     "typescript": "^6.0.3",
     "uglifyjs": "^2.4.11"
   },

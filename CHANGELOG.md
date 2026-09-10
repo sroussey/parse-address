@@ -1,5 +1,75 @@
 # Change Log
 
+## 3.3.0
+
+### Features
+
+- make IntlAddressParser a uniform auto-detecting superset
+- enforce token-preservation invariant with lossless fallback
+- add token-preservation detector calibrated against the corpus
+- make version match
+- add mirroring to github packages (#17)
+
+#### ca
+
+- recognize SEC EDGAR Canadian region codes (A0-B0, Z4)
+
+### Bug Fixes
+
+- preserve plus4 in lossless fallback; guard IntlAddressParser override
+- remove masking city-abbrev and PO-box exemptions from token-drop detector
+- stop country/PO-box exemptions from masking real token drops
+- capture attached-letter civic number suffix (123A)
+- capture full French compound street names (greedy street_5)
+- throw on unsupported country in AddressParser constructor
+- update away from shared workflow
+
+#### ca
+
+- don't use SEC region codes for country detection
+
+#### esm
+
+- make ESM output Node-loadable via tsc-alias (extensionless source)
+
+#### build
+
+- make the build and tests pass under TypeScript 6.x
+
+### Refactors
+
+- address parsing for European countries by consolidating postal code handling. Introduce field-time repair rules for Bermuda, Great Britain, Cayman Islands, and British Virgin Islands to enhance postal code normalization. Update parser to utilize new postal utilities and streamline country key resolution. This improves address accuracy and expands support for various postal formats.
+- scope token-drop detector to the street segment
+
+### Tests
+
+- lock postal_code as the sole postal field (no zip)
+
+### Documentation
+
+- note streetSegment boundary-collision limit; clarify dist-tag steps
+- add release runbook
+- document Canadian usage, fields, detection, and the zip->postal_code migration
+- pin country-detection precedence contract with tests
+
+### Chores
+
+- update package.json and version
+- node version in tag pipeline
+- gh pack test
+- gh pack test
+
+### Updated Dependencies
+
+- `xregexp`: ^5.1.2
+- `@types/jest`: ^30.0.0
+- `@types/node`: ^24.13.4
+- `browserify`: ^17.0.1
+- `jest`: ^30.5.1
+- `ts-jest`: ^29.4.12
+- `ts-node`: ^10.9.2
+- `typescript`: ^6.0.3
+
 ## 3.2.0
 
 ### New features
