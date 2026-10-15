@@ -57,7 +57,7 @@ function parishVariants(p: string): string[] {
 
 const PARISH_ALT = ([] as string[])
   .concat(...PARISHES.map(parishVariants))
-  .map((s) => s.replace(/\./g, "\\.").replace(/ /g, "\\s+"))
+  .map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/ /g, "\\s+"))
   .sort((a, b) => b.length - a.length)
   .join("|");
 

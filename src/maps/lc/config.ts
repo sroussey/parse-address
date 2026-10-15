@@ -85,7 +85,7 @@ const STATES: Array<[string, string[]]> = [
 
 const STATE_ALT = ([] as string[])
   .concat(...STATES.map(([, vs]) => vs))
-  .map((s) => s.replace(/\./g, "\\.").replace(/ /g, "\\s+"))
+  .map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/ /g, "\\s+"))
   .sort((a, b) => b.length - a.length)
   .join("|");
 
